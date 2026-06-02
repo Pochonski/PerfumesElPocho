@@ -26,10 +26,9 @@ export function getProductos(): Producto[] {
   if (cached) return cached;
   const jsonPath = path.join(
     process.cwd(),
-    "..",
-    "scraper",
-    "output",
-    "parcial.json"
+    "src",
+    "data",
+    "productos.json"
   );
   if (!fs.existsSync(jsonPath)) return [];
   const data: Producto[] = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
