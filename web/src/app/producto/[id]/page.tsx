@@ -46,6 +46,8 @@ export async function generateMetadata({
 }
 
 /* ─── Página ─── */
+export const dynamicParams = true;
+
 export default async function ProductoPage({
   params,
 }: {
@@ -61,6 +63,28 @@ export default async function ProductoPage({
 
   return (
     <>
+      {/* Schema.org Product */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: producto.nombre,
+            description: producto.descripcion || producto.resumen || "",
+            image: producto.imagenes[0] || undefined,
+            brand: producto.marca
+              ? { "@type": "Brand", name: producto.marca }
+              : undefined,
+            offers: {
+              "@type": "Offer",
+              price: producto.precio.toString(),
+              priceCurrency: "CRC",
+              availability: "https://schema.org/InStock",
+            },
+          }),
+        }}
+      />
       <main className="min-h-screen pt-24">
         <div className="mx-auto max-w-[1400px] px-6 md:px-8">
           {/* Breadcrumb */}
