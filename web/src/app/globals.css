@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* === Luxury Perfume Palette === */
+  --background: #080808;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --muted-foreground: #71717a;
+  --card-bg: #141414;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --accent: #c8a84e;
+  --accent-glow: rgba(200, 168, 78, 0.3);
+  --accent-dim: rgba(200, 168, 78, 0.12);
+
+  /* === Neumorphic Shadow Stack (Dark Mode) === */
+  --card-shadow:
+    0px 0.7px 0.7px -0.67px rgba(0, 0, 0, 0.4),
+    0px 1.8px 1.8px -1.33px rgba(0, 0, 0, 0.4),
+    0px 3.6px 3.6px -2px    rgba(0, 0, 0, 0.35),
+    0px 6.9px 6.9px -2.67px rgba(0, 0, 0, 0.35),
+    0px 13.6px 13.6px -3.33px rgba(0, 0, 0, 0.25),
+    0px 30px 30px -4px       rgba(0, 0, 0, 0.15),
+    inset 0px 1px 1px 0px    rgba(255, 255, 255, 0.04);
+
+  --pill-shadow:
+    0px 0.7px 0.7px -0.67px rgba(0, 0, 0, 0.4),
+    0px 1.8px 1.8px -1.33px rgba(0, 0, 0, 0.4),
+    0px 3.6px 3.6px -2px rgba(0, 0, 0, 0.35),
+    inset 0px 2px 1px 0px rgba(255, 255, 255, 0.04);
+}
+
+/* === Base Styles === */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Neumorphic Card === */
+.card-surface {
+  background: var(--card-bg);
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+}
+
+.card-surface-hover {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.card-surface-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0px 0.7px 0.7px -0.67px rgba(0, 0, 0, 0.5),
+    0px 1.8px 1.8px -1.33px rgba(0, 0, 0, 0.5),
+    0px 3.6px 3.6px -2px    rgba(0, 0, 0, 0.45),
+    0px 6.9px 6.9px -2.67px rgba(0, 0, 0, 0.45),
+    0px 13.6px 13.6px -3.33px rgba(0, 0, 0, 0.35),
+    0px 40px 40px -4px       rgba(0, 0, 0, 0.25),
+    inset 0px 1px 1px 0px    rgba(255, 255, 255, 0.06);
+  border-color: rgba(200, 168, 78, 0.2);
+}
+
+/* === Glassmorphism === */
+.glass-surface {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-light {
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* === Gold Gradient === */
+.gold-gradient {
+  background: linear-gradient(135deg, #c8a84e 0%, #e2c87a 30%, #a08030 60%, #d4b65a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #c8a84e 0%, #e2c87a 30%, #a08030 60%, #d4b65a 100%);
+}
+
+/* === Scroll Animation === */
+.scroll-section {
+  height: 400vh;
+}
+
+.scroll-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* === Text Balance === */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* === Custom Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 168, 78, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 168, 78, 0.5);
+}
+
+/* === Loading Screen === */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease-out;
+}
+#loading-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}

@@ -1,0 +1,26 @@
+# Python
+scraper/venv/
+scraper/__pycache__/
+scraper/*.pyc
+scraper/output/productos.json
+scraper/output/parcial.json
+scraper/output/descubiertos.json
+scraper/output/images/
+
+# Node
+web/node_modules/
+web/.next/
+web/out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
