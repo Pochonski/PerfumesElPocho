@@ -56,8 +56,8 @@ Rango: **₡6,500 – ₡190,000** — hay para todo presupuesto. Los precios se
 
 ## 📞 Contacto
 
-- **WhatsApp:** [+506 8420-1630](https://wa.me/5068420791630)
-- **Email:** info@perfumeselpocho.cr
+- **WhatsApp:** [+506 6477-9672](https://wa.me/50664779672)
+- **Email:** joseph19102005@gmail.com
 
 ---
 

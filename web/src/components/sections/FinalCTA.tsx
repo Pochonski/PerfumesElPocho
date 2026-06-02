@@ -26,12 +26,12 @@ export default function FinalCTA() {
 
             <div className="mt-8 flex items-center justify-center gap-4">
               <Button
-                href="https://wa.me/5068420791630"
+                href="https://wa.me/50664779672"
                 showArrow
               >
                 WhatsApp
               </Button>
-              <Button href="mailto:info@perfumeselpocho.cr" variant="secondary">
+              <Button href="mailto:joseph19102005@gmail.com" variant="secondary">
                 Email
               </Button>
             </div>

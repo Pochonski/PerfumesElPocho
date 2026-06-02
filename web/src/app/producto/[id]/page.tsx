@@ -182,7 +182,7 @@ export default function ProductoPage({
               {/* CTA */}
               <div className="mt-8">
                 <Button
-                  href={`https://wa.me/5068420791630?text=Hola!%20Me%20interesa%20${encodeURIComponent(producto.nombre)}%20-%20${formatPrice(producto.precio)}`}
+                  href={`https://wa.me/50664779672?text=Hola!%20Me%20interesa%20${encodeURIComponent(producto.nombre)}%20-%20${formatPrice(producto.precio)}`}
                   showArrow
                 >
                   Consultar por WhatsApp
