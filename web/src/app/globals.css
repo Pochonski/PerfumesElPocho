@@ -126,6 +126,20 @@ body {
   background: rgba(200, 168, 78, 0.5);
 }
 
+/* === Floating Animation === */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
 /* === Loading Screen === */
 #loading-screen {
   position: fixed;
