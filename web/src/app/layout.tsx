@@ -78,12 +78,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html
-        lang="es"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col bg-[#080808] text-zinc-100">
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-[#080808] text-zinc-100">
+        <ClerkProvider>
           <SmoothScrollProvider>
             <Navbar>
               <AuthButtons />
@@ -91,8 +91,8 @@ export default function RootLayout({
             {children}
             <WhatsAppFloat />
           </SmoothScrollProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
