@@ -5,6 +5,9 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 
+// Admin debe ser dinámico para que Clerk funcione
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({
   children,
 }: {
