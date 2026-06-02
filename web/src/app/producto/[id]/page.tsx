@@ -46,8 +46,6 @@ export async function generateMetadata({
 }
 
 /* ─── Página ─── */
-export const dynamicParams = true;
-
 export default async function ProductoPage({
   params,
 }: {
