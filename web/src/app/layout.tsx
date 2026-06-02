@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  Show,
+  UserButton,
+} from "@clerk/nextjs";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import Navbar from "@/components/ui/Navbar";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
@@ -37,23 +44,55 @@ export const metadata: Metadata = {
   },
 };
 
+function AuthButtons() {
+  return (
+    <>
+      <Show when="signed-out">
+        <div className="hidden items-center gap-3 md:flex">
+          <SignInButton mode="modal">
+            <button className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 cursor-pointer">
+              Iniciar Sesión
+            </button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button className="rounded-full border border-[#c8a84e]/30 bg-[#c8a84e]/10 px-4 py-1.5 text-sm font-medium text-[#c8a84e] transition-all hover:bg-[#c8a84e]/20 hover:border-[#c8a84e]/50 cursor-pointer">
+              Registrarse
+            </button>
+          </SignUpButton>
+        </div>
+      </Show>
+      <Show when="signed-in">
+        <div className="hidden items-center gap-3 md:flex">
+          <UserButton
+            appearance={{ elements: { avatarBox: "h-8 w-8" } }}
+          />
+        </div>
+      </Show>
+    </>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-[#080808] text-zinc-100">
-        <SmoothScrollProvider>
-          <Navbar />
-          {children}
-          <WhatsAppFloat />
-        </SmoothScrollProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="es"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col bg-[#080808] text-zinc-100">
+          <SmoothScrollProvider>
+            <Navbar>
+              <AuthButtons />
+            </Navbar>
+            {children}
+            <WhatsAppFloat />
+          </SmoothScrollProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

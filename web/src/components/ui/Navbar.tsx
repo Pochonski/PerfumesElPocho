@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { List, X } from "@phosphor-icons/react";
 import Button from "./Button";
 
-export default function Navbar() {
+export default function Navbar({ children }: { children?: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -44,6 +44,7 @@ export default function Navbar() {
           <Button href="#contacto" showArrow>
             Contáctanos
           </Button>
+          {children}
         </div>
 
         {/* Mobile toggle */}
