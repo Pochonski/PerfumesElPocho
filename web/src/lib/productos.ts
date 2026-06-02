@@ -1,11 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-export interface ProductoImagen {
-  url: string;
-  local: string;
-}
-
 export interface Producto {
   id: number;
   url: string;
@@ -16,7 +11,7 @@ export interface Producto {
   resumen: string;
   categorias: string[];
   atributos: Record<string, string>;
-  imagenes: ProductoImagen[];
+  imagenes: string[];
   marca: string;
   concentracion: string;
   tamano: string;
@@ -34,11 +29,18 @@ export function getProductos(): Producto[] {
     "..",
     "scraper",
     "output",
-    "productos.json"
+    "parcial.json"
   );
   if (!fs.existsSync(jsonPath)) return [];
-  cached = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-  return cached as Producto[];
+  const data: Producto[] = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+  // Asegurar que imagenes sea siempre string[]
+  for (const p of data) {
+    if (!Array.isArray(p.imagenes)) {
+      p.imagenes = [];
+    }
+  }
+  cached = data;
+  return data;
 }
 
 export function getProductoById(id: number): Producto | undefined {

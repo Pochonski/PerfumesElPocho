@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import Navbar from "@/components/ui/Navbar";
+import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,14 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Perfumes El Pocho | Fragancias Premium",
+  title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
   description:
-    "Descubre fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.",
-  keywords: ["perfumes", "fragancias", "Costa Rica", "árabes", "diseñador"],
+    "Descubre más de 4,000 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.",
+  keywords: [
+    "perfumes",
+    "fragancias",
+    "Costa Rica",
+    "árabes",
+    "diseñador",
+    "perfumes originales",
+    "comprar perfumes",
+  ],
   openGraph: {
     title: "Perfumes El Pocho | Fragancias Premium",
-    description: "Fragancias originales con envíos a todo Costa Rica.",
+    description:
+      "Más de 4,000 fragancias originales con envíos a todo Costa Rica.",
     type: "website",
+    locale: "es_CR",
   },
 };
 
@@ -40,6 +51,7 @@ export default function RootLayout({
         <SmoothScrollProvider>
           <Navbar />
           {children}
+          <WhatsAppFloat />
         </SmoothScrollProvider>
       </body>
     </html>

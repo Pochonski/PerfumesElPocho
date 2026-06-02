@@ -1,21 +1,57 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import type { Metadata } from "next";
 import { getProductos, getProductoById } from "@/lib/productos";
 import Button from "@/components/ui/Button";
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import Footer from "@/components/sections/Footer";
 
+/* ─── Static Params ─── */
 export function generateStaticParams() {
   const productos = getProductos();
-  return productos.map((p) => ({ id: String(p.id) }));
+  // Solo generar los primeros 500 para no reventar el build
+  // El resto se sirve SSR/ISR automáticamente
+  return productos.slice(0, 500).map((p) => ({ id: String(p.id) }));
 }
 
-export default function ProductoPage({
+/* ─── Metadata Dinámica ─── */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = (await params) as unknown as { id: string };
+  const producto = getProductoById(Number(id));
+  if (!producto) return { title: "Producto no encontrado" };
+
+  const precio = `₡${producto.precio.toLocaleString("es-CR")}`;
+  const imgUrl = producto.imagenes[0] || null;
+
+  return {
+    title: `${producto.nombre} — ${precio} | Perfumes El Pocho`,
+    description:
+      producto.resumen ||
+      producto.descripcion?.slice(0, 160) ||
+      `${producto.marca} — ${producto.concentracion} — ${producto.tamano}`,
+    openGraph: {
+      title: `${producto.nombre} — ${precio}`,
+      description:
+        producto.resumen || `${producto.marca} — ${producto.tamano}`,
+      ...(imgUrl
+        ? { images: [{ url: imgUrl, width: 800, height: 800 }] }
+        : {}),
+      type: "website",
+    },
+  };
+}
+
+/* ─── Página ─── */
+export default async function ProductoPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = params as unknown as { id: string };
+  const { id } = (await params) as unknown as { id: string };
   const producto = getProductoById(Number(id));
 
   if (!producto) notFound();
@@ -33,7 +69,7 @@ export default function ProductoPage({
               Inicio
             </Link>
             <span>/</span>
-            {producto.categorias.map((cat) => (
+            {producto.categorias.slice(0, 2).map((cat) => (
               <span key={cat}>
                 <Link
                   href={`/#productos`}
@@ -44,51 +80,57 @@ export default function ProductoPage({
                 <span className="mx-1">/</span>
               </span>
             ))}
-            <span className="text-zinc-400 line-clamp-1">{producto.nombre}</span>
+            <span className="line-clamp-1 text-zinc-400">
+              {producto.nombre}
+            </span>
           </nav>
 
           <div className="grid gap-10 lg:grid-cols-2">
-            {/* Images */}
+            {/* ─── Images ─── */}
             <div className="flex flex-col gap-4">
-              <div className="card-surface overflow-hidden">
+              {/* Main image */}
+              <div className="card-surface relative aspect-square overflow-hidden bg-zinc-900/30">
                 {producto.imagenes[0] ? (
-                  <img
-                    src={producto.imagenes[0].local}
+                  <Image
+                    src={producto.imagenes[0]}
                     alt={producto.nombre}
-                    className="h-auto w-full object-contain p-8"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-contain p-8"
+                    priority
                   />
                 ) : (
-                  <div className="flex aspect-square items-center justify-center text-zinc-700">
-                    Sin imagen
+                  <div className="flex h-full items-center justify-center text-6xl">
+                    🕯️
                   </div>
                 )}
               </div>
 
+              {/* Thumbnails */}
               {producto.imagenes.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
-                  {producto.imagenes.slice(1).map((img, i) => (
-                    <div key={i} className="card-surface aspect-square overflow-hidden p-2">
-                      <img
-                        src={img.local}
-                        alt={`${producto.nombre} ${i + 2}`}
-                        className="h-full w-full object-contain"
-                      />
+                  {producto.imagenes.slice(1, 5).map((img, i) => (
+                    <div
+                      key={i}
+                      className="card-surface relative aspect-square overflow-hidden p-2"
+                    >
+                      {img ? (
+                        <Image
+                          src={img}
+                          alt={`${producto.nombre} vista ${i + 2}`}
+                          fill
+                          sizes="25vw"
+                          className="object-contain"
+                        />
+                      ) : null}
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Info */}
+            {/* ─── Product Info ─── */}
             <div>
-              <Link
-                href="/"
-                className="mb-4 inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-300"
-              >
-                <ArrowLeft size={14} />
-                Volver al catálogo
-              </Link>
-
               <h1 className="text-2xl font-semibold tracking-tighter text-white md:text-3xl">
                 {producto.nombre}
               </h1>
@@ -97,61 +139,41 @@ export default function ProductoPage({
                 {formatPrice(producto.precio)}
               </p>
 
+              <p className="mt-2 text-xs text-zinc-600">
+                Envíos a todo Costa Rica 🇨🇷
+              </p>
+
               {producto.resumen && (
-                <p className="mt-6 text-zinc-400 leading-relaxed">
+                <p className="mt-6 leading-relaxed text-zinc-400">
                   {producto.resumen}
                 </p>
               )}
 
-              {/* Attributes */}
+              {/* Attributes grid */}
               <div className="mt-8 grid grid-cols-2 gap-4">
                 {producto.marca && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Marca</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.marca}
-                    </p>
-                  </div>
+                  <AttributeCard label="Marca" value={producto.marca} />
                 )}
                 {producto.concentracion && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Concentración</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.concentracion}
-                    </p>
-                  </div>
+                  <AttributeCard
+                    label="Concentración"
+                    value={producto.concentracion}
+                  />
                 )}
                 {producto.tamano && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Tamaño</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.tamano}
-                    </p>
-                  </div>
+                  <AttributeCard label="Tamaño" value={producto.tamano} />
                 )}
                 {producto.genero && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Género</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.genero}
-                    </p>
-                  </div>
+                  <AttributeCard label="Género" value={producto.genero} />
                 )}
                 {producto.familia_olfativa && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Familia Olfativa</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.familia_olfativa}
-                    </p>
-                  </div>
+                  <AttributeCard
+                    label="Familia Olfativa"
+                    value={producto.familia_olfativa}
+                  />
                 )}
                 {producto.ocasion && (
-                  <div className="card-surface p-4">
-                    <span className="text-xs text-zinc-500">Ocasión</span>
-                    <p className="mt-1 text-sm font-medium text-zinc-200">
-                      {producto.ocasion}
-                    </p>
-                  </div>
+                  <AttributeCard label="Ocasión" value={producto.ocasion} />
                 )}
               </div>
 
@@ -167,17 +189,18 @@ export default function ProductoPage({
                 ))}
               </div>
 
-              {/* Description */}
-              {producto.descripcion && producto.descripcion !== producto.resumen && (
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-zinc-300">
-                    Descripción
-                  </h3>
-                  <p className="mt-2 text-sm text-zinc-500 leading-relaxed">
-                    {producto.descripcion}
-                  </p>
-                </div>
-              )}
+              {/* Full description */}
+              {producto.descripcion &&
+                producto.descripcion !== producto.resumen && (
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-zinc-300">
+                      Descripción
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                      {producto.descripcion}
+                    </p>
+                  </div>
+                )}
 
               {/* CTA */}
               <div className="mt-8">
@@ -194,5 +217,21 @@ export default function ProductoPage({
       </main>
       <Footer />
     </>
+  );
+}
+
+/* ─── Mini Component ─── */
+function AttributeCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="card-surface p-4">
+      <span className="text-xs text-zinc-500">{label}</span>
+      <p className="mt-1 text-sm font-medium text-zinc-200">{value}</p>
+    </div>
   );
 }
