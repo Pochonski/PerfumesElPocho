@@ -1,7 +1,10 @@
 import Hero from "@/components/sections/Hero";
+import ShippingBanner from "@/components/sections/ShippingBanner";
 import HowItWorks from "@/components/sections/HowItWorks";
+import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import CategoryShowcase from "@/components/sections/CategoryShowcase";
 import ProductGrid from "@/components/sections/ProductGrid";
+import FAQ from "@/components/sections/FAQ";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
 import { getProductos } from "@/lib/productos";
@@ -41,9 +44,12 @@ export default function Home() {
       />
 
       <Hero />
+      <ShippingBanner />
+      <FeaturedProducts productos={productos} />
       <HowItWorks />
       <CategoryShowcase />
       <ProductGrid productos={productos} />
+      <FAQ />
       <FinalCTA />
       <Footer />
     </main>
