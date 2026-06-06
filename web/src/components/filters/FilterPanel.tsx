@@ -7,7 +7,8 @@ import { FacetCheckbox } from "./FacetCheckbox";
 import { PriceRange } from "./PriceRange";
 import type { FilterState } from "@/lib/filter-state";
 import { formatPrice } from "@/lib/format";
-import { normalizeText, type Producto } from "@/lib/productos";
+import { normalizeText } from "@/lib/utils";
+import type { Producto } from "@/lib/productos";
 
 interface FilterPanelProps {
   state: FilterState;

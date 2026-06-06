@@ -22,7 +22,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { formatPrice } from "@/lib/format";
-import { normalizeText } from "@/lib/productos";
+import { normalizeText } from "@/lib/utils";
 import {
   decodeFilters,
   encodeFilters,

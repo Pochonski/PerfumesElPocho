@@ -10,7 +10,8 @@ import {
   MagnifyingGlass,
   Funnel,
 } from "@phosphor-icons/react";
-import { normalizeText, type Producto } from "@/lib/productos";
+import { normalizeText } from "@/lib/utils";
+import type { Producto } from "@/lib/productos";
 
 const PER_PAGE = 24;
 
