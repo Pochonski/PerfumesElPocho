@@ -1,3 +1,5 @@
+"use client";
+
 import CatalogClient from "@/components/sections/CatalogClient";
 import type { Producto } from "@/lib/productos";
 
