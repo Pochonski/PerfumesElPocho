@@ -5,7 +5,6 @@ import Image from "next/image";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import Button from "@/components/ui/Button";
 
-const PARTICLE_COUNT = 100;
 const HERO_BOTTLE =
   "https://3pspglobal.s3.us-east-2.amazonaws.com/assets/images/hombre/1-million-night-elixir-hombre-100ml-perfume-paco-rabanne.png";
 
@@ -19,6 +18,18 @@ interface Particle {
   opacityDir: number;
 }
 
+function getParticleCount(): number {
+  // Fewer particles on mobile for performance
+  if (typeof window === "undefined") return 80;
+  return window.innerWidth < 768 ? 50 : 80;
+}
+
+function getMaxDPR(): number {
+  if (typeof window === "undefined") return 1.5;
+  // Cap DPR on mobile to avoid performance issues
+  return window.innerWidth < 768 ? 1.5 : 2;
+}
+
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -28,9 +39,9 @@ export default function Hero() {
   const initializedRef = useRef(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const initParticles = useCallback((w: number, h: number) => {
+  const initParticles = useCallback((w: number, h: number, count: number) => {
     const particles: Particle[] = [];
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -45,13 +56,14 @@ export default function Hero() {
     initializedRef.current = true;
   }, []);
 
-  const draw = useCallback((canvas: HTMLCanvasElement, progress: number) => {
+  const draw = useCallback((canvas: HTMLCanvasElement, progress: number, isMobile: boolean) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
-    const dpr = window.devicePixelRatio || 1;
+    const maxDPR = getMaxDPR();
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDPR);
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
 
     if (canvas.width !== window.innerWidth * dpr) {
       canvas.width = window.innerWidth * dpr;
@@ -64,7 +76,7 @@ export default function Hero() {
     ctx.scale(dpr, dpr);
 
     if (!initializedRef.current) {
-      initParticles(window.innerWidth, window.innerHeight);
+      initParticles(window.innerWidth, window.innerHeight, getParticleCount());
     }
 
     // Dark bg with radial glow
@@ -81,6 +93,7 @@ export default function Hero() {
 
     // Particles
     const particles = particlesRef.current;
+    const showGlow = !isMobile; // Skip glow effect on mobile for performance
     for (const p of particles) {
       p.x += p.speedX;
       p.y += p.speedY;
@@ -99,7 +112,8 @@ export default function Hero() {
       ctx.fillStyle = `rgba(200, 168, 78, ${alpha})`;
       ctx.fill();
 
-      if (p.size > 1.5) {
+      // Skip glow on mobile for performance
+      if (showGlow && p.size > 1.5) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(200, 168, 78, ${alpha * 0.12})`;
@@ -127,10 +141,28 @@ export default function Hero() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
-    canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+    const maxDPR = getMaxDPR();
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDPR);
+
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
     canvas.style.width = window.innerWidth + "px";
     canvas.style.height = window.innerHeight + "px";
+
+    // Debounced resize handler
+    let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handleResize = () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const maxDPRNew = getMaxDPR();
+        const dprNew = Math.min(window.devicePixelRatio || 1, maxDPRNew);
+        canvas.width = window.innerWidth * dprNew;
+        canvas.height = window.innerHeight * dprNew;
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        initializedRef.current = false;
+      }, 250);
+    };
 
     const handleScroll = () => {
       if (tickingRef.current) return;
@@ -141,18 +173,20 @@ export default function Hero() {
         const viewportHeight = window.innerHeight;
         const progress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - viewportHeight)));
         setScrollProgress(progress);
-        draw(canvas, progress);
+        const isMobile = window.innerWidth < 768;
+        draw(canvas, progress, isMobile);
         tickingRef.current = false;
       });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
     };
   }, [draw]);
 

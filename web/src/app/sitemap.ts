@@ -14,8 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Product pages (top 1000 for sitemap size)
-  const productos = getProductos().slice(0, 1000);
+  // Product pages (all products for complete SEO coverage)
+  const productos = getProductos();
   for (const p of productos) {
     routes.push({
       url: `${baseUrl}/producto/${p.id}`,
