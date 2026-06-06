@@ -65,7 +65,7 @@ export default function CategoryShowcase() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (

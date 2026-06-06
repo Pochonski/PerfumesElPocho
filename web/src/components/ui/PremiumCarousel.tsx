@@ -5,7 +5,6 @@ import {
   useRef,
   useEffect,
   useCallback,
-  useMemo,
   type ReactNode,
   type KeyboardEvent,
   type PointerEvent,
@@ -35,7 +34,7 @@ interface PremiumCarouselProps<T> {
   renderSkeleton?: (i: number) => ReactNode;
 }
 
-export function PremiumCarousel<T>({
+export default function PremiumCarousel<T>({
   items,
   renderItem,
   keyExtractor,
@@ -58,10 +57,8 @@ export function PremiumCarousel<T>({
   const scrollStart = useRef<number>(0);
   const autoplayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Calcular cuántos items hay visibles actualmente (para X/Y y snapping)
   const maxIndex = Math.max(0, items.length - 1);
 
-  // Avanza al siguiente item (loop infinito)
   const next = useCallback(() => {
     if (items.length === 0) return;
     setCurrentIndex((c) => (c >= maxIndex ? 0 : c + 1));
@@ -83,7 +80,7 @@ export function PremiumCarousel<T>({
     track.scrollTo({ left: offset, behavior: "smooth" });
   }, [currentIndex, gap]);
 
-  // Detectar índice activo por scroll (incluye drag)
+  // Detectar índice activo por scroll
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -161,8 +158,18 @@ export function PremiumCarousel<T>({
     }
   };
 
+  // Helper para generar clases responsivas de flex
+  const getFlexClass = () => {
+    const base = `flex-[0_0_calc((100%-${gap * (mobileVisible - 1)}px)/${mobileVisible})]`;
+    const sm = `sm:flex-[0_0_calc((100%-${gap}px)/2)]`;
+    const md = `md:flex-[0_0_calc((100%-${gap * 2}px)/3)]`;
+    const lg = `lg:flex-[0_0_calc((100%-${gap * (desktopVisible - 1)}px)/${desktopVisible})]`;
+    return `${base} ${sm} ${md} ${lg}`;
+  };
+
   // Skeleton state
   if (loading) {
+    const skeletonFlex = getFlexClass();
     return (
       <div
         className={`flex gap-5 overflow-hidden ${className}`}
@@ -172,10 +179,7 @@ export function PremiumCarousel<T>({
         {Array.from({ length: skeletonCount }).map((_, i) => (
           <div
             key={`sk-${i}`}
-            style={{
-              flex: `0 0 calc((100% - ${gap * (desktopVisible - 1)}px) / ${desktopVisible})`,
-            }}
-            className="min-w-0 shrink-0"
+            className={`min-w-0 shrink-0 snap-start ${skeletonFlex}`}
           >
             {renderSkeleton ? renderSkeleton(i) : <DefaultSkeleton />}
           </div>
@@ -213,10 +217,7 @@ export function PremiumCarousel<T>({
           <div
             key={keyExtractor(item, i)}
             data-carousel-item
-            className="min-w-0 shrink-0 snap-start px-2"
-            style={{
-              flex: `0 0 calc((100% - ${gap * (desktopVisible - 1)}px) / ${desktopVisible})`,
-            }}
+            className={`min-w-0 shrink-0 snap-start px-2 ${getFlexClass()}`}
             role="group"
             aria-roledescription="slide"
             aria-label={`${i + 1} de ${items.length}`}

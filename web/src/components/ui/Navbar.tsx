@@ -60,19 +60,21 @@ export default function Navbar({ children }: { children?: ReactNode }) {
       {/* Mobile menu */}
       {open && (
         <div className="glass-surface border-t border-white/5 md:hidden">
-          <div className="flex flex-col gap-4 px-6 py-6">
-            <Link href="/#productos" className="text-sm text-zinc-400" onClick={() => setOpen(false)}>
+          <div className="flex flex-col gap-1 px-6 py-4">
+            <Link href="/#productos" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
               Productos
             </Link>
-            <Link href="/#categorias" className="text-sm text-zinc-400" onClick={() => setOpen(false)}>
+            <Link href="/#categorias" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
               Categorías
             </Link>
-            <Link href="/#contacto" className="text-sm text-zinc-400" onClick={() => setOpen(false)}>
+            <Link href="/#contacto" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
               Contacto
             </Link>
-            <Button href="#contacto" showArrow>
-              Contáctanos
-            </Button>
+            <div className="mt-3">
+              <Button href="#contacto" showArrow>
+                Contáctanos
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -220,12 +220,12 @@ export default function Hero() {
                 <div className="absolute h-64 w-64 rounded-full bg-[#c8a84e]/10 blur-3xl animate-pulse" />
 
                 {/* Floating animation wrapper */}
-                <div className="animate-float relative h-[350px] w-[350px] md:h-[450px] md:w-[450px]">
+                <div className="animate-float relative h-[280px] w-[280px] sm:h-[350px] sm:w-[350px] md:h-[400px] md:w-[400px] lg:h-[450px] lg:w-[450px]">
                   <Image
                     src={HERO_BOTTLE}
                     alt="Perfume Premium"
                     fill
-                    sizes="(max-width: 768px) 350px, 450px"
+                    sizes="(max-width: 640px) 280px, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
                     className="object-contain drop-shadow-[0_20px_40px_rgba(200,168,78,0.15)]"
                     priority
                   />

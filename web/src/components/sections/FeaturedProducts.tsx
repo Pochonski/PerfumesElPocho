@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
@@ -14,19 +14,32 @@ interface FeaturedProductsProps {
 
 export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
   const [current, setCurrent] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   // Seleccionamos 12 productos variados como "destacados"
-  // Criterio: diversidad de categorías, marcas conocidas, buenas imágenes
   const featured = productos
-    .filter((p) => p.imagenes.length > 0) // que tengan imagen
-    .sort(() => 0.5 - Math.random()) // aleatorio controlado
+    .filter((p) => p.imagenes.length > 0)
+    .sort(() => 0.5 - Math.random())
     .slice(0, 12);
 
-  const visible = 4;
-  const maxPage = Math.ceil(featured.length / visible);
+  // En desktop mostramos 4 items, tablet 2, mobile 1
+  const itemsPerPage = 4;
+  const maxPage = Math.max(1, Math.ceil(featured.length / itemsPerPage));
 
   const prev = () => setCurrent((c) => (c === 0 ? maxPage - 1 : c - 1));
   const next = () => setCurrent((c) => (c === maxPage - 1 ? 0 : c + 1));
+
+  // Scroll to current page on desktop
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = track.querySelector<HTMLElement>("[data-card]");
+    if (!card) return;
+    const cardWidth = card.offsetWidth;
+    const gap = 20;
+    const offset = current * (cardWidth + gap) * itemsPerPage;
+    track.scrollTo({ left: offset, behavior: "smooth" });
+  }, [current, itemsPerPage]);
 
   if (featured.length === 0) return null;
 
@@ -48,19 +61,18 @@ export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
 
         {/* Carousel */}
         <div className="relative">
-          {/* Cards */}
-          <div className="overflow-hidden">
-            <div
-              className="flex gap-5 transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-              style={{
-                transform: `translateX(-${current * (100 / visible)}%)`,
-              }}
-            >
-              {featured.map((p) => (
+          {/* Track - scroll snap en mobile, scroll libre en desktop */}
+          <div
+            ref={trackRef}
+            className="overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:snap-none"
+          >
+            <div className="flex gap-5">
+              {featured.map((p, i) => (
                 <Link
                   key={p.id}
                   href={`/producto/${p.id}`}
-                  className="card-surface card-surface-hover group block min-w-[calc(25%-15px)] shrink-0 overflow-hidden"
+                  data-card
+                  className="card-surface card-surface-hover group block w-[80vw] shrink-0 overflow-hidden snap-start sm:w-[calc(50%-10px)] md:snap-normal lg:w-[calc(25%-15px)]"
                 >
                   {/* Image */}
                   <div className="relative aspect-square overflow-hidden bg-zinc-900/30">
@@ -69,7 +81,7 @@ export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
                         src={p.imagenes[0]}
                         alt={p.nombre}
                         fill
-                        sizes="25vw"
+                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
@@ -94,24 +106,24 @@ export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
             </div>
           </div>
 
-          {/* Nav arrows */}
+          {/* Nav arrows - solo visibles en desktop */}
           <button
             onClick={prev}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
             aria-label="Anterior"
           >
             <CaretLeft size={20} weight="bold" />
           </button>
           <button
             onClick={next}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
             aria-label="Siguiente"
           >
             <CaretRight size={20} weight="bold" />
           </button>
 
-          {/* Dots */}
-          <div className="mt-6 flex justify-center gap-2">
+          {/* Dots - hidden en mobile, mostrados en desktop */}
+          <div className="mt-6 hidden justify-center gap-2 md:flex">
             {Array.from({ length: maxPage }).map((_, i) => (
               <button
                 key={i}
@@ -124,6 +136,11 @@ export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
                 aria-label={`Página ${i + 1}`}
               />
             ))}
+          </div>
+
+          {/* Mobile scroll indicator */}
+          <div className="mt-4 flex justify-center md:hidden">
+            <span className="text-xs text-zinc-600">Desliza para ver más →</span>
           </div>
         </div>
       </div>
