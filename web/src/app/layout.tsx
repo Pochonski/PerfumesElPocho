@@ -1,20 +1,23 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  Show,
-  UserButton,
-} from "@clerk/nextjs";
+import type { Metadata, Viewport } from "next";
+import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/ui/Navbar";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 const geistMono = Geist_Mono({
@@ -25,7 +28,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
   description:
-    "Descubre más de 4,000 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.",
+    "Descubre más de 2,900 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.",
   keywords: [
     "perfumes",
     "fragancias",
@@ -38,39 +41,41 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Perfumes El Pocho | Fragancias Premium",
     description:
-      "Más de 4,000 fragancias originales con envíos a todo Costa Rica.",
+      "Más de 2,900 fragancias originales con envíos a todo Costa Rica.",
     type: "website",
     locale: "es_CR",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Perfumes El Pocho | Fragancias Premium",
+    description:
+      "Más de 2,900 fragancias originales con envíos a todo Costa Rica.",
+  },
 };
 
-function AuthButtons() {
-  return (
-    <>
-      <Show when="signed-out">
-        <div className="hidden items-center gap-3 md:flex">
-          <SignInButton mode="modal">
-            <button className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 cursor-pointer">
-              Iniciar Sesión
-            </button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <button className="rounded-full border border-[#c8a84e]/30 bg-[#c8a84e]/10 px-4 py-1.5 text-sm font-medium text-[#c8a84e] transition-all hover:bg-[#c8a84e]/20 hover:border-[#c8a84e]/50 cursor-pointer">
-              Registrarse
-            </button>
-          </SignUpButton>
-        </div>
-      </Show>
-      <Show when="signed-in">
-        <div className="hidden items-center gap-3 md:flex">
-          <UserButton
-            appearance={{ elements: { avatarBox: "h-8 w-8" } }}
-          />
-        </div>
-      </Show>
-    </>
-  );
-}
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf7f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#080808" },
+  ],
+  colorScheme: "light dark",
+  width: "device-width",
+  initialScale: 1,
+};
+
+// Anti-flash: lee localStorage / system preference y setea data-theme antes del primer paint
+const themeScript = `
+(function() {
+  try {
+    var stored = localStorage.getItem('theme');
+    var systemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    var theme = stored || (systemLight ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+`.trim();
 
 export default function RootLayout({
   children,
@@ -79,19 +84,34 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="es-CR"
+      suppressHydrationWarning
+      className={`${inter.variable} ${playfair.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#080808] text-zinc-100">
-        <ClerkProvider>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
+      </head>
+      <body
+        className="min-h-full flex flex-col text-[color:var(--foreground)]"
+        style={{ background: "var(--background)" }}
+      >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
+        >
+          Saltar al contenido
+        </a>
+        <ThemeProvider>
           <SmoothScrollProvider>
-            <Navbar>
-              <AuthButtons />
-            </Navbar>
-            {children}
+            <Navbar />
+            <div id="main-content" className="flex-1">
+              {children}
+            </div>
             <WhatsAppFloat />
           </SmoothScrollProvider>
-        </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

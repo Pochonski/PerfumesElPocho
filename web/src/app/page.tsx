@@ -3,7 +3,7 @@ import ShippingBanner from "@/components/sections/ShippingBanner";
 import HowItWorks from "@/components/sections/HowItWorks";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import CategoryShowcase from "@/components/sections/CategoryShowcase";
-import ProductGrid from "@/components/sections/ProductGrid";
+import CatalogSection from "@/components/sections/CatalogSection";
 import FAQ from "@/components/sections/FAQ";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
@@ -13,7 +13,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
   description:
-    "Más de 4,000 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica en 24-48h. Comprá por WhatsApp.",
+    "Más de 2,900 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica en 24-48h. Comprá por WhatsApp.",
 };
 
 export default function Home() {
@@ -38,7 +38,7 @@ export default function Home() {
               "@type": "PostalAddress",
               addressCountry: "CR",
             },
-            priceRange: "₡6,500 - ₡190,000",
+            priceRange: "₡6,000 - ₡230,000",
           }),
         }}
       />
@@ -48,7 +48,12 @@ export default function Home() {
       <FeaturedProducts productos={productos} />
       <HowItWorks />
       <CategoryShowcase />
-      <ProductGrid productos={productos} />
+      <CatalogSection
+        productos={productos}
+        eyebrow="Catálogo"
+        title="Nuestra Colección"
+        description="Más de 2,900 fragancias originales, árabes y de diseñador. Filtrá por categoría, marca, precio, familia olfativa y más."
+      />
       <FAQ />
       <FinalCTA />
       <Footer />
