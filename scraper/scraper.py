@@ -215,11 +215,32 @@ def scrape_product(product):
             if "tamaño" in key or "tamano" in key:
                 data["tamano"] = value.upper()
     
-    # Breadcrumbs for categories (exclude "Inicio")
+    def is_valid_categoria(text: str) -> bool:
+        if not text:
+            return False
+        lower = text.lower()
+        # Exclude sizes
+        if re.search(r'\d+\s*[mM][lL]', text):
+            return False
+        # Exclude occasions
+        if any(w in lower for w in ['día', 'dia', 'noche', 'verano', 'invierno']):
+            return False
+        # Exclude fragrance families
+        if any(w in lower for w in ['amaderad', 'aromatic', 'floral', 'oriental', 'cítrica', 'citrica', 'frutal', 'especiad', 'acuátic', 'acquatic', 'gourmand', 'fougere', 'avainillad', 'amber', 'ámbar', 'chypre', 'cuero']):
+            return False
+        # Exclude multi-piece packs
+        if re.search(r'^\d+\s*pzs?', lower):
+            return False
+        if lower in ['inicio', 'home', 'tienda', 'todos']:
+            return False
+        return True
+
+    # Breadcrumbs for categories (filtered)
     for link in soup.select(".product-breadcrumb a"):
         text = link.get_text(strip=True)
         if text and text.lower() not in ["inicio", "home"]:
-            data["categorias"].append(text)
+            if is_valid_categoria(text):
+                data["categorias"].append(text)
     
     # Deduplicate categories
     data["categorias"] = list(dict.fromkeys(data["categorias"]))

@@ -28,6 +28,42 @@ def fetch(url):
             time.sleep(1)
     return None
 
+def is_valid_categoria(text: str) -> bool:
+    """Filter out garbage categories (sizes, occasions, families) and keep only real ones."""
+    if not text:
+        return False
+    
+    lower = text.lower()
+    
+    # Exclude sizes (100ML, 50ML, 10ml, etc.)
+    if re.search(r'\d+\s*[mM][lL]', text):
+        return False
+    
+    # Exclude occasions
+    occasion_words = ['día', 'dia', 'noche', 'verano', 'invierno']
+    if any(w in lower for w in occasion_words):
+        return False
+    
+    # Exclude fragrance families (AMADERADO, AROMATICA, FLORAL, etc.)
+    family_words = [
+        'amaderad', 'aromatic', 'floral', 'oriental', 'cítrica', 'citrica',
+        'frutal', 'especiad', 'acuátic', 'acquatic', 'gourmand', 'fougere',
+        'avainillad', 'amber', 'ámbar', 'chypre', 'cuero',
+    ]
+    if any(w in lower for w in family_words):
+        return False
+    
+    # Exclude multi-piece packs (4PZS, 3PZS, etc.)
+    if re.search(r'^\d+\s*pzs?', lower):
+        return False
+    
+    # Exclude generic words
+    if lower in ['inicio', 'home', 'tienda', 'todos']:
+        return False
+    
+    return True
+
+
 def scrape_product(pid):
     """Scrape a single product by ID."""
     url = f"{BASE_URL}/producto.php?id={pid}"
@@ -107,11 +143,11 @@ def scrape_product(pid):
             if "tamaño" in key or "tamano" in key:
                 data["tamano"] = val.upper()
     
-    # Categories from breadcrumbs
+    # Categories from breadcrumbs (filtered)
     for a in soup.select(".product-breadcrumb a"):
         text = a.get_text(strip=True)
         if text and text.lower() not in ["inicio", "home"]:
-            if text not in data["categorias"]:
+            if is_valid_categoria(text) and text not in data["categorias"]:
                 data["categorias"].append(text)
     
     # Try to extract more from all text
