@@ -8,32 +8,24 @@ import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import type { Producto } from "@/lib/productos";
 
-export default function FeaturedProducts() {
+interface FeaturedProductsProps {
+  productos: Producto[];
+}
+
+export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
   const [current, setCurrent] = useState(0);
-  const [items, setItems] = useState<Producto[]>([]);
-  const [loading, setLoading] = useState(true);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  // Fetch featured products from API (sin filtros = todos, limit 24 para variedad)
-  useEffect(() => {
-    fetch("/api/productos?page=1&perPage=24")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.productos && Array.isArray(data.productos)) {
-          // Filtrar los que tienen imagen y mezclar aleatoriamente
-          const withImages = data.productos.filter((p: Producto) => p.imagenes && p.imagenes.length > 0);
-          // Mezclar y tomar 12
-          const shuffled = withImages.sort(() => 0.5 - Math.random()).slice(0, 12);
-          setItems(shuffled);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  // Seleccionamos 12 productos variados como "destacados"
+  // Mezclar aleatoriamente y filtrar los que tienen imagen
+  const featured = productos
+    .filter((p) => p.imagenes && p.imagenes.length > 0)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 12);
 
   // En desktop mostramos 4 items, tablet 2, mobile 1
   const itemsPerPage = 4;
-  const maxPage = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const maxPage = Math.max(1, Math.ceil(featured.length / itemsPerPage));
 
   const prev = useCallback(() => setCurrent((c) => (c === 0 ? maxPage - 1 : c - 1)), [maxPage]);
   const next = useCallback(() => setCurrent((c) => (c === maxPage - 1 ? 0 : c + 1)), [maxPage]);
@@ -50,28 +42,7 @@ export default function FeaturedProducts() {
     track.scrollTo({ left: offset, behavior: "smooth" });
   }, [current, itemsPerPage]);
 
-  if (loading) {
-    return (
-      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="mb-12 flex flex-col items-center gap-4 text-center">
-            <EyebrowBadge>Los más buscados</EyebrowBadge>
-            <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
-              Fragancias Destacadas
-            </h2>
-          </div>
-          {/* Skeleton loader */}
-          <div className="flex gap-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-64 w-[calc(25%-15px)] animate-pulse rounded-2xl bg-white/5" />
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-    );
-  }
-
-  if (items.length === 0) return null;
+  if (featured.length === 0) return null;
 
   const formatPrice = (p: number) => `₡${p.toLocaleString("es-CR")}`;
 
@@ -97,7 +68,7 @@ export default function FeaturedProducts() {
             className="overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:snap-none"
           >
             <div className="flex gap-5">
-              {items.map((p, i) => (
+              {featured.map((p, i) => (
                 <Link
                   key={p.id}
                   href={`/producto/${p.id}`}
