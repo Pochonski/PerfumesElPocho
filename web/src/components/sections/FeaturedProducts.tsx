@@ -97,9 +97,7 @@ export default function FeaturedProducts({ productos }: FeaturedProductsProps) {
                     <h3 className="line-clamp-2 text-sm font-semibold text-zinc-200 group-hover:text-white">
                       {p.nombre}
                     </h3>
-                    {p.marca && (
-                      <p className="mt-1 text-xs text-zinc-500">{p.marca}</p>
-                    )}
+                    <p className="mt-1 text-xs text-zinc-500">{p.marca || "Sin marca"}</p>
                   </div>
                 </Link>
               ))}

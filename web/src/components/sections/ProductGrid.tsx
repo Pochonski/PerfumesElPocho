@@ -285,9 +285,7 @@ function ProductCard({
         <h3 className="line-clamp-2 text-sm font-semibold text-zinc-200 group-hover:text-white">
           {producto.nombre}
         </h3>
-        {producto.marca && (
-          <p className="mt-1 text-xs text-zinc-500">{producto.marca}</p>
-        )}
+        <p className="mt-1 text-xs text-zinc-500">{producto.marca || "Sin marca"}</p>
         <p className="mt-3 text-lg font-bold gold-gradient">
           {formatPrice(producto.precio)}
         </p>

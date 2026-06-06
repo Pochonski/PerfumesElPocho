@@ -173,9 +173,7 @@ export default async function ProductoPage({
 
               {/* Attributes grid */}
               <div className="mt-8 grid grid-cols-2 gap-4">
-                {producto.marca && (
-                  <AttributeCard label="Marca" value={producto.marca} />
-                )}
+                <AttributeCard label="Marca" value={producto.marca || "Sin marca"} />
                 {producto.concentracion && (
                   <AttributeCard
                     label="Concentración"

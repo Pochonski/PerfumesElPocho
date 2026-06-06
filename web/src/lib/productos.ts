@@ -72,6 +72,18 @@ export function getProductos(): Producto[] {
     if (!p.resumen && p.descripcion) {
       p.resumen = p.descripcion.slice(0, 150).trim() + (p.descripcion.length > 150 ? "…" : "");
     }
+
+    // Generar descripcion fallback desde nombre + marca + concentracion
+    if (!p.descripcion && (p.nombre || p.marca || p.concentracion)) {
+      const parts: string[] = [];
+      if (p.marca) parts.push(p.marca);
+      if (p.concentracion) parts.push(p.concentracion);
+      if (p.tamano) parts.push(p.tamano);
+      if (p.familia_olfativa) parts.push(`Familia olfativa: ${p.familia_olfativa}`);
+      p.descripcion = parts.length > 0
+        ? `${p.nombre}. ${parts.join(". ")}.`
+        : p.nombre;
+    }
   }
   cached = data;
   return data;
