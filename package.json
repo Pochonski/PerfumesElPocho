@@ -1,0 +1,12 @@
+{
+  "name": "perfumes-el-pocho-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd web && npm run build",
+    "dev": "cd web && npm run dev",
+    "start": "cd web && npm run start",
+    "vercel-build": "cd web && npm run vercel-build",
+    "install": "cd web && npm install"
+  }
+}
