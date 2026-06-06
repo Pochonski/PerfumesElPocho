@@ -22,6 +22,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { formatPrice } from "@/lib/format";
+import { normalizeText } from "@/lib/productos";
 import {
   decodeFilters,
   encodeFilters,
@@ -169,7 +170,7 @@ export default function CatalogClient({
   const deferredState = useDeferredValue(state);
 
   const filtered = useMemo(() => {
-    const q = state.q.toLowerCase().trim();
+    const q = normalizeText(state.q);
     let out = productos;
 
     if (state.categoria !== "Todos") {
@@ -201,7 +202,7 @@ export default function CatalogClient({
     }
     if (q) {
       out = out.filter((p) => {
-        const haystack = [
+        const haystack = normalizeText([
           p.nombre,
           p.marca,
           p.descripcion,
@@ -210,8 +211,7 @@ export default function CatalogClient({
           p.concentracion,
         ]
           .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+          .join(" "));
         return haystack.includes(q);
       });
     }

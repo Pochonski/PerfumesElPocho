@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   getProductos,
+  normalizeText,
   type Producto,
 } from "@/lib/productos";
 
@@ -16,13 +17,20 @@ const MAX_PER_PAGE = 48;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const categoria = searchParams.get("categoria");
-  const marca = searchParams.get("marca");
-  const q = searchParams.get("q")?.toLowerCase().trim() || "";
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+
+  // Validar y normalizar params
+  const rawCategoria = searchParams.get("categoria");
+  const rawMarca = searchParams.get("marca");
+  const rawQ = searchParams.get("q") || "";
+  const rawPage = searchParams.get("page") || "1";
+  const rawPerPage = searchParams.get("perPage") || `${DEFAULT_PER_PAGE}`;
+
+  const categoria = rawCategoria || "Todos";
+  const q = normalizeText(rawQ);
+  const page = Math.max(1, parseInt(rawPage, 10) || 1);
   const perPage = Math.min(
     MAX_PER_PAGE,
-    Math.max(1, parseInt(searchParams.get("perPage") || `${DEFAULT_PER_PAGE}`, 10))
+    Math.max(1, parseInt(rawPerPage, 10) || DEFAULT_PER_PAGE)
   );
 
   let filtered: Producto[] = getProductos();
@@ -30,12 +38,15 @@ export async function GET(request: NextRequest) {
   if (categoria && categoria !== "Todos") {
     filtered = filtered.filter((p) => p.categorias.includes(categoria));
   }
-  if (marca) {
-    filtered = filtered.filter((p) => p.marca === marca);
+
+  if (rawMarca) {
+    const normalizedMarca = normalizeText(rawMarca);
+    filtered = filtered.filter((p) => normalizeText(p.marca) === normalizedMarca);
   }
+
   if (q) {
     filtered = filtered.filter((p) => {
-      const haystack = [
+      const haystack = normalizeText([
         p.nombre,
         p.marca,
         p.descripcion,
@@ -44,8 +55,7 @@ export async function GET(request: NextRequest) {
         p.concentracion,
       ]
         .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        .join(" "));
       return haystack.includes(q);
     });
   }

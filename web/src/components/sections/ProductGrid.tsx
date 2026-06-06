@@ -10,7 +10,7 @@ import {
   MagnifyingGlass,
   Funnel,
 } from "@phosphor-icons/react";
-import type { Producto } from "@/lib/productos";
+import { normalizeText, type Producto } from "@/lib/productos";
 
 const PER_PAGE = 24;
 
@@ -64,8 +64,8 @@ export default function ProductGrid({ productos }: ProductGridProps) {
     }
 
     if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      filtered = filtered.filter((p) => p.nombre.toLowerCase().includes(q));
+      const q = normalizeText(debouncedSearch);
+      filtered = filtered.filter((p) => normalizeText(p.nombre).includes(q));
     }
 
     const totalCount = filtered.length;

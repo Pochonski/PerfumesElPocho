@@ -7,7 +7,7 @@ import { FacetCheckbox } from "./FacetCheckbox";
 import { PriceRange } from "./PriceRange";
 import type { FilterState } from "@/lib/filter-state";
 import { formatPrice } from "@/lib/format";
-import type { Producto } from "@/lib/productos";
+import { normalizeText, type Producto } from "@/lib/productos";
 
 interface FilterPanelProps {
   state: FilterState;
@@ -84,8 +84,8 @@ export function FilterPanel({
 
   const marcasFiltradas = useMemo(() => {
     if (!marcaSearch.trim()) return marcas;
-    const q = marcaSearch.toLowerCase();
-    return marcas.filter((m) => m.toLowerCase().includes(q));
+    const q = normalizeText(marcaSearch);
+    return marcas.filter((m) => normalizeText(m).includes(q));
   }, [marcas, marcaSearch]);
 
   return (

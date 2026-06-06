@@ -43,6 +43,35 @@ export function getProductos(): Producto[] {
     if (!Array.isArray(p.familias_olfativas)) p.familias_olfativas = [];
     if (!Array.isArray(p.ocasiones)) p.ocasiones = [];
     if (!Array.isArray(p.generos)) p.generos = [];
+
+    // Derivar familias_olfativas desde familia_olfativa (string comma-separated)
+    if (p.familias_olfativas.length === 0 && p.familia_olfativa) {
+      p.familias_olfativas = p.familia_olfativa
+        .split(",")
+        .map((f: string) => f.trim())
+        .filter(Boolean);
+    }
+
+    // Derivar ocasiones desde ocasion (string comma-separated)
+    if (p.ocasiones.length === 0 && p.ocasion) {
+      p.ocasiones = p.ocasion
+        .split(",")
+        .map((o: string) => o.trim())
+        .filter(Boolean);
+    }
+
+    // Derivar generos desde genero (string comma-separated)
+    if (p.generos.length === 0 && p.genero) {
+      p.generos = p.genero
+        .split(",")
+        .map((g: string) => g.trim())
+        .filter(Boolean);
+    }
+
+    // Generar resumen desde descripcion si está vacío
+    if (!p.resumen && p.descripcion) {
+      p.resumen = p.descripcion.slice(0, 150).trim() + (p.descripcion.length > 150 ? "…" : "");
+    }
   }
   cached = data;
   return data;
@@ -127,12 +156,18 @@ export function getPrecioRange(): { min: number; max: number } {
   return { min, max };
 }
 
-/** Slugify seguro para URL: lowercase, sin acentos, con guiones */
-export function slugify(text: string): string {
+/** Normalizar texto para búsqueda: lowercase + sin acentos */
+export function normalizeText(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+/** Slugify seguro para URL: lowercase, sin acentos, con guiones */
+export function slugify(text: string): string {
+  return normalizeText(text)
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
