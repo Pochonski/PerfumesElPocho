@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Development
+.git/
+.env*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# Local scripts (not needed on Vercel)
+scripts/
+scraper/
+*.py
+
+# Large data files that shouldn't be uploaded during deploy
+# (they're fetched at build time via getProductos())
+# Note: productos.json is needed at build time for generateStaticParams
+# so we don't exclude it
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Misc
+*.bak
+*.tmp

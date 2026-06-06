@@ -9,13 +9,9 @@ const nextConfig: NextConfig = {
         pathname: "/assets/images/**",
       },
     ],
-    // Cache de imágenes en el servidor para no re-descargar siempre
-    minimumCacheTTL: 86400, // 24 horas
+    minimumCacheTTL: 86400,
   },
-  // Aumentar tamaño de página para SSG (necesario con muchos productos)
-  experimental: {
-    // Large page data support
-  },
+  swcMinify: true,
 };
 
 export default nextConfig;
