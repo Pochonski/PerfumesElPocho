@@ -28,7 +28,6 @@ import {
   encodeFilters,
   hasActiveFilters,
   type FilterState,
-  type SortKey,
 } from "@/lib/filter-state";
 import { FilterPanel } from "@/components/filters/FilterPanel";
 import { FilterSheet } from "@/components/filters/FilterSheet";
@@ -68,41 +67,6 @@ export default function CatalogClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  /* === Estado de productos desde el API === */
-  const [allProductos, setAllProductos] = useState<Producto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  /* === Cargar todos los productos una vez al montar === */
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setApiError(null);
-
-    // Fetch todos los productos (sin paginar en el servidor, paginamos en memoria)
-    fetch("/api/productos?page=1&perPage=5000")
-      .then((r) => {
-        if (!r.ok) throw new Error("Error cargando productos");
-        return r.json();
-      })
-      .then((data: ApiResponse) => {
-        if (!cancelled) {
-          setAllProductos(data.items || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setApiError(err.message);
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   /* === Estado de filtros (sincronizado con URL) === */
   const [state, setState] = useState<FilterState>(() => {
@@ -144,9 +108,6 @@ export default function CatalogClient({
     debounceRef.current = setTimeout(() => {
       pushState({ ...state, q: searchInput });
     }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput]);
 
@@ -154,121 +115,73 @@ export default function CatalogClient({
     setSearchInput(e.target.value);
   };
 
-  /* === Pagination === */
+  /* === Productos + loading desde el API === */
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  // Fetch productos del API cuando cambian los filtros o la página
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setApiError(null);
+
+    // Construir query string con filtros
+    const qs = new URLSearchParams();
+    qs.set("page", String(page));
+    qs.set("perPage", String(PER_PAGE));
+    if (state.categoria && state.categoria !== "Todos") qs.set("categoria", state.categoria);
+    if (state.q) qs.set("q", state.q);
+    if (state.marcas.length > 0) qs.set("marcas", state.marcas.join(","));
+    if (state.familias.length > 0) qs.set("familias", state.familias.join(","));
+    if (state.ocasiones.length > 0) qs.set("ocasiones", state.ocasiones.join(","));
+    if (state.generos.length > 0) qs.set("generos", state.generos.join(","));
+    if (state.precioMin != null) qs.set("precioMin", String(state.precioMin));
+    if (state.precioMax != null) qs.set("precioMax", String(state.precioMax));
+    if (state.sort) qs.set("sort", state.sort);
+
+    fetch(`/api/productos?${qs.toString()}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        return r.json();
+      })
+      .then((data: ApiResponse) => {
+        if (!cancelled) {
+          setProductos(data.items || []);
+          setTotal(data.total);
+          setTotalPages(data.totalPages);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setApiError(err.message);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state, page]);
+
+  // Reset page cuando cambian los filtros
   useEffect(() => {
     setPage(1);
   }, [state]);
 
-  /* === Facets disponibles (calculados de los productos cargados) === */
+  /* === Facets: cargamos todas las categorías disponibles una vez === */
   const facets = useMemo(() => {
-    const cats = availableCategories ?? Array.from(
-      new Set(allProductos.flatMap((p) => p.categorias))
-    );
+    const cats = availableCategories ?? ["Todos"];
     return {
-      categorias: cats.filter(Boolean).sort(),
-      marcas: Array.from(
-        new Set(allProductos.map((p) => p.marca).filter(Boolean))
-      ).sort(),
-      familias: Array.from(
-        new Set(allProductos.flatMap((p) => p.familias_olfativas))
-      ).sort(),
-      ocasiones: Array.from(
-        new Set(allProductos.flatMap((p) => p.ocasiones))
-      ).sort(),
-      generos: Array.from(
-        new Set(allProductos.flatMap((p) => p.generos))
-      ).sort(),
-      precioMin: Math.min(...allProductos.map((p) => p.precio).filter((x) => x > 0)),
-      precioMax: Math.max(...allProductos.map((p) => p.precio)),
+      categorias: cats,
+      precioMin: 0,
+      precioMax: 500000,
     };
-  }, [allProductos, availableCategories]);
-
-  /* === Filtrado === */
-  const deferredState = useDeferredValue(state);
-
-  const filtered = useMemo(() => {
-    const q = normalizeText(deferredState.q);
-    let out = allProductos;
-
-    if (deferredState.categoria !== "Todos") {
-      out = out.filter((p) => p.categorias.includes(deferredState.categoria));
-    }
-    if (deferredState.marcas.length > 0) {
-      out = out.filter((p) => deferredState.marcas.includes(p.marca));
-    }
-    if (deferredState.familias.length > 0) {
-      out = out.filter((p) =>
-        p.familias_olfativas.some((f) => deferredState.familias.includes(f))
-      );
-    }
-    if (deferredState.ocasiones.length > 0) {
-      out = out.filter((p) =>
-        p.ocasiones.some((o) => deferredState.ocasiones.includes(o))
-      );
-    }
-    if (deferredState.generos.length > 0) {
-      out = out.filter((p) =>
-        p.generos.some((g) => deferredState.generos.includes(g))
-      );
-    }
-    if (deferredState.precioMin != null) {
-      out = out.filter((p) => p.precio >= deferredState.precioMin!);
-    }
-    if (deferredState.precioMax != null) {
-      out = out.filter((p) => p.precio <= deferredState.precioMax!);
-    }
-    if (q) {
-      out = out.filter((p) => {
-        const haystack = normalizeText([
-          p.nombre,
-          p.marca,
-          p.descripcion,
-          p.resumen,
-          p.familia_olfativa,
-          p.concentracion,
-        ]
-          .filter(Boolean)
-          .join(" "));
-        return haystack.includes(q);
-      });
-    }
-
-    // Sort
-    if (deferredState.sort === "precio-asc") {
-      out = [...out].sort((a, b) => a.precio - b.precio);
-    } else if (deferredState.sort === "precio-desc") {
-      out = [...out].sort((a, b) => b.precio - a.precio);
-    } else if (deferredState.sort === "nombre-asc") {
-      out = [...out].sort((a, b) => a.nombre.localeCompare(b.nombre));
-    }
-
-    return out;
-  }, [allProductos, deferredState]);
-
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / PER_PAGE);
-  const items = useMemo(
-    () => filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE),
-    [filtered, page]
-  );
-
-  const visiblePages = useMemo(() => {
-    const pages: (number | "...")[] = [];
-    const delta = 2;
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= page - delta && i <= page + delta)
-      ) {
-        pages.push(i);
-      } else if (pages[pages.length - 1] !== "...") {
-        pages.push("...");
-      }
-    }
-    return pages;
-  }, [totalPages, page]);
+  }, [availableCategories]);
 
   const clearAll = useCallback(() => {
     pushState({
@@ -331,12 +244,29 @@ export default function CatalogClient({
   /* === Mobile filter sheet === */
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  /* === Visible pages for pagination === */
+  const visiblePages = useMemo(() => {
+    const pages: (number | "...")[] = [];
+    const delta = 2;
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= page - delta && i <= page + delta)
+      ) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== "...") {
+        pages.push("...");
+      }
+    }
+    return pages;
+  }, [totalPages, page]);
+
   /* === Loading state === */
-  if (loading) {
+  if (loading && productos.length === 0) {
     return (
       <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
         <div className="mx-auto max-w-7xl">
-          {/* Header skeleton */}
           <div className="mb-12 flex flex-col items-center gap-4 text-center">
             <div className="h-6 w-32 animate-pulse rounded-full bg-zinc-800" />
             <div className="h-10 w-64 animate-pulse rounded-lg bg-zinc-800" />
@@ -359,12 +289,12 @@ export default function CatalogClient({
     );
   }
 
-  if (apiError) {
+  if (apiError && productos.length === 0) {
     return (
       <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
         <div className="mx-auto max-w-7xl text-center">
           <p className="text-red-400">Error cargando productos: {apiError}</p>
-          <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-zinc-800 rounded-lg">
+          <button onClick={() => setPage(1)} className="mt-4 px-4 py-2 bg-zinc-800 rounded-lg">
             Reintentar
           </button>
         </div>
@@ -392,14 +322,14 @@ export default function CatalogClient({
           <div className="hidden w-72 shrink-0 lg:block xl:w-80">
             <FilterPanel
               state={state}
-              productos={allProductos}
+              productos={productos}
               precioMin={facets.precioMin}
               precioMax={facets.precioMax}
               categorias={facets.categorias}
-              marcas={facets.marcas}
-              familias={facets.familias}
-              ocasiones={facets.ocasiones}
-              generos={facets.generos}
+              marcas={[]}
+              familias={[]}
+              ocasiones={[]}
+              generos={[]}
               onChange={pushState}
               onClear={clearAll}
             />
@@ -409,7 +339,6 @@ export default function CatalogClient({
           <div className="flex-1 min-w-0">
             {/* Search + Sort + Filter toggle */}
             <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:gap-4">
-              {/* Search input */}
               <div className="relative flex-1">
                 <MagnifyingGlass
                   size={18}
@@ -433,7 +362,6 @@ export default function CatalogClient({
                 )}
               </div>
 
-              {/* Sort + filter buttons */}
               <div className="flex items-center gap-3">
                 <SortDropdown
                   value={state.sort}
@@ -477,10 +405,11 @@ export default function CatalogClient({
                 <span className="font-mono text-white">{total.toLocaleString("es-CR")}</span>{" "}
                 {total === 1 ? "fragancia" : "fragancias"}
               </p>
+              {loading && <span className="text-zinc-600">Cargando...</span>}
             </div>
 
             {/* Grid */}
-            {items.length === 0 ? (
+            {productos.length === 0 && !loading ? (
               <div className="flex flex-col items-center gap-3 py-24">
                 <Sparkle size={40} className="text-zinc-700" weight="thin" aria-hidden="true" />
                 <p className="text-zinc-500">No se encontraron fragancias.</p>
@@ -494,7 +423,7 @@ export default function CatalogClient({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((p, i) => (
+                {productos.map((p, i) => (
                   <AnimatedItem key={p.id} index={i % PER_PAGE}>
                     <ProductCard producto={p} />
                   </AnimatedItem>
@@ -560,14 +489,14 @@ export default function CatalogClient({
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         state={state}
-        productos={allProductos}
+        productos={productos}
         precioMin={facets.precioMin}
         precioMax={facets.precioMax}
         categorias={facets.categorias}
-        marcas={facets.marcas}
-        familias={facets.familias}
-        ocasiones={facets.ocasiones}
-        generos={facets.generos}
+        marcas={[]}
+        familias={[]}
+        ocasiones={[]}
+        generos={[]}
         onChange={pushState}
         onClear={clearAll}
       />
@@ -575,7 +504,7 @@ export default function CatalogClient({
   );
 }
 
-/* === ProductCard inline (no separate file needed) === */
+/* === ProductCard inline === */
 function ProductCard({ producto }: { producto: Producto }) {
   const imgUrl = producto.imagenes?.[0] || null;
 

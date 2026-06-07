@@ -12,7 +12,7 @@ export const revalidate = 3600;
 /* ─── Rate Limiting ─── */
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 60;
+const RATE_LIMIT_MAX = 120;
 
 function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now();
@@ -42,15 +42,21 @@ function getClientIP(request: NextRequest): string {
 /* ─── Zod Schema for Search Params ─── */
 const SearchParamsSchema = z.object({
   categoria: z.string().optional(),
-  marca: z.string().optional(),
+  marcas: z.string().optional(), // comma-separated
+  familias: z.string().optional(),
+  ocasiones: z.string().optional(),
+  generos: z.string().optional(),
+  precioMin: z.string().optional(),
+  precioMax: z.string().optional(),
   q: z.string().optional(),
+  sort: z.string().optional(), // precio-asc | precio-desc | nombre-asc
   page: z
     .string()
     .transform((v) => {
       const n = parseInt(v, 10);
       return isNaN(n) || n < 1 ? 1 : n;
     })
-    .default(1),
+    .default("1"),
   perPage: z
     .string()
     .transform((v) => {
@@ -58,19 +64,11 @@ const SearchParamsSchema = z.object({
       if (isNaN(n) || n < 1) return 24;
       return n > 48 ? 48 : n;
     })
-    .default(24),
+    .default("24"),
 });
 
-interface ApiParams {
-  categoria?: string;
-  marca?: string;
-  q?: string;
-  page: number;
-  perPage: number;
-}
-
 function parseSearchParams(raw: NextRequest["nextUrl"]["searchParams"]): {
-  params: ApiParams;
+  params: z.infer<typeof SearchParamsSchema> & { page: number; perPage: number };
   errors: string[];
 } {
   const rawObj = Object.fromEntries(raw.entries());
@@ -78,23 +76,15 @@ function parseSearchParams(raw: NextRequest["nextUrl"]["searchParams"]): {
 
   if (!result.success) {
     const errors = result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
-    return {
-      params: {
-        categoria: raw.get("categoria") ?? undefined,
-        marca: raw.get("marca") ?? undefined,
-        q: raw.get("q") ?? undefined,
-        page: 1,
-        perPage: 24,
-      },
-      errors,
-    };
+    const fallback = { categoria: undefined, marcas: undefined, familias: undefined, ocasiones: undefined, generos: undefined, precioMin: undefined, precioMax: undefined, q: undefined, sort: undefined, page: 1, perPage: 24 };
+    return { params: fallback as typeof fallback & { page: number; perPage: number }, errors };
   }
 
-  return { params: result.data as ApiParams, errors: [] };
+  return { params: result.data as any, errors: [] };
 }
 
 /* ─── Response Types ─── */
-interface ApiProducto extends Producto {
+interface ApiProducto extends Omit<Producto, "imagenes"> {
   imagen: string | null;
 }
 
@@ -133,15 +123,60 @@ export async function GET(request: NextRequest) {
 
   let filtered: Producto[] = getProductos();
 
+  // Filter by categoria
   if (params.categoria && params.categoria !== "Todos") {
     filtered = filtered.filter((p) => p.categorias.includes(params.categoria!));
   }
 
-  if (params.marca) {
-    const normalizedMarca = normalizeText(params.marca);
-    filtered = filtered.filter((p) => normalizeText(p.marca) === normalizedMarca);
+  // Filter by marcas (comma-separated, OR logic)
+  if (params.marcas) {
+    const marcaList = params.marcas.split(",").map((m) => normalizeText(m.trim())).filter(Boolean);
+    if (marcaList.length > 0) {
+      filtered = filtered.filter((p) => marcaList.includes(normalizeText(p.marca)));
+    }
   }
 
+  // Filter by familias olfativas (OR logic)
+  if (params.familias) {
+    const familiaList = params.familias.split(",").map((f) => normalizeText(f.trim())).filter(Boolean);
+    if (familiaList.length > 0) {
+      filtered = filtered.filter((p) =>
+        p.familias_olfativas.some((f) => familiaList.includes(normalizeText(f)))
+      );
+    }
+  }
+
+  // Filter by ocasiones (OR logic)
+  if (params.ocasiones) {
+    const occasionList = params.ocasiones.split(",").map((o) => normalizeText(o.trim())).filter(Boolean);
+    if (occasionList.length > 0) {
+      filtered = filtered.filter((p) =>
+        p.ocasiones.some((o) => occasionList.includes(normalizeText(o)))
+      );
+    }
+  }
+
+  // Filter by generos (OR logic)
+  if (params.generos) {
+    const generoList = params.generos.split(",").map((g) => normalizeText(g.trim())).filter(Boolean);
+    if (generoList.length > 0) {
+      filtered = filtered.filter((p) =>
+        p.generos.some((g) => generoList.includes(normalizeText(g)))
+      );
+    }
+  }
+
+  // Filter by price range
+  if (params.precioMin) {
+    const min = parseFloat(params.precioMin);
+    if (!isNaN(min)) filtered = filtered.filter((p) => p.precio >= min);
+  }
+  if (params.precioMax) {
+    const max = parseFloat(params.precioMax);
+    if (!isNaN(max)) filtered = filtered.filter((p) => p.precio <= max);
+  }
+
+  // Full-text search
   if (params.q) {
     const q = normalizeText(params.q);
     filtered = filtered.filter((p) => {
@@ -159,24 +194,48 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // Sort
+  if (params.sort === "precio-asc") {
+    filtered = [...filtered].sort((a, b) => a.precio - b.precio);
+  } else if (params.sort === "precio-desc") {
+    filtered = [...filtered].sort((a, b) => b.precio - a.precio);
+  } else if (params.sort === "nombre-asc") {
+    filtered = [...filtered].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
   const total = filtered.length;
   const totalPages = Math.ceil(total / params.perPage);
-  const start = (params.page - 1) * params.perPage;
+  const page = Math.min(params.page, Math.max(1, totalPages));
+  const start = (page - 1) * params.perPage;
+
   const items: ApiProducto[] = filtered
     .slice(start, start + params.perPage)
     .map((p) => ({
-      ...p,
+      id: p.id,
+      nombre: p.nombre,
+      marca: p.marca,
+      precio: p.precio,
+      imagenes: p.imagenes,
       imagen: p.imagenes[0] || null,
+      categorias: p.categorias,
+      familias_olfativas: p.familias_olfativas,
+      ocasiones: p.ocasiones,
+      generos: p.generos,
+      descripcion: p.descripcion,
+      resumen: p.resumen,
+      familia_olfativa: p.familia_olfativa,
+      concentracion: p.concentracion,
+      tamano: p.tamano,
     }));
 
   const response: ApiResponse = {
     items,
     total,
-    page: params.page,
+    page,
     perPage: params.perPage,
     totalPages,
-    hasNext: params.page < totalPages,
-    hasPrev: params.page > 1,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
     ...(errors.length > 0 ? { errors } : {}),
   };
 
