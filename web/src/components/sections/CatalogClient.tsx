@@ -66,12 +66,7 @@ export default function CatalogClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  /* === Estado de filtros (sincronizado con URL al montar) === */
-  const [state, setState] = useState<FilterState>(() => {
-    const fromUrl = decodeFilters(searchParams);
-    return { ...fromUrl, categoria: fromUrl.categoria || initialCategory };
-  });
-
+  /* Estado base: se inicializa desde URL al montar */
   const [page, setPage] = useState(1);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [total, setTotal] = useState(0);
@@ -79,38 +74,68 @@ export default function CatalogClient({
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  /* === Sincronizar con URL cuando cambia (back/forward) === */
+  /* Filtros: ref para evitar stale closures, state para render */
+  const filtrosRef = useRef<FilterState>({
+    categoria: initialCategory,
+    marcas: [],
+    familias: [],
+    ocasiones: [],
+    generos: [],
+    precioMin: null,
+    precioMax: null,
+    sort: undefined,
+    q: "",
+  });
+  const [filtrosState, setFiltrosState] = useState<FilterState>(filtrosRef.current);
+
+  /* Solo inicializar desde URL una vez al montar */
+  const initRef = useRef(false);
+  if (!initRef.current && searchParams) {
+    initRef.current = true;
+    const fromUrl = decodeFilters(searchParams);
+    const inicial: FilterState = {
+      ...fromUrl,
+      categoria: fromUrl.categoria || initialCategory,
+    };
+    filtrosRef.current = inicial;
+    setFiltrosState(inicial);
+  }
+
+  /* Sync con URL cuando cambia (back/forward) */
   useEffect(() => {
     const fromUrl = decodeFilters(searchParams);
-    setState((s) => {
-      const next: FilterState = {
-        ...s,
-        ...fromUrl,
-        categoria: fromUrl.categoria || initialCategory,
-      };
-      return JSON.stringify(next) === JSON.stringify(s) ? s : next;
-    });
-    setPage(1);
+    const next: FilterState = {
+      ...fromUrl,
+      categoria: fromUrl.categoria || initialCategory,
+    };
+    // Solo actualizar si realmente cambió
+    if (JSON.stringify(next) !== JSON.stringify(filtrosRef.current)) {
+      filtrosRef.current = next;
+      setFiltrosState(next);
+      setPage(1);
+    }
   }, [searchParams, initialCategory]);
 
-  /* === Fetch productos cuando cambian filtros o página === */
+  /* Fetch productos: solo se dispara cuando cambian filtrosRef o page */
   useEffect(() => {
     let cancelled = false;
+
     setLoading(true);
     setApiError(null);
 
+    const filtros = filtrosRef.current;
     const qs = new URLSearchParams();
     qs.set("page", String(page));
     qs.set("perPage", String(PER_PAGE));
-    if (state.categoria && state.categoria !== "Todos") qs.set("categoria", state.categoria);
-    if (state.q) qs.set("q", state.q);
-    if (state.marcas.length > 0) qs.set("marcas", state.marcas.join(","));
-    if (state.familias.length > 0) qs.set("familias", state.familias.join(","));
-    if (state.ocasiones.length > 0) qs.set("ocasiones", state.ocasiones.join(","));
-    if (state.generos.length > 0) qs.set("generos", state.generos.join(","));
-    if (state.precioMin != null) qs.set("precioMin", String(state.precioMin));
-    if (state.precioMax != null) qs.set("precioMax", String(state.precioMax));
-    if (state.sort) qs.set("sort", state.sort);
+    if (filtros.categoria && filtros.categoria !== "Todos") qs.set("categoria", filtros.categoria);
+    if (filtros.q) qs.set("q", filtros.q);
+    if (filtros.marcas.length > 0) qs.set("marcas", filtros.marcas.join(","));
+    if (filtros.familias.length > 0) qs.set("familias", filtros.familias.join(","));
+    if (filtros.ocasiones.length > 0) qs.set("ocasiones", filtros.ocasiones.join(","));
+    if (filtros.generos.length > 0) qs.set("generos", filtros.generos.join(","));
+    if (filtros.precioMin != null) qs.set("precioMin", String(filtros.precioMin));
+    if (filtros.precioMax != null) qs.set("precioMax", String(filtros.precioMax));
+    if (filtros.sort) qs.set("sort", filtros.sort);
 
     fetch(`/api/productos?${qs.toString()}`)
       .then((r) => {
@@ -135,45 +160,39 @@ export default function CatalogClient({
     return () => {
       cancelled = true;
     };
-  }, [state, page]);
+  }, [page]);
 
-  /* === Search debounced === */
-  const [searchInput, setSearchInput] = useState(state.q);
+  /* pushState: actualiza URL + ref + state, resetea página */
+  const pushState = useCallback(
+    (next: FilterState) => {
+      filtrosRef.current = next;
+      setFiltrosState(next);
+      setPage(1);
+      const params = encodeFilters(next);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  /* Search debounced */
+  const [searchInput, setSearchInput] = useState(filtrosRef.current.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (searchInput === state.q) return;
+    const currentQ = filtrosRef.current.q;
+    if (searchInput === currentQ) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      setPage(1);
-      setState((s) => ({ ...s, q: searchInput }));
+      pushState({ ...filtrosRef.current, q: searchInput });
     }, 300);
-  }, [searchInput]);
+  }, [searchInput, pushState]);
 
   const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
 
-  /* === Sincronizar estado al router === */
-  const pushState = useCallback(
-    (next: FilterState) => {
-      const params = encodeFilters(next);
-      const qs = params.toString();
-      const url = qs ? `${pathname}?${qs}` : pathname;
-      router.replace(url, { scroll: false });
-      setState(next);
-      setPage(1);
-    },
-    [pathname, router]
-  );
-
-  /* === Facets === */
-  const facets = useMemo(() => {
-    const cats = availableCategories ?? ["Todos"];
-    return { categorias: cats, precioMin: 0, precioMax: 500000 };
-  }, [availableCategories]);
-
-  /* === Clear all === */
+  /* Clear all */
   const clearAll = useCallback(() => {
     pushState({
       categoria: initialCategory,
@@ -189,31 +208,32 @@ export default function CatalogClient({
     setSearchInput("");
   }, [pushState, initialCategory]);
 
-  /* === Remove single filter === */
+  /* Remove single filter */
   const removeFilter = useCallback(
     (
       field: "categoria" | "marca" | "familia" | "ocasion" | "genero" | "precio" | "q",
       value?: string
     ) => {
-      if (field === "categoria") { pushState({ ...state, categoria: "Todos" }); return; }
-      if (field === "q") { pushState({ ...state, q: "" }); setSearchInput(""); return; }
-      if (field === "precio") { pushState({ ...state, precioMin: null, precioMax: null }); return; }
+      const current = filtrosRef.current;
+      if (field === "categoria") { pushState({ ...current, categoria: "Todos" }); return; }
+      if (field === "q") { pushState({ ...current, q: "" }); setSearchInput(""); return; }
+      if (field === "precio") { pushState({ ...current, precioMin: null, precioMax: null }); return; }
       if (!value) return;
       const keyMap: Partial<Record<typeof field, keyof FilterState>> = {
         marca: "marcas", familia: "familias", ocasion: "ocasiones", genero: "generos",
       };
       const stateKey = keyMap[field];
       if (stateKey) {
-        pushState({ ...state, [stateKey]: (state[stateKey] as string[]).filter((v) => v !== value) });
+        pushState({ ...current, [stateKey]: (current[stateKey] as string[]).filter((v) => v !== value) });
       }
     },
-    [pushState, state]
+    [pushState]
   );
 
-  /* === Mobile sheet === */
+  /* Mobile sheet */
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  /* === Pagination === */
+  /* Pagination */
   const visiblePages = useMemo(() => {
     const pages: (number | "...")[] = [];
     const delta = 2;
@@ -227,7 +247,7 @@ export default function CatalogClient({
     return pages;
   }, [totalPages, page]);
 
-  /* === Loading skeleton === */
+  /* Loading skeleton */
   if (loading && productos.length === 0) {
     return (
       <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
@@ -280,11 +300,11 @@ export default function CatalogClient({
           {/* Desktop sidebar */}
           <div className="hidden w-72 shrink-0 lg:block xl:w-80">
             <FilterPanel
-              state={state}
+              state={filtrosState}
               productos={productos}
-              precioMin={facets.precioMin}
-              precioMax={facets.precioMax}
-              categorias={facets.categorias}
+              precioMin={0}
+              precioMax={500000}
+              categorias={availableCategories ?? ["Todos"]}
               marcas={[]}
               familias={[]}
               ocasiones={[]}
@@ -314,7 +334,7 @@ export default function CatalogClient({
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <SortDropdown value={state.sort || "default"} onChange={(sort) => pushState({ ...state, sort })} />
+                <SortDropdown value={filtrosState.sort || "default"} onChange={(sort) => pushState({ ...filtrosState, sort })} />
                 <button
                   type="button"
                   onClick={() => setSheetOpen(true)}
@@ -322,16 +342,16 @@ export default function CatalogClient({
                 >
                   <SlidersHorizontal size={18} />
                   Filtros
-                  {hasActiveFilters(state, initialCategory) && (
+                  {hasActiveFilters(filtrosState, initialCategory) && (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#c8a84e] text-[10px] font-bold text-black">
                       {[
-                        state.categoria !== initialCategory,
-                        ...state.marcas,
-                        ...state.familias,
-                        ...state.ocasiones,
-                        ...state.generos,
-                        state.precioMin != null || state.precioMax != null,
-                        !!state.q,
+                        filtrosState.categoria !== initialCategory,
+                        ...filtrosState.marcas,
+                        ...filtrosState.familias,
+                        ...filtrosState.ocasiones,
+                        ...filtrosState.generos,
+                        filtrosState.precioMin != null || filtrosState.precioMax != null,
+                        !!filtrosState.q,
                       ].filter(Boolean).length}
                     </span>
                   )}
@@ -339,7 +359,7 @@ export default function CatalogClient({
               </div>
             </div>
 
-            <ActiveFilterChips state={state} initialCategory={initialCategory} onRemove={removeFilter} onClear={clearAll} />
+            <ActiveFilterChips state={filtrosState} initialCategory={initialCategory} onRemove={removeFilter} onClear={clearAll} />
 
             {/* Count */}
             <div className="mb-4 flex items-center justify-between text-xs">
@@ -397,11 +417,11 @@ export default function CatalogClient({
       <FilterSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        state={state}
+        state={filtrosState}
         productos={productos}
-        precioMin={facets.precioMin}
-        precioMax={facets.precioMax}
-        categorias={facets.categorias}
+        precioMin={0}
+        precioMax={500000}
+        categorias={availableCategories ?? ["Todos"]}
         marcas={[]}
         familias={[]}
         ocasiones={[]}
