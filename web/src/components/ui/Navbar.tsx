@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { List, X } from "@phosphor-icons/react";
 import Button from "./Button";
@@ -25,9 +26,15 @@ export default function Navbar({ children }: { children?: ReactNode }) {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 md:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tighter gold-gradient">
-            Perfumes El Pocho
-          </span>
+          <div className="relative h-10 w-32 md:h-12 md:w-40">
+            <Image
+              src="/brand/logo.png"
+              alt="Perfumes El Pocho"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </Link>
 
         {/* Desktop links */}
