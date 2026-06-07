@@ -73,6 +73,8 @@ export default function CatalogClient({
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
+  /* Version counter para forzar re-fetch cuando filtros cambian */
+  const [filterVersion, setFilterVersion] = useState(0);
 
   /* Filtros: ref para evitar stale closures, state para render */
   const filtrosRef = useRef<FilterState>({
@@ -160,7 +162,7 @@ export default function CatalogClient({
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, filterVersion]);
 
   /* pushState: actualiza URL + ref + state, resetea página */
   const pushState = useCallback(
@@ -168,6 +170,7 @@ export default function CatalogClient({
       filtrosRef.current = next;
       setFiltrosState(next);
       setPage(1);
+      setFilterVersion((v) => v + 1);
       const params = encodeFilters(next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
