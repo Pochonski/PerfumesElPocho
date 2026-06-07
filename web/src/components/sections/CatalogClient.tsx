@@ -39,23 +39,25 @@ import type { Producto } from "@/lib/productos";
 const PER_PAGE = 24;
 
 interface CatalogClientProps {
-  productos: Producto[];
-  /** Categoría preseleccionada (para páginas /categoria/[slug]) */
   initialCategory?: string;
-  /** Categorías disponibles. Si no se pasa, se calculan */
   availableCategories?: string[];
-  /** Eyebrow del header */
   eyebrow?: string;
-  /** Título del header */
   title: string;
-  /** Descripción del header */
   description?: string;
-  /** ID opcional de la sección */
   id?: string;
 }
 
+interface ApiResponse {
+  items: Producto[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
 export default function CatalogClient({
-  productos,
   initialCategory = "Todos",
   availableCategories,
   eyebrow = "Catálogo",
@@ -66,6 +68,41 @@ export default function CatalogClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  /* === Estado de productos desde el API === */
+  const [allProductos, setAllProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  /* === Cargar todos los productos una vez al montar === */
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setApiError(null);
+
+    // Fetch todos los productos (sin paginar en el servidor, paginamos en memoria)
+    fetch("/api/productos?page=1&perPage=5000")
+      .then((r) => {
+        if (!r.ok) throw new Error("Error cargando productos");
+        return r.json();
+      })
+      .then((data: ApiResponse) => {
+        if (!cancelled) {
+          setAllProductos(data.items || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setApiError(err.message);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* === Estado de filtros (sincronizado con URL) === */
   const [state, setState] = useState<FilterState>(() => {
@@ -119,86 +156,67 @@ export default function CatalogClient({
 
   /* === Pagination === */
   const [page, setPage] = useState(1);
-  // Reset page cuando cambia cualquier filtro
   useEffect(() => {
     setPage(1);
   }, [state]);
 
-  /* === Facets disponibles === */
+  /* === Facets disponibles (calculados de los productos cargados) === */
   const facets = useMemo(() => {
     const cats = availableCategories ?? Array.from(
-      new Set(productos.flatMap((p) => p.categorias))
-    ).sort();
-
-    const marcas = Array.from(
-      new Set(productos.map((p) => p.marca).filter(Boolean))
-    ).sort();
-
-    const familias = Array.from(
-      new Set(productos.flatMap((p) => p.familias_olfativas))
-    ).sort();
-
-    const ocasiones = Array.from(
-      new Set(productos.flatMap((p) => p.ocasiones))
-    ).sort();
-
-    const generos = Array.from(
-      new Set(productos.flatMap((p) => p.generos))
-    ).sort();
-
-    let precioMin = Infinity;
-    let precioMax = -Infinity;
-    for (const p of productos) {
-      if (p.precio < precioMin) precioMin = p.precio;
-      if (p.precio > precioMax) precioMax = p.precio;
-    }
-    if (!isFinite(precioMin)) precioMin = 0;
-    if (!isFinite(precioMax)) precioMax = 0;
-
+      new Set(allProductos.flatMap((p) => p.categorias))
+    );
     return {
-      categorias: cats,
-      marcas,
-      familias,
-      ocasiones,
-      generos,
-      precioMin,
-      precioMax,
+      categorias: cats.filter(Boolean).sort(),
+      marcas: Array.from(
+        new Set(allProductos.map((p) => p.marca).filter(Boolean))
+      ).sort(),
+      familias: Array.from(
+        new Set(allProductos.flatMap((p) => p.familias_olfativas))
+      ).sort(),
+      ocasiones: Array.from(
+        new Set(allProductos.flatMap((p) => p.ocasiones))
+      ).sort(),
+      generos: Array.from(
+        new Set(allProductos.flatMap((p) => p.generos))
+      ).sort(),
+      precioMin: Math.min(...allProductos.map((p) => p.precio).filter((x) => x > 0)),
+      precioMax: Math.max(...allProductos.map((p) => p.precio)),
     };
-  }, [productos, availableCategories]);
+  }, [allProductos, availableCategories]);
 
   /* === Filtrado === */
   const deferredState = useDeferredValue(state);
 
   const filtered = useMemo(() => {
-    const q = normalizeText(state.q);
-    let out = productos;
+    const q = normalizeText(deferredState.q);
+    let out = allProductos;
 
-    if (state.categoria !== "Todos") {
-      out = out.filter((p) => p.categorias.includes(state.categoria));
+    if (deferredState.categoria !== "Todos") {
+      out = out.filter((p) => p.categorias.includes(deferredState.categoria));
     }
-    if (state.marcas.length > 0) {
-      out = out.filter((p) => state.marcas.includes(p.marca));
+    if (deferredState.marcas.length > 0) {
+      out = out.filter((p) => deferredState.marcas.includes(p.marca));
     }
-    if (state.familias.length > 0) {
+    if (deferredState.familias.length > 0) {
       out = out.filter((p) =>
-        p.familias_olfativas.some((f) => state.familias.includes(f))
+        p.familias_olfativas.some((f) => deferredState.familias.includes(f))
       );
     }
-    if (state.ocasiones.length > 0) {
+    if (deferredState.ocasiones.length > 0) {
       out = out.filter((p) =>
-        p.ocasiones.some((o) => state.ocasiones.includes(o))
+        p.ocasiones.some((o) => deferredState.ocasiones.includes(o))
       );
     }
-    if (state.generos.length > 0) {
+    if (deferredState.generos.length > 0) {
       out = out.filter((p) =>
-        p.generos.some((g) => state.generos.includes(g))
+        p.generos.some((g) => deferredState.generos.includes(g))
       );
     }
-    if (state.precioMin != null) {
-      out = out.filter((p) => p.precio >= state.precioMin!);
+    if (deferredState.precioMin != null) {
+      out = out.filter((p) => p.precio >= deferredState.precioMin!);
     }
-    if (state.precioMax != null) {
-      out = out.filter((p) => p.precio <= state.precioMax!);
+    if (deferredState.precioMax != null) {
+      out = out.filter((p) => p.precio <= deferredState.precioMax!);
     }
     if (q) {
       out = out.filter((p) => {
@@ -217,16 +235,16 @@ export default function CatalogClient({
     }
 
     // Sort
-    if (state.sort === "precio-asc") {
+    if (deferredState.sort === "precio-asc") {
       out = [...out].sort((a, b) => a.precio - b.precio);
-    } else if (state.sort === "precio-desc") {
+    } else if (deferredState.sort === "precio-desc") {
       out = [...out].sort((a, b) => b.precio - a.precio);
-    } else if (state.sort === "nombre-asc") {
+    } else if (deferredState.sort === "nombre-asc") {
       out = [...out].sort((a, b) => a.nombre.localeCompare(b.nombre));
     }
 
     return out;
-  }, [productos, state, deferredState]);
+  }, [allProductos, deferredState]);
 
   const total = filtered.length;
   const totalPages = Math.ceil(total / PER_PAGE);
@@ -299,104 +317,74 @@ export default function CatalogClient({
         ocasion: "ocasiones",
         genero: "generos",
       };
-      const key = keyMap[field];
-      if (!key) return;
-      const current = state[key] as string[];
-      pushState({ ...state, [key]: current.filter((v) => v !== value) });
+      const stateKey = keyMap[field];
+      if (stateKey) {
+        pushState({
+          ...state,
+          [stateKey]: (state[stateKey] as string[]).filter((v) => v !== value),
+        });
+      }
     },
     [pushState, state]
   );
 
-  const onSortChange = (sort: SortKey) => pushState({ ...state, sort });
-
-  const isFiltering = hasActiveFilters(state);
-
-  /* === Mobile sheet state === */
+  /* === Mobile filter sheet === */
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  /* === Loading state === */
+  if (loading) {
+    return (
+      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
+        <div className="mx-auto max-w-7xl">
+          {/* Header skeleton */}
+          <div className="mb-12 flex flex-col items-center gap-4 text-center">
+            <div className="h-6 w-32 animate-pulse rounded-full bg-zinc-800" />
+            <div className="h-10 w-64 animate-pulse rounded-lg bg-zinc-800" />
+            <div className="h-4 w-80 animate-pulse rounded bg-zinc-800/50" />
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="card-surface overflow-hidden animate-pulse">
+                <div className="aspect-square bg-zinc-800/50" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 rounded bg-zinc-800/50 w-3/4" />
+                  <div className="h-4 rounded bg-zinc-800/50 w-1/2" />
+                  <div className="h-5 rounded bg-zinc-800/50 w-1/4 mt-3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
+        <div className="mx-auto max-w-7xl text-center">
+          <p className="text-red-400">Error cargando productos: {apiError}</p>
+          <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-zinc-800 rounded-lg">
+            Reintentar
+          </button>
+        </div>
+      </AnimatedSection>
+    );
+  }
+
   return (
-    <AnimatedSection id={id} className="px-4 py-12 md:px-8 md:py-20">
+    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8 flex flex-col items-center gap-3 text-center md:mb-10">
-          <EyebrowBadge>{eyebrow}</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tighter text-[color:var(--foreground)] md:text-5xl">
+        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
+          {eyebrow && <EyebrowBadge>{eyebrow}</EyebrowBadge>}
+          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
             {title}
           </h2>
           {description && (
-            <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
-              {description}
-            </p>
+            <p className="max-w-[56ch] text-zinc-400">{description}</p>
           )}
         </div>
-
-        {/* Search + sort bar */}
-        <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:gap-4">
-          <label
-            htmlFor="catalog-search"
-            className="card-surface relative flex flex-1 items-center gap-2 rounded-2xl px-4 py-3 transition-all focus-within:border-[color:var(--accent)]/40 focus-within:ring-1 focus-within:ring-[color:var(--accent)]/20"
-          >
-            <span className="sr-only">Buscar perfume</span>
-            <MagnifyingGlass
-              size={18}
-              className="shrink-0 text-[color:var(--muted)]"
-              weight="bold"
-              aria-hidden="true"
-            />
-            <input
-              id="catalog-search"
-              type="search"
-              placeholder="Buscar por nombre, marca o descripción…"
-              aria-label="Buscar perfume"
-              value={searchInput}
-              onChange={onSearchChange}
-              className="w-full bg-transparent text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--muted)] outline-none"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchInput("");
-                  pushState({ ...state, q: "" });
-                }}
-                className="cursor-pointer rounded p-1 text-[color:var(--muted)] transition-colors hover:text-[color:var(--foreground)]"
-                aria-label="Limpiar búsqueda"
-              >
-                <X size={14} weight="bold" />
-              </button>
-            )}
-          </label>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              className="card-surface inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-[color:var(--foreground)] transition-colors hover:border-[color:var(--accent)]/40 md:hidden"
-            >
-              <SlidersHorizontal size={16} weight="bold" />
-              Filtros
-              {isFiltering && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[color:var(--accent)] text-[10px] font-bold text-black">
-                  ●
-                </span>
-              )}
-            </button>
-            <SortDropdown value={state.sort} onChange={onSortChange} />
-          </div>
-        </div>
-
-        {/* Active filter chips */}
-        {isFiltering && (
-          <div className="mb-5">
-            <ActiveFilterChips
-              state={state}
-              onRemove={removeFilter}
-              onClearAll={clearAll}
-              precioMin={facets.precioMin}
-              precioMax={facets.precioMax}
-            />
-          </div>
-        )}
 
         {/* Main layout: Sidebar + Grid */}
         <div className="flex gap-6 lg:gap-8">
@@ -404,7 +392,7 @@ export default function CatalogClient({
           <div className="hidden w-72 shrink-0 lg:block xl:w-80">
             <FilterPanel
               state={state}
-              productos={productos}
+              productos={allProductos}
               precioMin={facets.precioMin}
               precioMax={facets.precioMax}
               categorias={facets.categorias}
@@ -419,12 +407,74 @@ export default function CatalogClient({
 
           {/* Grid + Pagination */}
           <div className="flex-1 min-w-0">
+            {/* Search + Sort + Filter toggle */}
+            <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:gap-4">
+              {/* Search input */}
+              <div className="relative flex-1">
+                <MagnifyingGlass
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+                />
+                <input
+                  type="search"
+                  placeholder="Buscar fragancias..."
+                  value={searchInput}
+                  onChange={onSearchChange}
+                  className="card-surface w-full pl-11 pr-10 py-3 text-sm bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-zinc-600"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort + filter buttons */}
+              <div className="flex items-center gap-3">
+                <SortDropdown
+                  value={state.sort}
+                  onChange={(sort) => pushState({ ...state, sort })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setSheetOpen(true)}
+                  className="card-surface inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:text-white md:hidden"
+                >
+                  <SlidersHorizontal size={18} />
+                  Filtros
+                  {hasActiveFilters(state, initialCategory) && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#c8a84e] text-[10px] font-bold text-black">
+                      {[
+                        state.categoria !== initialCategory,
+                        ...state.marcas,
+                        ...state.familias,
+                        ...state.ocasiones,
+                        ...state.generos,
+                        state.precioMin != null || state.precioMax != null,
+                        !!state.q,
+                      ].filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Active filter chips */}
+            <ActiveFilterChips
+              state={state}
+              initialCategory={initialCategory}
+              onRemove={removeFilter}
+              onClear={clearAll}
+            />
+
             {/* Count */}
             <div className="mb-4 flex items-center justify-between text-xs">
-              <p className="text-[color:var(--muted-foreground)]" aria-live="polite">
-                <span className="font-mono text-[color:var(--foreground)]">
-                  {total.toLocaleString("es-CR")}
-                </span>{" "}
+              <p className="text-zinc-500" aria-live="polite">
+                <span className="font-mono text-white">{total.toLocaleString("es-CR")}</span>{" "}
                 {total === 1 ? "fragancia" : "fragancias"}
               </p>
             </div>
@@ -432,19 +482,12 @@ export default function CatalogClient({
             {/* Grid */}
             {items.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-24">
-                <Sparkle
-                  size={40}
-                  className="text-[color:var(--muted)]"
-                  weight="thin"
-                  aria-hidden="true"
-                />
-                <p className="text-[color:var(--muted-foreground)]">
-                  No se encontraron fragancias.
-                </p>
+                <Sparkle size={40} className="text-zinc-700" weight="thin" aria-hidden="true" />
+                <p className="text-zinc-500">No se encontraron fragancias.</p>
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="cursor-pointer text-sm text-[color:var(--accent)] transition-colors hover:underline focus-visible:underline focus-visible:outline-none"
+                  className="cursor-pointer text-sm text-[#c8a84e] transition-colors hover:underline focus-visible:underline focus-visible:outline-none"
                 >
                   Limpiar filtros
                 </button>
@@ -469,7 +512,7 @@ export default function CatalogClient({
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="cursor-pointer rounded-xl p-2 text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-30"
+                  className="cursor-pointer rounded-xl p-2 text-zinc-500 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Página anterior"
                 >
                   <CaretLeft size={20} weight="bold" />
@@ -477,25 +520,20 @@ export default function CatalogClient({
 
                 {visiblePages.map((p, i) =>
                   p === "..." ? (
-                    <span
-                      key={`dots-${i}`}
-                      className="px-2 text-sm text-[color:var(--muted)]"
-                      aria-hidden="true"
-                    >
-                      …
+                    <span key={`ellipsis-${i}`} className="px-2 text-zinc-600">
+                      ...
                     </span>
                   ) : (
                     <button
                       key={p}
                       type="button"
-                      onClick={() => setPage(p)}
-                      aria-current={page === p ? "page" : undefined}
-                      aria-label={`Ir a página ${p}`}
-                      className={`cursor-pointer min-w-[36px] rounded-xl border px-3 py-1.5 text-sm font-medium transition-all ${
+                      onClick={() => setPage(p as number)}
+                      className={`h-9 min-w-[2.5rem] rounded-xl px-3 text-sm font-medium transition-all ${
                         page === p
-                          ? "border-[color:var(--accent)]/40 bg-[color:var(--accent)]/15 text-[color:var(--accent)]"
-                          : "border-transparent text-[color:var(--muted-foreground)] hover:bg-[color:var(--foreground)]/5 hover:text-[color:var(--foreground)]"
+                          ? "gold-gradient-bg text-black"
+                          : "text-zinc-400 hover:bg-white/5 hover:text-white"
                       }`}
+                      aria-current={page === p ? "page" : undefined}
                     >
                       {p}
                     </button>
@@ -506,7 +544,7 @@ export default function CatalogClient({
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="cursor-pointer rounded-xl p-2 text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-30"
+                  className="cursor-pointer rounded-xl p-2 text-zinc-500 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Página siguiente"
                 >
                   <CaretRight size={20} weight="bold" />
@@ -521,46 +559,32 @@ export default function CatalogClient({
       <FilterSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title="Filtros"
-        footer={
-          <button
-            type="button"
-            onClick={() => setSheetOpen(false)}
-            className="gold-gradient-bg w-full cursor-pointer rounded-2xl py-3 text-sm font-semibold text-black transition-all hover:brightness-110"
-          >
-            Ver {total.toLocaleString("es-CR")}{" "}
-            {total === 1 ? "fragancia" : "fragancias"}
-          </button>
-        }
-      >
-        <FilterPanel
-          state={state}
-          productos={productos}
-          precioMin={facets.precioMin}
-          precioMax={facets.precioMax}
-          categorias={facets.categorias}
-          marcas={facets.marcas}
-          familias={facets.familias}
-          ocasiones={facets.ocasiones}
-          generos={facets.generos}
-          onChange={pushState}
-          onClear={clearAll}
-        />
-      </FilterSheet>
+        state={state}
+        productos={allProductos}
+        precioMin={facets.precioMin}
+        precioMax={facets.precioMax}
+        categorias={facets.categorias}
+        marcas={facets.marcas}
+        familias={facets.familias}
+        ocasiones={facets.ocasiones}
+        generos={facets.generos}
+        onChange={pushState}
+        onClear={clearAll}
+      />
     </AnimatedSection>
   );
 }
 
-/* ─── Product Card ─── */
+/* === ProductCard inline (no separate file needed) === */
 function ProductCard({ producto }: { producto: Producto }) {
-  const imgUrl = producto.imagenes[0] || null;
+  const imgUrl = producto.imagenes?.[0] || null;
 
   return (
     <a
       href={`/producto/${producto.id}`}
       className="card-surface card-surface-hover group block overflow-hidden"
     >
-      <div className="relative aspect-square overflow-hidden bg-[color:var(--image-bg)]">
+      <div className="relative aspect-square overflow-hidden bg-[var(--image-bg)]">
         {imgUrl ? (
           <Image
             src={imgUrl}
@@ -571,32 +595,30 @@ function ProductCard({ producto }: { producto: Producto }) {
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-[color:var(--muted)]">
+          <div className="flex h-full items-center justify-center text-zinc-700">
             <Sparkle size={48} weight="thin" aria-hidden="true" />
           </div>
         )}
 
-        {producto.categorias[0] && (
-          <span className="absolute left-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[color:var(--accent)] backdrop-blur-sm">
+        {producto.categorias?.[0] && (
+          <span className="absolute left-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[#c8a84e] backdrop-blur-sm">
             {producto.categorias[0]}
           </span>
         )}
       </div>
 
       <div className="p-5">
-        <h3 className="line-clamp-2 text-sm font-semibold text-[color:var(--foreground)]/90 transition-colors group-hover:text-[color:var(--foreground)]">
+        <h3 className="line-clamp-2 text-sm font-semibold text-white/90 transition-colors group-hover:text-white">
           {producto.nombre}
         </h3>
-        <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">
+        <p className="mt-1 text-xs text-zinc-500">
           {producto.marca || "Sin marca"}
         </p>
-        <p className="mt-3 text-lg font-bold gold-gradient">
+        <p className="mt-3 text-lg font-bold bg-gradient-to-r from-[#c8a84e] to-[#e8c97e] bg-clip-text text-transparent">
           {formatPrice(producto.precio)}
         </p>
         {producto.tamano && (
-          <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">
-            {producto.tamano}
-          </p>
+          <p className="mt-1 text-xs text-zinc-500">{producto.tamano}</p>
         )}
       </div>
     </a>

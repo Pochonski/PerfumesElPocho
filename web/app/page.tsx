@@ -7,10 +7,9 @@ import CatalogSection from "@/components/sections/CatalogSection";
 import FAQ from "@/components/sections/FAQ";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
-import { getProductos } from "@/lib/productos";
 import type { Metadata } from "next";
 
-// ISR: revalidar cada hora (los productos casi no cambian)
+// ISR: revalidar cada hora
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
@@ -20,8 +19,6 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const productos = getProductos();
-
   return (
     <main>
       {/* Schema.org Organization */}
@@ -48,11 +45,10 @@ export default function Home() {
 
       <Hero />
       <ShippingBanner />
-      <FeaturedProducts productos={productos} />
+      <FeaturedProducts />
       <HowItWorks />
       <CategoryShowcase />
       <CatalogSection
-        productos={productos}
         eyebrow="Catálogo"
         title="Nuestra Colección"
         description="Más de 2,900 fragancias originales, árabes y de diseñador. Filtrá por categoría, marca, precio, familia olfativa y más."

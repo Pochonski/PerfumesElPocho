@@ -1,10 +1,8 @@
 "use client";
 
 import CatalogClient from "@/components/sections/CatalogClient";
-import type { Producto } from "@/lib/productos";
 
 interface CatalogSectionProps {
-  productos: Producto[];
   initialCategory?: string;
   availableCategories?: string[];
   eyebrow?: string;
