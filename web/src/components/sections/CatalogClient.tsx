@@ -90,18 +90,18 @@ export default function CatalogClient({
   });
   const [filtrosState, setFiltrosState] = useState<FilterState>(filtrosRef.current);
 
-  /* Solo inicializar desde URL una vez al montar */
-  const initRef = useRef(false);
-  if (!initRef.current && searchParams) {
-    initRef.current = true;
-    const fromUrl = decodeFilters(searchParams);
-    const inicial: FilterState = {
-      ...fromUrl,
-      categoria: fromUrl.categoria || initialCategory,
-    };
-    filtrosRef.current = inicial;
-    setFiltrosState(inicial);
-  }
+  /* Inicializar desde URL una sola vez al montar (cliente) */
+  useEffect(() => {
+    if (searchParams && searchParams.toString()) {
+      const fromUrl = decodeFilters(searchParams);
+      const inicial: FilterState = {
+        ...fromUrl,
+        categoria: fromUrl.categoria || initialCategory,
+      };
+      filtrosRef.current = inicial;
+      setFiltrosState(inicial);
+    }
+  }, []); // Solo al montar
 
   /* Sync con URL cuando cambia (back/forward) */
   useEffect(() => {
