@@ -27,13 +27,31 @@ import {
   hasActiveFilters,
   type FilterState,
 } from "@/lib/filter-state";
-import { FilterPanel } from "@/components/filters/FilterPanel";
+import { FilterPanel, FilterPanelBody } from "@/components/filters/FilterPanel";
 import { FilterSheet } from "@/components/filters/FilterSheet";
 import { ActiveFilterChips } from "@/components/filters/ActiveFilterChips";
 import { SortDropdown } from "@/components/filters/SortDropdown";
 import type { Producto } from "@/lib/productos";
 
 const PER_PAGE = 24;
+
+interface Facets {
+  categorias: string[];
+  marcas: string[];
+  familias: string[];
+  ocasiones: string[];
+  generos: string[];
+  precioRange: { min: number; max: number };
+}
+
+const DEFAULT_FACETS: Facets = {
+  categorias: [],
+  marcas: [],
+  familias: [],
+  ocasiones: [],
+  generos: [],
+  precioRange: { min: 0, max: 500000 },
+};
 
 interface CatalogClientProps {
   initialCategory?: string;
@@ -73,6 +91,8 @@ export default function CatalogClient({
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
+  /* Facets cargados una sola vez desde /api/facets para alimentar Marca/Familia/Ocasión/Género */
+  const [facets, setFacets] = useState<Facets>(DEFAULT_FACETS);
   /* Version counter para forzar re-fetch cuando filtros cambian */
   const [filterVersion, setFilterVersion] = useState(0);
 
@@ -90,6 +110,10 @@ export default function CatalogClient({
   });
   const [filtrosState, setFiltrosState] = useState<FilterState>(filtrosRef.current);
 
+  /* Search input state (declarado arriba porque los useEffect de URL lo setean) */
+  const [searchInput, setSearchInput] = useState(filtrosRef.current.q);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   /* Inicializar desde URL una sola vez al montar (cliente) */
   useEffect(() => {
     if (searchParams && searchParams.toString()) {
@@ -100,8 +124,25 @@ export default function CatalogClient({
       };
       filtrosRef.current = inicial;
       setFiltrosState(inicial);
+      setSearchInput(inicial.q);
     }
   }, []); // Solo al montar
+
+  /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/facets")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`Error ${r.status}`))))
+      .then((data: Facets) => {
+        if (!cancelled) setFacets(data);
+      })
+      .catch(() => {
+        /* Silenciar: mantenemos DEFAULT_FACETS, los filtros se renderizan vacíos */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* Sync con URL cuando cambia (back/forward) */
   useEffect(() => {
@@ -114,6 +155,7 @@ export default function CatalogClient({
     if (JSON.stringify(next) !== JSON.stringify(filtrosRef.current)) {
       filtrosRef.current = next;
       setFiltrosState(next);
+      setSearchInput(next.q);
       setPage(1);
     }
   }, [searchParams, initialCategory]);
@@ -179,9 +221,6 @@ export default function CatalogClient({
   );
 
   /* Search debounced */
-  const [searchInput, setSearchInput] = useState(filtrosRef.current.q);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     const currentQ = filtrosRef.current.q;
     if (searchInput === currentQ) return;
@@ -305,13 +344,13 @@ export default function CatalogClient({
             <FilterPanel
               state={filtrosState}
               productos={productos}
-              precioMin={0}
-              precioMax={500000}
-              categorias={availableCategories ?? ["Todos"]}
-              marcas={[]}
-              familias={[]}
-              ocasiones={[]}
-              generos={[]}
+              precioMin={facets.precioRange.min}
+              precioMax={facets.precioRange.max}
+              categorias={facets.categorias}
+              marcas={facets.marcas}
+              familias={facets.familias}
+              ocasiones={facets.ocasiones}
+              generos={facets.generos}
               onChange={pushState}
               onClear={clearAll}
             />
@@ -420,18 +459,22 @@ export default function CatalogClient({
       <FilterSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        state={filtrosState}
-        productos={productos}
-        precioMin={0}
-        precioMax={500000}
-        categorias={availableCategories ?? ["Todos"]}
-        marcas={[]}
-        familias={[]}
-        ocasiones={[]}
-        generos={[]}
-        onChange={pushState}
-        onClear={clearAll}
-      />
+        title="Filtros"
+      >
+        <FilterPanelBody
+          state={filtrosState}
+          productos={productos}
+          precioMin={facets.precioRange.min}
+          precioMax={facets.precioRange.max}
+          categorias={facets.categorias}
+          marcas={facets.marcas}
+          familias={facets.familias}
+          ocasiones={facets.ocasiones}
+          generos={facets.generos}
+          onChange={pushState}
+          onClear={clearAll}
+        />
+      </FilterSheet>
     </AnimatedSection>
   );
 }
