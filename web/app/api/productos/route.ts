@@ -69,7 +69,7 @@ interface ApiProducto {
   nombre: string;
   marca: string;
   precio: number;
-  imagen: string | null;
+  imagenes: string[];
   categorias: string[];
   familias_olfativas: string[];
   ocasiones: string[];
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
       nombre: p.nombre,
       marca: p.marca,
       precio: p.precio,
-      imagen: p.imagenes[0] || null,
+      imagenes: p.imagenes,
       categorias: p.categorias,
       familias_olfativas: p.familias_olfativas,
       ocasiones: p.ocasiones,
