@@ -444,7 +444,7 @@ function ProductCard({ producto }: { producto: Producto }) {
       <div className="relative aspect-square overflow-hidden bg-[var(--image-bg)]">
         {imgUrl ? (
           <Image src={imgUrl} alt={producto.nombre} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-contain p-6 transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+            className="object-contain p-6 transition-transform duration-500 group-hover:scale-110" />
         ) : (
           <div className="flex h-full items-center justify-center text-zinc-700">
             <Sparkle size={48} weight="thin" aria-hidden="true" />

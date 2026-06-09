@@ -127,20 +127,3 @@ body {
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
-
-/* === Loading Screen === */
-#loading-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--background);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.6s ease-out;
-}
-#loading-screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}

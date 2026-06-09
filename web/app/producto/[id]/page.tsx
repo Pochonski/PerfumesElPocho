@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { getProductos, getProductoById } from "@/lib/productos";
 import Button from "@/components/ui/Button";
 import Footer from "@/components/sections/Footer";
+import ProductGallery from "@/components/product/ProductGallery";
 
 /* ─── Static Params ─── */
 export function generateStaticParams() {
@@ -109,47 +109,10 @@ export default async function ProductoPage({
 
           <div className="grid gap-10 lg:grid-cols-2">
             {/* ─── Images ─── */}
-            <div className="flex flex-col gap-4">
-              {/* Main image */}
-              <div className="card-surface relative aspect-square overflow-hidden bg-zinc-900/30">
-                {producto.imagenes[0] ? (
-                  <Image
-                    src={producto.imagenes[0]}
-                    alt={producto.nombre}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain p-8"
-                    priority
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-6xl">
-                    🕯️
-                  </div>
-                )}
-              </div>
-
-              {/* Thumbnails */}
-              {producto.imagenes.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
-                  {producto.imagenes.slice(1, 5).map((img, i) => (
-                    <div
-                      key={i}
-                      className="card-surface relative aspect-square overflow-hidden p-2"
-                    >
-                      {img ? (
-                        <Image
-                          src={img}
-                          alt={`${producto.nombre} vista ${i + 2}`}
-                          fill
-                          sizes="25vw"
-                          className="object-contain"
-                        />
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductGallery
+              imagenes={producto.imagenes}
+              nombre={producto.nombre}
+            />
 
             {/* ─── Product Info ─── */}
             <div>

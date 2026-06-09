@@ -63,47 +63,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
-      {/* Loading Screen */}
-      <div id="loading-screen">
-        <div className="flex flex-col items-center gap-4">
-          <span className="text-2xl font-bold tracking-tighter gold-gradient">
-            Perfumes El Pocho
-          </span>
-          <div className="h-0.5 w-32 overflow-hidden rounded-full bg-zinc-800">
-            <div
-              id="loading-bar"
-              className="h-full gold-gradient-bg transition-all duration-300"
-              style={{ width: "0%" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              var bar = document.getElementById('loading-bar');
-              if (!bar) return;
-              var w = 0;
-              var t = setInterval(function() {
-                w += Math.random() * 15;
-                if (w > 90) w = 90;
-                bar.style.width = w + '%';
-              }, 150);
-              window.addEventListener('load', function() {
-                bar.style.width = '100%';
-                setTimeout(function() {
-                  var screen = document.getElementById('loading-screen');
-                  if (screen) screen.classList.add('hidden');
-                }, 400);
-                clearInterval(t);
-              });
-            })();
-          `,
-        }}
-      />
     </>
   );
 }
