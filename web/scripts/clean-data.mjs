@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const INPUT = path.resolve("src/data/productos.json");
+const INPUT = path.resolve("../scraper/output/productos.json");
 const OUTPUT = path.resolve("src/data/productos.cleaned.json");
 const REPORT = path.resolve("src/data/clean-report.json");
 
@@ -154,6 +154,10 @@ for (const p of raw) {
 
   cleaned.push({
     ...p,
+    url: p.url || `https://essenzaperfumes.cr/producto.php?id=${p.id}`,
+    imagenes: (p.imagenes || [])
+      .map((img) => (typeof img === "string" ? img : img?.url))
+      .filter(Boolean),
     marca: marcaClean,
     tamano: tamClean,
     familias_olfativas: familias,

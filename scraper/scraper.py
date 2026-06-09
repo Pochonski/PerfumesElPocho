@@ -302,48 +302,116 @@ def scrape_product(product):
 
 
 def download_images(products):
-    """Download all product images."""
-    print(f"\n🖼️ Descargando imágenes...")
+    """
+    Hybrid image processing:
+    - If the source URL is already a public S3 URL (e.g. essenzaperfumes.cr's CDN),
+      preserve it as a string and don't download locally.
+    - Otherwise, download locally and upload to our S3/R2 bucket, returning the
+      permanent public URL. If S3 isn't configured or upload fails, fall back to
+      a local relative path so the scraper can still complete.
+    """
+    from upload_image import upload_to_s3, is_configured as s3_configured
+
+    print(f"\n🖼️ Procesando imágenes...")
+    print(f"   S3/R2 upload: {'ON' if s3_configured() else 'OFF (will use local paths)'}")
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    
-    downloaded = 0
-    skipped = 0
+
+    preserved_remote = 0
+    downloaded_local = 0
+    uploaded_s3 = 0
+    failed_uploads = 0
+    failed_downloads = 0
+
     for product in products:
         pid = product["id"]
-        for i, img_url in enumerate(product["imagenes"]):
-            # Create filename from URL hash
-            ext = os.path.splitext(urlparse(img_url).path)[1]
-            if not ext or ext.lower() not in ['.jpg', '.jpeg', '.png', '.webp']:
-                ext = '.jpg'
-            
-            if len(product["imagenes"]) == 1:
-                fname = f"{pid}{ext}"
+        final_imgs = []
+
+        for i, img_entry in enumerate(product["imagenes"]):
+            # Normalize input: string URL or {url, local} dict
+            if isinstance(img_entry, dict):
+                img_url = img_entry.get("url")
             else:
-                fname = f"{pid}_{i+1}{ext}"
-            
-            fpath = IMAGES_DIR / fname
-            
-            # Update product data with local path
-            product["imagenes"][i] = {
-                "url": img_url,
-                "local": f"images/{fname}",
-            }
-            
-            if fpath.exists():
-                skipped += 1
+                img_url = img_entry
+
+            if not img_url:
                 continue
-            
-            resp = fetch(img_url)
-            if resp and resp.status_code == 200:
-                with open(fpath, "wb") as f:
-                    f.write(resp.content)
-                downloaded += 1
-        
-        if len(products) % 50 == 0:
-            print(f"  Progreso: {len([p for p in products if p['id'] <= pid])}/{len(products)} productos...")
-        time.sleep(0.1)
-    
-    print(f"  ✅ {downloaded} imágenes descargadas, {skipped} ya existían")
+
+            # CASE 1: Already a public http(s) URL from the source CDN
+            if img_url.startswith("http://") or img_url.startswith("https://"):
+                # Skip our own bucket to avoid re-processing
+                if "3pspglobal.s3.us-east-2.amazonaws.com" in img_url:
+                    final_imgs.append(img_url)
+                    preserved_remote += 1
+                    continue
+                # Some other remote URL — try to mirror to our bucket
+                ext = os.path.splitext(urlparse(img_url).path)[1]
+                if not ext or ext.lower() not in [".jpg", ".jpeg", ".png", ".webp"]:
+                    ext = ".jpg"
+                fname = f"{pid}_{i+1}{ext}" if len(product["imagenes"]) > 1 else f"{pid}{ext}"
+                fpath = IMAGES_DIR / fname
+                if not fpath.exists():
+                    resp = fetch(img_url)
+                    if resp and resp.status_code == 200:
+                        fpath.write_bytes(resp.content)
+                        downloaded_local += 1
+                    else:
+                        failed_downloads += 1
+                        # Keep the original URL as last resort
+                        final_imgs.append(img_url)
+                        continue
+                if s3_configured():
+                    public_url = upload_to_s3(fpath, pid, i+1, ext)
+                    if public_url:
+                        final_imgs.append(public_url)
+                        uploaded_s3 += 1
+                    else:
+                        failed_uploads += 1
+                        final_imgs.append(f"images/{fname}")
+                else:
+                    final_imgs.append(f"images/{fname}")
+                continue
+
+            # CASE 2: Local path or unknown scheme — try to fetch
+            ext = os.path.splitext(urlparse(img_url).path)[1]
+            if not ext or ext.lower() not in [".jpg", ".jpeg", ".png", ".webp"]:
+                ext = ".jpg"
+            fname = f"{pid}_{i+1}{ext}" if len(product["imagenes"]) > 1 else f"{pid}{ext}"
+            fpath = IMAGES_DIR / fname
+            if fpath.exists():
+                pass  # already have it locally
+            else:
+                # Try fetching as URL anyway
+                resp = fetch(img_url)
+                if resp and resp.status_code == 200:
+                    fpath.write_bytes(resp.content)
+                    downloaded_local += 1
+                else:
+                    failed_downloads += 1
+                    continue
+
+            if s3_configured():
+                public_url = upload_to_s3(fpath, pid, i+1, ext)
+                if public_url:
+                    final_imgs.append(public_url)
+                    uploaded_s3 += 1
+                else:
+                    failed_uploads += 1
+                    final_imgs.append(f"images/{fname}")
+            else:
+                final_imgs.append(f"images/{fname}")
+
+        product["imagenes"] = final_imgs
+
+        if products.index(product) % 50 == 0 and product["id"] != products[0]["id"]:
+            print(f"  Progreso: {products.index(product)+1}/{len(products)} | uploaded: {uploaded_s3} | preserved: {preserved_remote}")
+
+    print(f"  ✅ preserved remote: {preserved_remote}")
+    print(f"  ✅ downloaded locally: {downloaded_local}")
+    print(f"  ✅ uploaded to S3/R2: {uploaded_s3}")
+    if failed_downloads:
+        print(f"  ⚠️ failed downloads: {failed_downloads}")
+    if failed_uploads:
+        print(f"  ⚠️ failed uploads (fell back to local path): {failed_uploads}")
 
 
 def main():
