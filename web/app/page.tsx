@@ -49,6 +49,7 @@ export default function Home() {
       <HowItWorks />
       <CategoryShowcase />
       <CatalogSection
+        id="productos"
         eyebrow="Catálogo"
         title="Nuestra Colección"
         description="Más de 2,900 fragancias originales, árabes y de diseñador. Filtrá por categoría, marca, precio, familia olfativa y más."

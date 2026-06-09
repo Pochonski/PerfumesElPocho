@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
@@ -14,13 +14,11 @@ export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  // Fetch featured products from API on mount
   useEffect(() => {
     fetch("/api/productos?page=1&perPage=48")
       .then((r) => r.json())
       .then((data) => {
         if (data.items && Array.isArray(data.items)) {
-          // Mezclar aleatoriamente y tomar 12 con imagen
           const withImages = data.items.filter(
             (p: Producto) => p.imagenes && p.imagenes.length > 0
           );
@@ -38,16 +36,14 @@ export default function FeaturedProducts() {
   const prev = useCallback(() => setCurrent((c) => (c === 0 ? maxPage - 1 : c - 1)), [maxPage]);
   const next = useCallback(() => setCurrent((c) => (c === maxPage - 1 ? 0 : c + 1)), [maxPage]);
 
+  // Aplicar transform translateX (no scroll container, evita conflicto con Lenis)
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector<HTMLElement>("[data-card]");
-    if (!card) return;
-    const cardWidth = card.offsetWidth;
-    const gap = 20;
-    const offset = current * (cardWidth + gap) * itemsPerPage;
-    track.scrollTo({ left: offset, behavior: "smooth" });
-  }, [current, itemsPerPage]);
+    if (!trackRef.current) return;
+    // Calcular el porcentaje de desplazamiento
+    // current=0 -> 0%, current=1 -> -25%, current=2 -> -50%, etc.
+    const translatePct = -current * 100;
+    trackRef.current.style.transform = `translateX(${translatePct}%)`;
+  }, [current, items.length]);
 
   if (loading) {
     return (
@@ -55,7 +51,7 @@ export default function FeaturedProducts() {
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-12 flex flex-col items-center gap-4 text-center">
             <EyebrowBadge>Los más buscados</EyebrowBadge>
-            <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+            <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
               Fragancias Destacadas
             </h2>
           </div>
@@ -89,18 +85,21 @@ export default function FeaturedProducts() {
           </p>
         </div>
 
-        <div className="relative">
-          <div
-            ref={trackRef}
-            className="overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:snap-none"
-          >
-            <div className="flex gap-5">
+        <div className="relative overflow-hidden">
+          {/* Viewport con overflow:hidden (no scroll nativo, no choca con Lenis) */}
+          <div className="overflow-hidden">
+            {/* Track con transform translateX animado */}
+            <div
+              ref={trackRef}
+              className="flex gap-5 transition-transform duration-500 ease-out"
+              style={{ willChange: "transform" }}
+            >
               {items.map((p) => (
                 <Link
                   key={p.id}
                   href={`/producto/${p.id}`}
                   data-card
-                  className="card-surface card-surface-hover group block w-[80vw] shrink-0 overflow-hidden snap-start sm:w-[calc(50%-10px)] md:snap-normal lg:w-[calc(25%-15px)]"
+                  className="card-surface card-surface-hover group block w-[calc(100%-2rem)] shrink-0 overflow-hidden sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]"
                 >
                   <div className="relative aspect-square overflow-hidden bg-zinc-900/30">
                     {p.imagenes[0] && (
@@ -108,7 +107,7 @@ export default function FeaturedProducts() {
                         src={p.imagenes[0]}
                         alt={p.nombre}
                         fill
-                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 50vw, 25vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
@@ -130,14 +129,14 @@ export default function FeaturedProducts() {
 
           <button
             onClick={prev}
-            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
             aria-label="Anterior"
           >
             <CaretLeft size={20} weight="bold" />
           </button>
           <button
             onClick={next}
-            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
             aria-label="Siguiente"
           >
             <CaretRight size={20} weight="bold" />
@@ -148,12 +147,12 @@ export default function FeaturedProducts() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
+                aria-label={`Página ${i + 1}`}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === current
                     ? "w-6 bg-[#c8a84e]"
                     : "w-2 bg-zinc-700 hover:bg-zinc-500"
                 }`}
-                aria-label={`Página ${i + 1}`}
               />
             ))}
           </div>
