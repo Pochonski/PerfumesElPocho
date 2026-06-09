@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   type ChangeEvent,
 } from "react";
@@ -114,20 +115,6 @@ export default function CatalogClient({
   const [searchInput, setSearchInput] = useState(filtrosRef.current.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /* Inicializar desde URL una sola vez al montar (cliente) */
-  useEffect(() => {
-    if (searchParams && searchParams.toString()) {
-      const fromUrl = decodeFilters(searchParams);
-      const inicial: FilterState = {
-        ...fromUrl,
-        categoria: fromUrl.categoria || initialCategory,
-      };
-      filtrosRef.current = inicial;
-      setFiltrosState(inicial);
-      setSearchInput(inicial.q);
-    }
-  }, []); // Solo al montar
-
   /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
   useEffect(() => {
     let cancelled = false;
@@ -144,19 +131,21 @@ export default function CatalogClient({
     };
   }, []);
 
-  /* Sync con URL cuando cambia (back/forward) */
-  useEffect(() => {
+  /* Sync con URL: corre en mount Y en cada cambio (back/forward, client-side nav).
+     Usa useLayoutEffect para que el ref quede sincronizado ANTES del primer paint,
+     evitando que el fetch inicial dispare con q='' cuando la URL trae q=algo. */
+  useLayoutEffect(() => {
     const fromUrl = decodeFilters(searchParams);
     const next: FilterState = {
       ...fromUrl,
       categoria: fromUrl.categoria || initialCategory,
     };
-    // Solo actualizar si realmente cambió
     if (JSON.stringify(next) !== JSON.stringify(filtrosRef.current)) {
       filtrosRef.current = next;
       setFiltrosState(next);
       setSearchInput(next.q);
       setPage(1);
+      setFilterVersion((v) => v + 1);
     }
   }, [searchParams, initialCategory]);
 
