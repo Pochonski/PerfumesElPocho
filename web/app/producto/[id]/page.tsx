@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getProductos, getProductoById } from "@/lib/productos";
 import Button from "@/components/ui/Button";
@@ -109,10 +110,16 @@ export default async function ProductoPage({
 
           <div className="grid gap-10 lg:grid-cols-2">
             {/* ─── Images ─── */}
-            <ProductGallery
-              imagenes={producto.imagenes}
-              nombre={producto.nombre}
-            />
+            <Suspense
+              fallback={
+                <div className="card-surface aspect-square animate-pulse bg-zinc-900/30" />
+              }
+            >
+              <ProductGallery
+                imagenes={producto.imagenes}
+                nombre={producto.nombre}
+              />
+            </Suspense>
 
             {/* ─── Product Info ─── */}
             <div>

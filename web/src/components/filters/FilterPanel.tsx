@@ -10,7 +10,7 @@ import { formatPrice } from "@/lib/format";
 import { normalizeText } from "@/lib/utils";
 import type { Producto } from "@/lib/productos";
 
-interface FilterPanelProps {
+interface FilterPanelBodyProps {
   state: FilterState;
   productos: Producto[];
   precioMin: number;
@@ -24,7 +24,10 @@ interface FilterPanelProps {
   onClear: () => void;
 }
 
-export function FilterPanel({
+type FilterPanelProps = FilterPanelBodyProps;
+
+/** Cuerpo puro de los filtros (sin wrapper de aside). Reusado en desktop y mobile sheet. */
+export function FilterPanelBody({
   state,
   productos,
   precioMin,
@@ -35,8 +38,7 @@ export function FilterPanel({
   ocasiones,
   generos,
   onChange,
-  onClear,
-}: FilterPanelProps) {
+}: FilterPanelBodyProps) {
   const [marcaSearch, setMarcaSearch] = useState("");
 
   /** Cuenta cuántos productos matchean por valor de un facet (considerando los otros filtros activos) */
@@ -90,22 +92,7 @@ export function FilterPanel({
   }, [marcas, marcaSearch]);
 
   return (
-    <aside
-      className="card-surface sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl p-5"
-      aria-label="Filtros"
-      data-lenis-prevent
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[color:var(--foreground)]">Filtros</h2>
-        <button
-          type="button"
-          onClick={onClear}
-          className="cursor-pointer text-xs font-medium text-[color:var(--accent)] transition-colors hover:underline focus-visible:outline-none focus-visible:underline"
-        >
-          Limpiar todo
-        </button>
-      </div>
-
+    <>
       {/* Categoría */}
       <FilterSection
         title="Categoría"
@@ -308,6 +295,54 @@ export function FilterPanel({
           ))}
         </div>
       </FilterSection>
+    </>
+  );
+}
+
+/** Panel desktop: aside con card-surface + header "Filtros / Limpiar" + body. */
+export function FilterPanel({
+  state,
+  productos,
+  precioMin,
+  precioMax,
+  categorias,
+  marcas,
+  familias,
+  ocasiones,
+  generos,
+  onChange,
+  onClear,
+}: FilterPanelProps) {
+  return (
+    <aside
+      className="card-surface sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl p-5"
+      aria-label="Filtros"
+      data-lenis-prevent
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-[color:var(--foreground)]">Filtros</h2>
+        <button
+          type="button"
+          onClick={onClear}
+          className="cursor-pointer text-xs font-medium text-[color:var(--accent)] transition-colors hover:underline focus-visible:outline-none focus-visible:underline"
+        >
+          Limpiar todo
+        </button>
+      </div>
+
+      <FilterPanelBody
+        state={state}
+        productos={productos}
+        precioMin={precioMin}
+        precioMax={precioMax}
+        categorias={categorias}
+        marcas={marcas}
+        familias={familias}
+        ocasiones={ocasiones}
+        generos={generos}
+        onChange={onChange}
+        onClear={onClear}
+      />
     </aside>
   );
 }

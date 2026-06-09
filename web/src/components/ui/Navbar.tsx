@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { List, X } from "@phosphor-icons/react";
@@ -85,6 +85,10 @@ export default function Navbar({ children }: { children?: ReactNode }) {
       {open && (
         <div className="glass-surface border-t border-white/5 md:hidden">
           <div className="flex flex-col gap-1 px-6 py-4">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-zinc-500">Tema</span>
+              <ThemeToggle />
+            </div>
             <Link href="/#productos" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
               Productos
             </Link>
