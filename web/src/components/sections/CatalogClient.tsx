@@ -126,6 +126,12 @@ export default function CatalogClient({
   /* Search input state (declarado arriba porque los useEffect de URL lo setean) */
   const [searchInput, setSearchInput] = useState(filtrosState.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /* Flag para garantizar que el primer run del useLayoutEffect (URL sync) bumpee
+     filterVersion, incluso si useSearchParams() aún no tiene la URL real
+     (race en mount dentro de Suspense: el objeto searchParams es estable entre
+     renders y la guarda JSON.stringify(next === filtrosState) puede fallar
+     silenciosamente cuando ambos son defaults en el primer render). */
+  const hasSyncedRef = useRef(false);
 
   /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
   useEffect(() => {
@@ -145,14 +151,20 @@ export default function CatalogClient({
 
   /* Sync con URL: corre en mount Y en cada cambio (back/forward, client-side nav).
      Usa useLayoutEffect para que el state quede sincronizado ANTES del primer paint,
-     y bumpea filterVersion para forzar un refetch con los filtros correctos. */
+     y bumpea filterVersion para forzar un refetch con los filtros correctos.
+     El primer run bumpea siempre (hasSyncedRef) para evitar que un mount con
+     URL pre-aplicada (?pmin=..., ?c=...&m=...) termine haciendo un fetch con
+     filtros vacíos por la race entre useSearchParams() y el render inicial. */
   useLayoutEffect(() => {
     const fromUrl = decodeFilters(searchParams);
     const next: FilterState = {
       ...fromUrl,
       categoria: fromUrl.categoria || initialCategory,
     };
-    if (JSON.stringify(next) !== JSON.stringify(filtrosState)) {
+    const isFirstSync = !hasSyncedRef.current;
+    const hasChanged = JSON.stringify(next) !== JSON.stringify(filtrosState);
+    if (isFirstSync || hasChanged) {
+      hasSyncedRef.current = true;
       setFiltrosState(next);
       setSearchInput(next.q);
       setPage(1);
