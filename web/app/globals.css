@@ -94,18 +94,6 @@ body {
   background: linear-gradient(135deg, #c8a84e 0%, #e2c87a 30%, #a08030 60%, #d4b65a 100%);
 }
 
-/* === Scroll Animation === */
-.scroll-section {
-  height: 400vh;
-}
-
-.scroll-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-}
-
 /* === Text Balance === */
 .text-balance {
   text-wrap: balance;
