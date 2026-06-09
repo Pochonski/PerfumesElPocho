@@ -1,7 +1,10 @@
 # Python
 scraper/venv/
+scraper/venv.broken*/
 scraper/__pycache__/
 scraper/*.pyc
+scraper.pid
+scraper/rerun-*.log
 scraper/output/productos.json
 scraper/output/parcial.json
 scraper/output/descubiertos.json
