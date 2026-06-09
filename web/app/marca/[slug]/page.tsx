@@ -43,7 +43,7 @@ export default async function MarcaPage({ params }: PageProps) {
   const marca = findMarcaBySlug(slug);
   if (!marca) notFound();
 
-  const productos = getProductosByMarca(marca);
+  const totalMarca = getProductosByMarca(marca).length;
 
   return (
     <>
@@ -90,11 +90,10 @@ export default async function MarcaPage({ params }: PageProps) {
         </div>
 
         <CatalogSection
-          productos={productos}
           initialCategory="Todos"
           eyebrow={marca}
           title={`${marca}`}
-          description={`${productos.length.toLocaleString("es-CR")} fragancias de la marca ${marca}.`}
+          description={`${totalMarca.toLocaleString("es-CR")} fragancias de la marca ${marca}.`}
           id="catalogo-marca"
         />
       </main>

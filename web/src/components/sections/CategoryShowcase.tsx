@@ -14,37 +14,37 @@ const categories = [
   {
     label: "Mujer",
     icon: GenderFemale,
-    href: "/#productos",
+    href: "/categoria/perfumes-de-mujer",
     color: "from-pink-500/10 to-rose-500/5",
   },
   {
     label: "Hombre",
     icon: GenderMale,
-    href: "/#productos",
+    href: "/categoria/perfumes-de-hombre",
     color: "from-blue-500/10 to-cyan-500/5",
   },
   {
     label: "Unisex",
     icon: GenderIntersex,
-    href: "/#productos",
+    href: "/categoria/perfumes-unisex",
     color: "from-purple-500/10 to-violet-500/5",
   },
   {
     label: "Árabes",
     icon: Crop,
-    href: "/#productos",
+    href: "/categoria/arabes",
     color: "from-amber-500/10 to-yellow-500/5",
   },
   {
     label: "Niños",
     icon: Baby,
-    href: "/#productos",
+    href: "/categoria/ninos",
     color: "from-emerald-500/10 to-green-500/5",
   },
   {
     label: "Estuches",
     icon: Gift,
-    href: "/#productos",
+    href: "/categoria/estuches",
     color: "from-red-500/10 to-orange-500/5",
   },
 ];

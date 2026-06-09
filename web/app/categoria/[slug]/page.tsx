@@ -6,7 +6,6 @@ import {
   getProductosByCategoria,
   getCategorias,
   slugify,
-  type Producto,
 } from "@/lib/productos";
 import CatalogSection from "@/components/sections/CatalogSection";
 import Footer from "@/components/sections/Footer";
@@ -43,7 +42,7 @@ export default async function CategoriaPage({ params }: PageProps) {
   const categoria = findCategoriaBySlug(slug);
   if (!categoria) notFound();
 
-  const productos: Producto[] = getProductosByCategoria(categoria);
+  const totalCategoria = getProductosByCategoria(categoria).length;
 
   return (
     <>
@@ -91,11 +90,10 @@ export default async function CategoriaPage({ params }: PageProps) {
         </div>
 
         <CatalogSection
-          productos={productos}
           initialCategory={categoria}
           eyebrow={categoria}
           title={`Perfumes ${categoria}`}
-          description={`${productos.length.toLocaleString("es-CR")} fragancias de la categoría ${categoria.toLowerCase()}.`}
+          description={`${totalCategoria.toLocaleString("es-CR")} fragancias de la categoría ${categoria.toLowerCase()}.`}
           id="catalogo-categoria"
         />
       </main>
