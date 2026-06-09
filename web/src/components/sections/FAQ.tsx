@@ -41,10 +41,10 @@ export default function FAQ() {
         {/* Header */}
         <div className="mb-12 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Preguntas Frecuentes</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
             ¿Tenés dudas?
           </h2>
-          <p className="max-w-[48ch] text-zinc-400">
+          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
             Acá respondemos las preguntas más comunes. Si no encontrás lo que
             buscás, escribinos por WhatsApp.
           </p>
@@ -59,15 +59,15 @@ export default function FAQ() {
             >
               <button
                 onClick={() => toggle(i)}
-                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="text-sm font-medium text-zinc-200">
+                <span className="text-sm font-semibold text-[color:var(--subtle-foreground)]">
                   {faq.q}
                 </span>
                 <CaretDown
                   size={18}
                   weight="bold"
-                  className={`shrink-0 text-zinc-500 transition-transform duration-300 ${
+                  className={`shrink-0 text-[color:var(--muted-foreground)] transition-transform duration-300 ${
                     openIndex === i ? "rotate-180 text-[#c8a84e]" : ""
                   }`}
                 />
@@ -78,7 +78,7 @@ export default function FAQ() {
                   openIndex === i ? "max-h-96 pb-5" : "max-h-0"
                 }`}
               >
-                <p className="px-6 text-sm leading-relaxed text-zinc-400">
+                <p className="px-6 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
                   {faq.a}
                 </p>
               </div>

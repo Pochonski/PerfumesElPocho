@@ -333,8 +333,8 @@ export default function CatalogClient({
         {/* Header */}
         <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
           {eyebrow && <EyebrowBadge>{eyebrow}</EyebrowBadge>}
-          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">{title}</h2>
-          {description && <p className="max-w-[56ch] text-zinc-400">{description}</p>}
+          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">{title}</h2>
+          {description && <p className="max-w-[56ch] text-[color:var(--muted-foreground)]">{description}</p>}
         </div>
 
         {/* Main layout */}
@@ -500,10 +500,10 @@ function ProductCard({ producto }: { producto: Producto }) {
         )}
       </div>
       <div className="p-5">
-        <h3 className="line-clamp-2 text-sm font-semibold text-white/90 transition-colors group-hover:text-white">{producto.nombre}</h3>
-        <p className="mt-1 text-xs text-zinc-500">{producto.marca || "Sin marca"}</p>
-        <p className="mt-3 text-lg font-bold bg-gradient-to-r from-[#c8a84e] to-[#e8c97e] bg-clip-text text-transparent">{formatPrice(producto.precio)}</p>
-        {producto.tamano && <p className="mt-1 text-xs text-zinc-500">{producto.tamano}</p>}
+        <h3 className="line-clamp-2 text-sm font-semibold text-[color:var(--subtle-foreground)] transition-colors group-hover:text-[color:var(--foreground)]">{producto.nombre}</h3>
+        <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{producto.marca || "Sin marca"}</p>
+        <p className="mt-3 text-lg font-bold gold-gradient">{formatPrice(producto.precio)}</p>
+        {producto.tamano && <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{producto.tamano}</p>}
       </div>
     </a>
   );

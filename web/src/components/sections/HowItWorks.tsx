@@ -37,10 +37,10 @@ export default function HowItWorks() {
         {/* Header */}
         <div className="mb-16 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Así de fácil</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
             ¿Cómo funciona?
           </h2>
-          <p className="max-w-[48ch] text-zinc-400">
+          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
             Tres pasos. Cero complicaciones. Tu perfume favorito más cerca que nunca.
           </p>
         </div>
@@ -55,19 +55,19 @@ export default function HowItWorks() {
                 className="card-surface relative overflow-hidden p-8 text-center group transition-all duration-500 hover:border-[#c8a84e]/20"
               >
                 {/* Step number */}
-                <span className="absolute -top-6 -right-6 text-[120px] font-bold text-white/[0.02] select-none leading-none">
+                <span className="absolute -top-6 -right-6 font-serif text-[120px] font-bold text-[color:var(--foreground)]/[0.03] select-none leading-none">
                   {s.step}
                 </span>
 
                 {/* Icon */}
                 <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#c8a84e]/10 border border-[#c8a84e]/15 group-hover:bg-[#c8a84e]/15 transition-colors duration-500">
-                  <Icon size={28} className="text-[#c8a84e]" weight="fill" />
+                  <Icon size={28} className="text-[#c8a84e]" weight="duotone" />
                 </div>
 
-                <h3 className="text-lg font-semibold text-white mb-3">
+                <h3 className="mb-3 text-lg font-semibold text-[color:var(--foreground)]">
                   {s.title}
                 </h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">
+                <p className="text-sm leading-relaxed text-[color:var(--muted-foreground)]">
                   {s.description}
                 </p>
               </div>

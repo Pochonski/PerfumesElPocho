@@ -78,10 +78,10 @@ export default function FeaturedProducts() {
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-12 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Los más buscados</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
             Fragancias Destacadas
           </h2>
-          <p className="max-w-[48ch] text-zinc-400">
+          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
             Una selección de las fragancias más populares entre nuestros clientes.
           </p>
         </div>
@@ -115,10 +115,10 @@ export default function FeaturedProducts() {
                     </span>
                   </div>
                   <div className="p-4">
-                    <h3 className="line-clamp-2 text-sm font-semibold text-zinc-200 group-hover:text-white">
+                    <h3 className="line-clamp-2 text-sm font-semibold text-[color:var(--subtle-foreground)] transition-colors group-hover:text-[color:var(--foreground)]">
                       {p.nombre}
                     </h3>
-                    <p className="mt-1 text-xs text-zinc-500">{p.marca || "Sin marca"}</p>
+                    <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{p.marca || "Sin marca"}</p>
                   </div>
                 </Link>
               ))}

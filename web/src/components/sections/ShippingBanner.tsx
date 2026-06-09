@@ -33,7 +33,7 @@ export default function ShippingBanner() {
                   className="shrink-0 text-[#c8a84e]"
                   weight="fill"
                 />
-                <span className="text-sm font-medium text-zinc-300">
+                <span className="text-sm font-medium text-[color:var(--subtle-foreground)]">
                   {b.text}
                 </span>
               </div>

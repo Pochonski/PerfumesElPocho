@@ -56,10 +56,10 @@ export default function CategoryShowcase() {
         {/* Header */}
         <div className="mb-16 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Categorías</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
             Encontrá lo que buscás
           </h2>
-          <p className="max-w-[48ch] text-zinc-400">
+          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
             Navegá por categoría y descubrí fragancias para cada persona, ocasión y estilo.
           </p>
         </div>
@@ -83,12 +83,12 @@ export default function CategoryShowcase() {
                 <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-white/10 transition-colors duration-500">
                   <Icon
                     size={28}
-                    className="text-zinc-400 group-hover:text-[#c8a84e] transition-colors duration-500"
-                    weight="thin"
+                    className="text-[color:var(--muted-foreground)] group-hover:text-[#c8a84e] transition-colors duration-500"
+                    weight="duotone"
                   />
                 </div>
 
-                <span className="relative text-sm font-medium text-zinc-400 group-hover:text-white transition-colors duration-500">
+                <span className="relative text-sm font-medium text-[color:var(--muted-foreground)] group-hover:text-[color:var(--foreground)] transition-colors duration-500">
                   {cat.label}
                 </span>
               </Link>

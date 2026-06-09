@@ -48,13 +48,13 @@ export default function Navbar({ children }: { children?: ReactNode }) {
 
         {/* Desktop links */}
         <div className="hidden items-center gap-8 md:flex">
-          <Link href="/#productos" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200">
+          <Link href="/#productos" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
             Productos
           </Link>
-          <Link href="/#categorias" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200">
+          <Link href="/#categorias" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
             Categorías
           </Link>
-          <Link href="/#contacto" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200">
+          <Link href="/#contacto" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
             Contacto
           </Link>
           <ThemeToggle />
@@ -81,21 +81,21 @@ export default function Navbar({ children }: { children?: ReactNode }) {
         </Suspense>
       </div>
 
-      {/* Mobile menu */}
+        {/* Mobile menu */}
       {open && (
         <div className="glass-surface border-t border-white/5 md:hidden">
           <div className="flex flex-col gap-1 px-6 py-4">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-zinc-500">Tema</span>
+              <span className="text-sm text-[color:var(--muted-foreground)]">Tema</span>
               <ThemeToggle />
             </div>
-            <Link href="/#productos" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
+            <Link href="/#productos" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
               Productos
             </Link>
-            <Link href="/#categorias" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
+            <Link href="/#categorias" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
               Categorías
             </Link>
-            <Link href="/#contacto" className="text-sm text-zinc-400 transition-colors hover:text-zinc-200 py-2" onClick={() => setOpen(false)}>
+            <Link href="/#contacto" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
               Contacto
             </Link>
             <div className="mt-3">

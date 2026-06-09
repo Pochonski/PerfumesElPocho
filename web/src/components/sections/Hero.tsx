@@ -1,8 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { Truck, ShieldCheck, MapPin } from "@phosphor-icons/react/dist/ssr";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import Button from "@/components/ui/Button";
+
+const trustBadges = [
+  { icon: Truck, label: "Envíos 24-48h" },
+  { icon: ShieldCheck, label: "100% Original" },
+  { icon: MapPin, label: "Todo Costa Rica" },
+];
 
 export default function Hero() {
   return (
@@ -15,14 +22,14 @@ export default function Hero() {
             <div className="text-center md:text-left">
               <EyebrowBadge>Fragancias Premium</EyebrowBadge>
 
-              <h1 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl xl:text-7xl">
+              <h1 className="mt-6 font-serif text-4xl font-bold leading-[1.05] tracking-tight text-[color:var(--foreground)] md:text-5xl lg:text-6xl xl:text-7xl">
                 Descubre{" "}
-                <span className="gold-gradient">fragancias</span>
+                <span className="gold-gradient italic">fragancias</span>
                 <br />
                 que dejan huella
               </h1>
 
-              <p className="mx-auto mt-6 max-w-[42ch] text-base leading-relaxed text-zinc-400 md:mx-0 md:text-lg">
+              <p className="mx-auto mt-6 max-w-[42ch] text-base leading-relaxed text-[color:var(--muted-foreground)] md:mx-0 md:text-lg">
                 Más de 4,000 perfumes originales, árabes y de diseñador.
                 Envíos a todo Costa Rica en 24-48 horas.
               </p>
@@ -40,11 +47,25 @@ export default function Hero() {
               </div>
 
               {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-600 md:justify-start">
-                <span>🚚 Envíos 24-48h</span>
-                <span>✅ 100% Original</span>
-                <span>🇨🇷 Todo Costa Rica</span>
-              </div>
+              <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 md:justify-start">
+                {trustBadges.map((b) => {
+                  const Icon = b.icon;
+                  return (
+                    <li
+                      key={b.label}
+                      className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--muted-foreground)]"
+                    >
+                      <Icon
+                        size={16}
+                        weight="duotone"
+                        className="shrink-0 text-[color:var(--accent)]"
+                        aria-hidden="true"
+                      />
+                      <span>{b.label}</span>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
 
             {/* Right: Logo */}

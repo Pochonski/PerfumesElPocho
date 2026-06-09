@@ -13,13 +13,13 @@ export default function FinalCTA() {
           <div className="relative">
             <EyebrowBadge>Contáctanos</EyebrowBadge>
 
-            <h2 className="mt-6 text-3xl font-semibold tracking-tighter text-white md:text-5xl">
+            <h2 className="mt-6 text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
               ¿Listo para encontrar
               <br />
-              <span className="gold-gradient">tu esencia</span>?
+              <span className="gold-gradient italic">tu esencia</span>?
             </h2>
 
-            <p className="mx-auto mt-4 max-w-[48ch] text-zinc-400">
+            <p className="mx-auto mt-4 max-w-[48ch] text-[color:var(--muted-foreground)]">
               Escríbenos por WhatsApp y te ayudamos a elegir la fragancia
               perfecta. Envíos a todo Costa Rica.
             </p>
