@@ -32,6 +32,7 @@ import { FilterPanel, FilterPanelBody } from "@/components/filters/FilterPanel";
 import { FilterSheet } from "@/components/filters/FilterSheet";
 import { ActiveFilterChips } from "@/components/filters/ActiveFilterChips";
 import { SortDropdown } from "@/components/filters/SortDropdown";
+import { EMPTY_FACET_COUNTS, type FacetCounts } from "@/lib/facet-counts";
 import type { Producto } from "@/lib/productos";
 
 const PER_PAGE = 24;
@@ -74,6 +75,7 @@ interface ApiResponse {
   totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
+  facetCounts?: FacetCounts;
 }
 
 export default function CatalogClient({
@@ -98,6 +100,10 @@ export default function CatalogClient({
   const [apiError, setApiError] = useState<string | null>(null);
   /* Facets cargados una sola vez desde /api/facets para alimentar Marca/Familia/Ocasión/Género */
   const [facets, setFacets] = useState<Facets>(DEFAULT_FACETS);
+  /* Counts por valor de cada facet, devueltos por /api/productos en cada response.
+     Permiten mostrar "Adidas (234)" en el panel con el número real sobre el universo
+     filtrado (no sobre los 24 productos de la página actual). */
+  const [facetCounts, setFacetCounts] = useState<FacetCounts>(EMPTY_FACET_COUNTS);
   /* Version counter para forzar re-fetch cuando filtros cambian */
   const [filterVersion, setFilterVersion] = useState(0);
 
@@ -184,6 +190,7 @@ export default function CatalogClient({
           setProductos(data.items || []);
           setTotal(data.total);
           setTotalPages(data.totalPages);
+          if (data.facetCounts) setFacetCounts(data.facetCounts);
           setLoading(false);
         }
       })
@@ -336,7 +343,6 @@ export default function CatalogClient({
           <div className="hidden w-72 shrink-0 lg:block xl:w-80">
             <FilterPanel
               state={filtrosState}
-              productos={productos}
               precioMin={facets.precioRange.min}
               precioMax={facets.precioRange.max}
               categorias={facets.categorias}
@@ -344,6 +350,7 @@ export default function CatalogClient({
               familias={facets.familias}
               ocasiones={facets.ocasiones}
               generos={facets.generos}
+              facetCounts={facetCounts}
               onChange={pushState}
               onClear={clearAll}
             />
@@ -401,7 +408,22 @@ export default function CatalogClient({
             {/* Count */}
             <div className="mb-4 flex items-center justify-between text-xs">
               <p className="text-zinc-500" aria-live="polite">
-                <span className="font-mono text-[color:var(--foreground)]">{formatCount(total)}</span> {total === 1 ? "fragancia" : "fragancias"}
+                {totalPages > 1 ? (
+                  <>
+                    Mostrando{" "}
+                    <span className="font-mono text-[color:var(--foreground)]">
+                      {formatCount((page - 1) * PER_PAGE + 1)}–{formatCount(Math.min(page * PER_PAGE, total))}
+                    </span>{" "}
+                    de{" "}
+                    <span className="font-mono text-[color:var(--foreground)]">{formatCount(total)}</span>{" "}
+                    {total === 1 ? "fragancia" : "fragancias"}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-mono text-[color:var(--foreground)]">{formatCount(total)}</span>{" "}
+                    {total === 1 ? "fragancia" : "fragancias"}
+                  </>
+                )}
               </p>
               {loading && <span className="text-zinc-600 animate-pulse">Cargando...</span>}
             </div>
@@ -458,7 +480,6 @@ export default function CatalogClient({
       >
         <FilterPanelBody
           state={filtrosState}
-          productos={productos}
           precioMin={facets.precioRange.min}
           precioMax={facets.precioRange.max}
           categorias={facets.categorias}
@@ -466,6 +487,7 @@ export default function CatalogClient({
           familias={facets.familias}
           ocasiones={facets.ocasiones}
           generos={facets.generos}
+          facetCounts={facetCounts}
           onChange={pushState}
           onClear={clearAll}
         />

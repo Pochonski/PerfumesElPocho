@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
   getProductos,
+  getFacetCounts,
   normalizeText,
   type Producto,
 } from "@/lib/productos";
@@ -99,36 +100,50 @@ export async function GET(request: NextRequest) {
   const params = parsed.data;
   let filtered = getProductos();
 
+  /* Listas activas (originales, no normalizadas) para el cálculo de facetCounts */
+  const activeMarcas: string[] = [];
+  const activeFamilias: string[] = [];
+  const activeOcasiones: string[] = [];
+  const activeGeneros: string[] = [];
+
   if (params.categoria && params.categoria !== "Todos") {
     filtered = filtered.filter((p) => p.categorias.includes(params.categoria!));
   }
   if (params.marcas) {
-    const list = params.marcas.split(",").map((m) => normalizeText(m.trim())).filter(Boolean);
-    if (list.length > 0) {
-      filtered = filtered.filter((p) => list.includes(normalizeText(p.marca)));
+    const list = params.marcas.split(",").map((m) => m.trim()).filter(Boolean);
+    const normList = list.map(normalizeText);
+    if (normList.length > 0) {
+      activeMarcas.push(...list);
+      filtered = filtered.filter((p) => normList.includes(normalizeText(p.marca)));
     }
   }
   if (params.familias) {
-    const list = params.familias.split(",").map((f) => normalizeText(f.trim())).filter(Boolean);
-    if (list.length > 0) {
+    const list = params.familias.split(",").map((f) => f.trim()).filter(Boolean);
+    const normList = list.map(normalizeText);
+    if (normList.length > 0) {
+      activeFamilias.push(...list);
       filtered = filtered.filter((p) =>
-        p.familias_olfativas.some((f) => list.includes(normalizeText(f)))
+        p.familias_olfativas.some((f) => normList.includes(normalizeText(f)))
       );
     }
   }
   if (params.ocasiones) {
-    const list = params.ocasiones.split(",").map((o) => normalizeText(o.trim())).filter(Boolean);
-    if (list.length > 0) {
+    const list = params.ocasiones.split(",").map((o) => o.trim()).filter(Boolean);
+    const normList = list.map(normalizeText);
+    if (normList.length > 0) {
+      activeOcasiones.push(...list);
       filtered = filtered.filter((p) =>
-        p.ocasiones.some((o) => list.includes(normalizeText(o)))
+        p.ocasiones.some((o) => normList.includes(normalizeText(o)))
       );
     }
   }
   if (params.generos) {
-    const list = params.generos.split(",").map((g) => normalizeText(g.trim())).filter(Boolean);
-    if (list.length > 0) {
+    const list = params.generos.split(",").map((g) => g.trim()).filter(Boolean);
+    const normList = list.map(normalizeText);
+    if (normList.length > 0) {
+      activeGeneros.push(...list);
       filtered = filtered.filter((p) =>
-        p.generos.some((g) => list.includes(normalizeText(g)))
+        p.generos.some((g) => normList.includes(normalizeText(g)))
       );
     }
   }
@@ -158,6 +173,14 @@ export async function GET(request: NextRequest) {
   } else if (params.sort === "nombre-asc") {
     filtered = [...filtered].sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
+
+  /* Calcular facet counts sobre el universo filtrado (sin paginar) */
+  const facetCounts = getFacetCounts(filtered, {
+    marcas: activeMarcas,
+    familias: activeFamilias,
+    ocasiones: activeOcasiones,
+    generos: activeGeneros,
+  });
 
   const total = filtered.length;
   const totalPages = Math.ceil(total / params.perPage);
@@ -191,6 +214,7 @@ export async function GET(request: NextRequest) {
     totalPages,
     hasNext: page < totalPages,
     hasPrev: page > 1,
+    facetCounts,
   }, {
     headers: {
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",

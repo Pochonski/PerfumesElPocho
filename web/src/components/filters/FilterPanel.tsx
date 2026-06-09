@@ -8,11 +8,10 @@ import { PriceRange } from "./PriceRange";
 import type { FilterState } from "@/lib/filter-state";
 import { formatPrice } from "@/lib/format";
 import { normalizeText } from "@/lib/utils";
-import type { Producto } from "@/lib/productos";
+import type { FacetCounts } from "@/lib/facet-counts";
 
 interface FilterPanelBodyProps {
   state: FilterState;
-  productos: Producto[];
   precioMin: number;
   precioMax: number;
   categorias: string[];
@@ -20,6 +19,10 @@ interface FilterPanelBodyProps {
   familias: string[];
   ocasiones: string[];
   generos: string[];
+  /** Counts por valor de cada facet, calculados en el server sobre el universo
+   *  filtrado (no sobre la página actual). Se usa para mostrar "Adidas (234)"
+   *  y para ocultar facets sin matches. */
+  facetCounts: FacetCounts;
   onChange: (next: FilterState) => void;
   onClear: () => void;
 }
@@ -29,7 +32,6 @@ type FilterPanelProps = FilterPanelBodyProps;
 /** Cuerpo puro de los filtros (sin wrapper de aside). Reusado en desktop y mobile sheet. */
 export function FilterPanelBody({
   state,
-  productos,
   precioMin,
   precioMax,
   categorias,
@@ -37,45 +39,15 @@ export function FilterPanelBody({
   familias,
   ocasiones,
   generos,
+  facetCounts,
   onChange,
 }: FilterPanelBodyProps) {
   const [marcaSearch, setMarcaSearch] = useState("");
 
-  /** Cuenta cuántos productos matchean por valor de un facet (considerando los otros filtros activos) */
-  const countByValue = useMemo(() => {
-    return function countBy(
-      field: "marca" | "familia" | "ocasion" | "genero",
-      value: string
-    ): number {
-      return productos.filter((p) => {
-        if (state.categoria !== "Todos" && !p.categorias.includes(state.categoria))
-          return false;
-        if (state.marcas.length > 0 && field !== "marca" && !state.marcas.includes(p.marca))
-          return false;
-        if (state.familias.length > 0 && field !== "familia" && !p.familias_olfativas.some((f) => state.familias.includes(f)))
-          return false;
-        if (state.ocasiones.length > 0 && field !== "ocasion" && !p.ocasiones.some((o) => state.ocasiones.includes(o)))
-          return false;
-        if (state.generos.length > 0 && field !== "genero" && !p.generos.some((g) => state.generos.includes(g)))
-          return false;
-        if (state.precioMin != null && p.precio < state.precioMin) return false;
-        if (state.precioMax != null && p.precio > state.precioMax) return false;
-        if (state.q) {
-          const haystack = [p.nombre, p.marca, p.descripcion, p.familia_olfativa]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          if (!haystack.includes(state.q.toLowerCase().trim())) return false;
-        }
-
-        if (field === "marca") return p.marca === value;
-        if (field === "familia") return p.familias_olfativas.includes(value);
-        if (field === "ocasion") return p.ocasiones.includes(value);
-        if (field === "genero") return p.generos.includes(value);
-        return false;
-      }).length;
-    };
-  }, [state, productos]);
+  /** Lee el count de un facet del objeto facetCounts del server. */
+  const countBy = (field: keyof FacetCounts, value: string): number => {
+    return facetCounts[field]?.[value] ?? 0;
+  };
 
   const toggle = (field: keyof FilterState, value: string) => {
     const current = state[field] as string[];
@@ -85,11 +57,27 @@ export function FilterPanelBody({
     onChange({ ...state, [field]: next });
   };
 
-  const marcasFiltradas = useMemo(() => {
-    if (!marcaSearch.trim()) return marcas;
-    const q = normalizeText(marcaSearch);
-    return marcas.filter((m) => normalizeText(m).includes(q));
-  }, [marcas, marcaSearch]);
+  /** Filtrar facets: mostrar solo los que tienen count>0 (oculta los que no
+   *  matchean con los filtros activos). */
+  const marcasVisibles = useMemo(() => {
+    const base = !marcaSearch.trim()
+      ? marcas
+      : marcas.filter((m) => normalizeText(m).includes(normalizeText(marcaSearch)));
+    return base.filter((m) => (facetCounts.marcas[m] ?? 0) > 0);
+  }, [marcas, marcaSearch, facetCounts.marcas]);
+
+  const familiasVisibles = useMemo(
+    () => familias.filter((f) => (facetCounts.familias[f] ?? 0) > 0),
+    [familias, facetCounts.familias]
+  );
+  const ocasionesVisibles = useMemo(
+    () => ocasiones.filter((o) => (facetCounts.ocasiones[o] ?? 0) > 0),
+    [ocasiones, facetCounts.ocasiones]
+  );
+  const generosVisibles = useMemo(
+    () => generos.filter((g) => (facetCounts.generos[g] ?? 0) > 0),
+    [generos, facetCounts.generos]
+  );
 
   return (
     <>
@@ -166,17 +154,17 @@ export function FilterPanelBody({
           className="max-h-48 touch-pan-y overflow-y-auto pr-1"
           data-lenis-prevent
         >
-          {marcasFiltradas.length === 0 ? (
+          {marcasVisibles.length === 0 ? (
             <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
               Sin resultados
             </p>
           ) : (
             <div className="flex flex-col gap-0.5">
-              {marcasFiltradas.map((m) => (
+              {marcasVisibles.map((m) => (
                 <FacetCheckbox
                   key={m}
                   label={m}
-                  count={countByValue("marca", m)}
+                  count={countBy("marcas", m)}
                   checked={state.marcas.includes(m)}
                   onChange={() => toggle("marcas", m)}
                 />
@@ -254,45 +242,63 @@ export function FilterPanelBody({
       {/* Familia olfativa */}
       <FilterSection title="Familia olfativa" count={state.familias.length}>
         <div className="flex flex-col gap-0.5">
-          {familias.map((f) => (
-            <FacetCheckbox
-              key={f}
-              label={f}
-              count={countByValue("familia", f)}
-              checked={state.familias.includes(f)}
-              onChange={() => toggle("familias", f)}
-            />
-          ))}
+          {familiasVisibles.length === 0 ? (
+            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+              Sin resultados
+            </p>
+          ) : (
+            familiasVisibles.map((f) => (
+              <FacetCheckbox
+                key={f}
+                label={f}
+                count={countBy("familias", f)}
+                checked={state.familias.includes(f)}
+                onChange={() => toggle("familias", f)}
+              />
+            ))
+          )}
         </div>
       </FilterSection>
 
       {/* Ocasión */}
       <FilterSection title="Ocasión" count={state.ocasiones.length}>
         <div className="flex flex-col gap-0.5">
-          {ocasiones.map((o) => (
-            <FacetCheckbox
-              key={o}
-              label={o}
-              count={countByValue("ocasion", o)}
-              checked={state.ocasiones.includes(o)}
-              onChange={() => toggle("ocasiones", o)}
-            />
-          ))}
+          {ocasionesVisibles.length === 0 ? (
+            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+              Sin resultados
+            </p>
+          ) : (
+            ocasionesVisibles.map((o) => (
+              <FacetCheckbox
+                key={o}
+                label={o}
+                count={countBy("ocasiones", o)}
+                checked={state.ocasiones.includes(o)}
+                onChange={() => toggle("ocasiones", o)}
+              />
+            ))
+          )}
         </div>
       </FilterSection>
 
       {/* Género */}
       <FilterSection title="Género" count={state.generos.length}>
         <div className="flex flex-col gap-0.5">
-          {generos.map((g) => (
-            <FacetCheckbox
-              key={g}
-              label={g}
-              count={countByValue("genero", g)}
-              checked={state.generos.includes(g)}
-              onChange={() => toggle("generos", g)}
-            />
-          ))}
+          {generosVisibles.length === 0 ? (
+            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+              Sin resultados
+            </p>
+          ) : (
+            generosVisibles.map((g) => (
+              <FacetCheckbox
+                key={g}
+                label={g}
+                count={countBy("generos", g)}
+                checked={state.generos.includes(g)}
+                onChange={() => toggle("generos", g)}
+              />
+            ))
+          )}
         </div>
       </FilterSection>
     </>
@@ -302,7 +308,6 @@ export function FilterPanelBody({
 /** Panel desktop: aside con card-surface + header "Filtros / Limpiar" + body. */
 export function FilterPanel({
   state,
-  productos,
   precioMin,
   precioMax,
   categorias,
@@ -310,6 +315,7 @@ export function FilterPanel({
   familias,
   ocasiones,
   generos,
+  facetCounts,
   onChange,
   onClear,
 }: FilterPanelProps) {
@@ -332,7 +338,6 @@ export function FilterPanel({
 
       <FilterPanelBody
         state={state}
-        productos={productos}
         precioMin={precioMin}
         precioMax={precioMax}
         categorias={categorias}
@@ -340,6 +345,7 @@ export function FilterPanel({
         familias={familias}
         ocasiones={ocasiones}
         generos={generos}
+        facetCounts={facetCounts}
         onChange={onChange}
         onClear={onClear}
       />

@@ -1,5 +1,8 @@
 import fs from "fs";
 import path from "path";
+import type { FacetCounts } from "./facet-counts";
+export type { FacetCounts } from "./facet-counts";
+export { EMPTY_FACET_COUNTS } from "./facet-counts";
 
 export interface Producto {
   id: number;
@@ -166,6 +169,87 @@ export function getPrecioRange(): { min: number; max: number } {
     if (p.precio > max) max = p.precio;
   }
   return { min, max };
+}
+
+/**
+ * Calcula cuántos productos matchean por cada valor de cada facet,
+ * aplicando los filtros activos EXCEPTO el facet que se está contando.
+ *
+ * Convención estándar de e-commerce: si filtraste por Marca=Adidas, los counts
+ * de Familia asumen que Adidas está activa (muestran cuántas familias hay entre
+ * los Adidas). Los counts de Marca asumen que NO hay marca activa (muestran
+ * cuántas marcas hay en el universo, así el usuario ve qué otras marcas puede
+ * sumar).
+ */
+export function getFacetCounts(
+  productos: Producto[],
+  active: {
+    marcas: string[];
+    familias: string[];
+    ocasiones: string[];
+    generos: string[];
+  }
+): FacetCounts {
+  const counts: FacetCounts = {
+    marcas: {},
+    familias: {},
+    ocasiones: {},
+    generos: {},
+  };
+
+  function matchAllExcept(
+    p: Producto,
+    skip: "marca" | "familia" | "ocasion" | "genero"
+  ): boolean {
+    if (skip !== "marca" && active.marcas.length > 0 && !active.marcas.includes(p.marca)) {
+      return false;
+    }
+    if (
+      skip !== "familia" &&
+      active.familias.length > 0 &&
+      !p.familias_olfativas.some((f) => active.familias.includes(f))
+    ) {
+      return false;
+    }
+    if (
+      skip !== "ocasion" &&
+      active.ocasiones.length > 0 &&
+      !p.ocasiones.some((o) => active.ocasiones.includes(o))
+    ) {
+      return false;
+    }
+    if (
+      skip !== "genero" &&
+      active.generos.length > 0 &&
+      !p.generos.some((g) => active.generos.includes(g))
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  for (const p of productos) {
+    if (matchAllExcept(p, "marca") && p.marca) {
+      counts.marcas[p.marca] = (counts.marcas[p.marca] || 0) + 1;
+    }
+    if (matchAllExcept(p, "familia")) {
+      for (const f of p.familias_olfativas) {
+        counts.familias[f] = (counts.familias[f] || 0) + 1;
+      }
+    }
+    if (matchAllExcept(p, "ocasion")) {
+      for (const o of p.ocasiones) {
+        counts.ocasiones[o] = (counts.ocasiones[o] || 0) + 1;
+      }
+    }
+    if (matchAllExcept(p, "genero")) {
+      for (const g of p.generos) {
+        counts.generos[g] = (counts.generos[g] || 0) + 1;
+      }
+    }
+  }
+
+  return counts;
 }
 
 /** Normalizar texto para búsqueda: lowercase + sin acentos */
