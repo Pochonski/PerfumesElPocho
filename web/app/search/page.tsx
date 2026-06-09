@@ -45,6 +45,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         title={title}
         description={description}
         initialCategory={initialCategory}
+        hideSearch
         id="search-results"
       />
     </main>

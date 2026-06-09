@@ -61,6 +61,9 @@ interface CatalogClientProps {
   title: string;
   description?: string;
   id?: string;
+  /** Oculta el input de búsqueda interno. Usar cuando ya hay un SearchBar global
+   *  (p.ej. en /search, donde la Navbar ya provee búsqueda). */
+  hideSearch?: boolean;
 }
 
 interface ApiResponse {
@@ -80,6 +83,7 @@ export default function CatalogClient({
   title,
   description,
   id = "productos",
+  hideSearch = false,
 }: CatalogClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -349,22 +353,24 @@ export default function CatalogClient({
           <div className="flex-1 min-w-0">
             {/* Search + Sort */}
             <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:gap-4">
-              <div className="relative flex-1">
-                <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                <input
-                  type="search"
-                  placeholder="Buscar fragancias..."
-                  value={searchInput}
-                  onChange={onSearchChange}
-                  className="card-surface w-full pl-11 pr-10 py-3 text-sm bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-zinc-600"
-                />
-                {searchInput && (
-                  <button onClick={() => setSearchInput("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white" aria-label="Limpiar">
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
+              {!hideSearch && (
+                <div className="relative flex-1">
+                  <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input
+                    type="search"
+                    placeholder="Buscar fragancias..."
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    className="card-surface w-full pl-11 pr-10 py-3 text-sm bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-zinc-600"
+                  />
+                  {searchInput && (
+                    <button onClick={() => setSearchInput("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white" aria-label="Limpiar">
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className={`flex items-center gap-3 ${hideSearch ? "ml-auto" : ""}`}>
                 <SortDropdown value={filtrosState.sort || "default"} onChange={(sort) => pushState({ ...filtrosState, sort })} />
                 <button
                   type="button"

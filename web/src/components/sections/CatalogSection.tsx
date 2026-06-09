@@ -10,6 +10,7 @@ interface CatalogSectionProps {
   title: string;
   description?: string;
   id?: string;
+  hideSearch?: boolean;
 }
 
 function CatalogClientSkeleton() {
