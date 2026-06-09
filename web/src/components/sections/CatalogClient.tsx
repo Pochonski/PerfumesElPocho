@@ -107,8 +107,11 @@ export default function CatalogClient({
   /* Version counter para forzar re-fetch cuando filtros cambian */
   const [filterVersion, setFilterVersion] = useState(0);
 
-  /* Filtros: ref para evitar stale closures, state para render */
-  const filtrosRef = useRef<FilterState>({
+  /* Filtros: usamos solo state (no ref) para evitar race conditions en mount
+     cuando la URL trae filtros pre-aplicados. El useLayoutEffect (URL sync)
+     actualiza el state en el primer render antes del paint, y el useEffect
+     (fetch) lo lee consistentemente en cada cambio. */
+  const [filtrosState, setFiltrosState] = useState<FilterState>({
     categoria: initialCategory,
     marcas: [],
     familias: [],
@@ -116,13 +119,12 @@ export default function CatalogClient({
     generos: [],
     precioMin: null,
     precioMax: null,
-    sort: undefined,
+    sort: "relevancia",
     q: "",
   });
-  const [filtrosState, setFiltrosState] = useState<FilterState>(filtrosRef.current);
 
   /* Search input state (declarado arriba porque los useEffect de URL lo setean) */
-  const [searchInput, setSearchInput] = useState(filtrosRef.current.q);
+  const [searchInput, setSearchInput] = useState(filtrosState.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
@@ -142,16 +144,15 @@ export default function CatalogClient({
   }, []);
 
   /* Sync con URL: corre en mount Y en cada cambio (back/forward, client-side nav).
-     Usa useLayoutEffect para que el ref quede sincronizado ANTES del primer paint,
-     evitando que el fetch inicial dispare con q='' cuando la URL trae q=algo. */
+     Usa useLayoutEffect para que el state quede sincronizado ANTES del primer paint,
+     y bumpea filterVersion para forzar un refetch con los filtros correctos. */
   useLayoutEffect(() => {
     const fromUrl = decodeFilters(searchParams);
     const next: FilterState = {
       ...fromUrl,
       categoria: fromUrl.categoria || initialCategory,
     };
-    if (JSON.stringify(next) !== JSON.stringify(filtrosRef.current)) {
-      filtrosRef.current = next;
+    if (JSON.stringify(next) !== JSON.stringify(filtrosState)) {
       setFiltrosState(next);
       setSearchInput(next.q);
       setPage(1);
@@ -159,14 +160,15 @@ export default function CatalogClient({
     }
   }, [searchParams, initialCategory]);
 
-  /* Fetch productos: solo se dispara cuando cambian filtrosRef o page */
+  /* Fetch productos: se dispara cuando cambian filtrosState, page, o filterVersion.
+     filtrosState está en deps para que el fetch siempre vea los filtros actuales. */
   useEffect(() => {
     let cancelled = false;
 
     setLoading(true);
     setApiError(null);
 
-    const filtros = filtrosRef.current;
+    const filtros = filtrosState;
     const qs = new URLSearchParams();
     qs.set("page", String(page));
     qs.set("perPage", String(PER_PAGE));
@@ -178,7 +180,7 @@ export default function CatalogClient({
     if (filtros.generos.length > 0) qs.set("generos", filtros.generos.join(","));
     if (filtros.precioMin != null) qs.set("precioMin", String(filtros.precioMin));
     if (filtros.precioMax != null) qs.set("precioMax", String(filtros.precioMax));
-    if (filtros.sort) qs.set("sort", filtros.sort);
+    if (filtros.sort && filtros.sort !== "relevancia") qs.set("sort", filtros.sort);
 
     fetch(`/api/productos?${qs.toString()}`)
       .then((r) => {
@@ -204,15 +206,14 @@ export default function CatalogClient({
     return () => {
       cancelled = true;
     };
-  }, [page, filterVersion]);
+  }, [page, filterVersion, filtrosState]);
 
-  /* pushState: actualiza URL + ref + state, resetea página */
+  /* pushState: actualiza URL + state, resetea página. El useEffect (fetch)
+     detecta el cambio de filtrosState por estar en deps. */
   const pushState = useCallback(
     (next: FilterState) => {
-      filtrosRef.current = next;
       setFiltrosState(next);
       setPage(1);
-      setFilterVersion((v) => v + 1);
       const params = encodeFilters(next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -220,15 +221,19 @@ export default function CatalogClient({
     [pathname, router]
   );
 
-  /* Search debounced */
+  /* Search debounced: tipear en el input cambia searchInput, después de 300ms
+     se pushea al state (y URL) si difiere del q actual. */
   useEffect(() => {
-    const currentQ = filtrosRef.current.q;
+    const currentQ = filtrosState.q;
     if (searchInput === currentQ) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      pushState({ ...filtrosRef.current, q: searchInput });
+      pushState({ ...filtrosState, q: searchInput });
     }, 300);
-  }, [searchInput, pushState]);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput, filtrosState, pushState]);
 
   const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -245,7 +250,7 @@ export default function CatalogClient({
       precioMin: null,
       precioMax: null,
       q: "",
-      sort: undefined,
+      sort: "relevancia",
     });
     setSearchInput("");
   }, [pushState, initialCategory]);
@@ -256,7 +261,7 @@ export default function CatalogClient({
       field: "categoria" | "marca" | "familia" | "ocasion" | "genero" | "precio" | "q",
       value?: string
     ) => {
-      const current = filtrosRef.current;
+      const current = filtrosState;
       if (field === "categoria") { pushState({ ...current, categoria: "Todos" }); return; }
       if (field === "q") { pushState({ ...current, q: "" }); setSearchInput(""); return; }
       if (field === "precio") { pushState({ ...current, precioMin: null, precioMax: null }); return; }
@@ -269,7 +274,7 @@ export default function CatalogClient({
         pushState({ ...current, [stateKey]: (current[stateKey] as string[]).filter((v) => v !== value) });
       }
     },
-    [pushState]
+    [pushState, filtrosState]
   );
 
   /* Mobile sheet */

@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
+import { useLenis } from "lenis/react";
 import { formatPrice } from "@/lib/format";
 
 interface Suggestion {
@@ -51,6 +52,7 @@ export default function SearchBar({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const lenis = useLenis();
   // IDs determinísticos (no useId) para evitar hydration mismatch
   // cuando este componente se monta vía Suspense boundary
   const listboxId = `searchbar-listbox-${variant}`;
@@ -133,8 +135,12 @@ export default function SearchBar({
   }, [query, fetchSuggestions]);
 
   useEffect(() => {
-    return () => abortRef.current?.abort();
-  }, []);
+    return () => {
+      abortRef.current?.abort();
+      // Por si el componente se desmonta con el input focused, restaurar Lenis.
+      lenis?.start();
+    };
+  }, [lenis]);
 
   useEffect(() => {
     function onDocMouseDown(e: MouseEvent) {
@@ -255,6 +261,13 @@ export default function SearchBar({
           }}
           onFocus={() => {
             if (query.trim().length >= 2) setIsOpen(true);
+            // Lenis intercepta el scroll del viewport; al detenerlo mientras
+            // el input está focused evitamos que interfiera con la interacción
+            // (tipear, dropdown, keyboard nav).
+            lenis?.stop();
+          }}
+          onBlur={() => {
+            lenis?.start();
           }}
           onKeyDown={onKeyDown}
           autoComplete="off"
