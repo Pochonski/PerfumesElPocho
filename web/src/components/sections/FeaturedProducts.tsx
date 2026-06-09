@@ -71,7 +71,10 @@ export default function FeaturedProducts() {
 
   if (items.length === 0) return null;
 
-  const formatPrice = (p: number) => `₡${p.toLocaleString("es-CR")}`;
+  const formatPrice = (p: number | null | undefined) => {
+    if (p == null || isNaN(p) || p <= 0) return "₡—";
+    return `₡${p.toLocaleString("es-CR")}`;
+  };
 
   return (
     <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5">

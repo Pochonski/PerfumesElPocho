@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useRef,
   useState,
   type FormEvent,
@@ -52,8 +51,15 @@ export default function SearchBar({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const listboxId = useId();
-  const inputId = useId();
+  // IDs determinísticos (no useId) para evitar hydration mismatch
+  // cuando este componente se monta vía Suspense boundary
+  const listboxId = `searchbar-listbox-${variant}`;
+  const inputId = `searchbar-input-${variant}`;
+
+  // Mounted flag: render placeholder idéntico en server y first client render
+  // para evitar hydration mismatch cuando useSearchParams() fuerza bailout
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [query, setQuery] = useState(() => {
     if (typeof window === "undefined") return "";
@@ -207,6 +213,15 @@ export default function SearchBar({
     "card-surface w-full bg-transparent border-none text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-0";
   const inputSizing =
     variant === "panel" ? "pl-12 pr-10 py-3 rounded-2xl" : "pl-10 pr-9 py-2.5 rounded-2xl";
+
+  // Antes de hidratar, mostrar placeholder idéntico al fallback del Suspense
+  if (!mounted) {
+    const placeholderCls =
+      variant === "panel"
+        ? "card-surface w-full bg-transparent border-none h-[50px] rounded-2xl"
+        : "card-surface w-full bg-transparent border-none h-[42px] rounded-2xl";
+    return <div className={placeholderCls} aria-hidden="true" />;
+  }
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>

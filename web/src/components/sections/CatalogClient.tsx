@@ -21,7 +21,7 @@ import {
   SlidersHorizontal,
   X,
 } from "@phosphor-icons/react";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatCount } from "@/lib/format";
 import {
   decodeFilters,
   encodeFilters,
@@ -401,7 +401,7 @@ export default function CatalogClient({
             {/* Count */}
             <div className="mb-4 flex items-center justify-between text-xs">
               <p className="text-zinc-500" aria-live="polite">
-                <span className="font-mono text-white">{total.toLocaleString("es-CR")}</span> {total === 1 ? "fragancia" : "fragancias"}
+                <span className="font-mono text-[color:var(--foreground)]">{formatCount(total)}</span> {total === 1 ? "fragancia" : "fragancias"}
               </p>
               {loading && <span className="text-zinc-600 animate-pulse">Cargando...</span>}
             </div>
