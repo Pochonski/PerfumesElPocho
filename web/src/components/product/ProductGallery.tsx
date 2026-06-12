@@ -39,7 +39,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
 
   if (!hasImages) {
     return (
-      <div className="card-surface relative aspect-square overflow-hidden bg-zinc-900/30">
+      <div className="card-surface relative aspect-square overflow-hidden bg-[var(--image-bg)]">
         <div className="flex h-full items-center justify-center text-6xl">🕯️</div>
       </div>
     );
@@ -51,7 +51,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
         {/* Main image */}
         <div className="relative">
           <div
-            className="card-surface relative aspect-square overflow-hidden bg-zinc-900/30"
+            className="card-surface relative aspect-square overflow-hidden bg-[var(--image-bg)]"
           >
             {mainSrc ? (
               <Image
@@ -74,7 +74,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
                     goPrev();
                   }}
                   aria-label="Imagen anterior"
-                  className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-zinc-900/80 text-zinc-300 backdrop-blur-sm transition-all hover:border-white/20 hover:text-white"
+                  className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border-emphasis)] bg-[color:var(--card-bg)]/80 text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:border-[color:var(--accent)]/40 hover:text-[color:var(--foreground)]"
                 >
                   <CaretLeft size={20} weight="bold" />
                 </button>
@@ -85,7 +85,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
                     goNext();
                   }}
                   aria-label="Imagen siguiente"
-                  className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-zinc-900/80 text-zinc-300 backdrop-blur-sm transition-all hover:border-white/20 hover:text-white"
+                  className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border-emphasis)] bg-[color:var(--card-bg)]/80 text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:border-[color:var(--accent)]/40 hover:text-[color:var(--foreground)]"
                 >
                   <CaretRight size={20} weight="bold" />
                 </button>
@@ -95,7 +95,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
 
           {hasMultiple && (
             <p
-              className="mt-2 text-center text-xs text-zinc-500"
+              className="mt-2 text-center text-xs text-[color:var(--muted-foreground)]"
               aria-live="polite"
             >
               Imagen {active + 1} de {validImages.length}
