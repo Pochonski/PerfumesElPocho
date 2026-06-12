@@ -28,7 +28,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-6 py-4 md:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <div className="relative h-10 w-32 md:h-12 md:w-40">
+          <div className="relative h-12 w-40 md:h-16 md:w-52">
             <Image
               src="/brand/logo.png"
               alt="Perfumes El Pocho"
@@ -66,7 +66,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
 
         {/* Mobile toggle */}
         <button
-          className="shrink-0 text-zinc-300 md:hidden"
+          className="shrink-0 text-[color:var(--foreground)] md:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Menú"
         >
@@ -75,7 +75,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
       </nav>
 
       {/* Mobile search bar (always visible) */}
-      <div className="border-t border-white/5 px-4 pb-3 pt-1 md:hidden">
+      <div className="border-t border-[color:var(--border-subtle)] px-4 pb-3 pt-1 md:hidden">
         <Suspense fallback={<SearchBarFallback variant="panel" />}>
           <SearchBar variant="panel" />
         </Suspense>
@@ -83,7 +83,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
 
         {/* Mobile menu */}
       {open && (
-        <div className="glass-surface border-t border-white/5 md:hidden">
+        <div className="glass-surface border-t border-[color:var(--border-subtle)] md:hidden">
           <div className="flex flex-col gap-1 px-6 py-4">
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-[color:var(--muted-foreground)]">Tema</span>
