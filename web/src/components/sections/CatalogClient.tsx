@@ -149,16 +149,25 @@ export default function CatalogClient({
     };
   }, []);
 
-  /* Restaurar scroll si quedó pendiente de un pushState. Deps = [searchParams, lenis]
-     para que corra SOLO cuando la URL cambia (o cuando Lenis se inicializa) — no en
-     cada commit. Esto evita una race con el browser scroll-to-top que Next 15.5.19
-     dispara al cambiar query params. Usamos lenis.scrollTo con { immediate: true }
-     si está disponible (SmoothScrollProvider está siempre activo), con fallback a
-     window.scrollTo. */
+  /* Doble safety net para preservar scroll al cambiar filtros:
+
+     (1) useLayoutEffect: restaura scroll SÍNCRONAMENTE después del re-render
+         por URL change. Cubre el caso del browser scroll-to-top que ocurre
+         antes/después del re-render pero antes del paint. NO limpia el ref —
+         la limpieza la hace el useEffect abajo para que ambos effects puedan
+         intentar restaurar si el browser vuelve a scrollear a top.
+
+     (2) useEffect con setTimeout(0): safety net que corre después de que el
+         browser procesó TODO (Lenis init, fetch response, layout shifts).
+         setTimeout(0) tiene delay mínimo de ~4ms en browsers, suficiente
+         para que cualquier scroll-to-top asíncrono ya haya ocurrido.
+         Puede causar un flash de ~4-16ms pero es la opción más confiable.
+
+     Usamos lenis.scrollTo con { immediate: true } si está disponible
+     (SmoothScrollProvider siempre activo), fallback a window.scrollTo. */
   useLayoutEffect(() => {
     if (pendingScrollY.current !== null) {
       const y = pendingScrollY.current;
-      pendingScrollY.current = null;
       if (lenis) {
         lenis.scrollTo(y, { immediate: true });
       } else {
@@ -166,6 +175,20 @@ export default function CatalogClient({
       }
     }
   }, [searchParams, lenis]);
+
+  useEffect(() => {
+    if (pendingScrollY.current !== null) {
+      const y = pendingScrollY.current;
+      pendingScrollY.current = null;
+      setTimeout(() => {
+        if (lenis) {
+          lenis.scrollTo(y, { immediate: true });
+        } else {
+          window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+        }
+      }, 0);
+    }
+  }, [searchParams]);
 
   /* Fetch productos: se dispara cuando cambian searchParams (URL) o page.
      filtrosState se deriva de searchParams vía useMemo, así que con searchParams
