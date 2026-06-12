@@ -6,7 +6,12 @@ export default function FinalCTA() {
   return (
     <AnimatedSection id="contacto" className="px-6 py-24 md:px-8 md:py-32">
       <div className="mx-auto max-w-[1400px]">
-        <div className="relative overflow-hidden rounded-[32px] border border-[#c8a84e]/10 bg-gradient-to-br from-[#1a1a1a] via-[#111] to-[#0a0a0a] p-12 text-center md:p-20">
+        <div
+          className="relative overflow-hidden rounded-[32px] border border-[#c8a84e]/10 p-12 text-center md:p-20"
+          style={{
+            backgroundImage: `linear-gradient(to bottom right, var(--featured-card-from), var(--featured-card-via), var(--featured-card-to))`,
+          }}
+        >
           {/* Background glow */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,168,78,0.08)_0%,transparent_70%)]" />
 
@@ -31,7 +36,7 @@ export default function FinalCTA() {
               >
                 WhatsApp
               </Button>
-              <Button href="mailto:joseph19102005@gmail.com" variant="secondary">
+              <Button href="mailto:joseph19102005@gmail.com?subject=Consulta%20Perfumes%20El%20Pocho" variant="secondary">
                 Email
               </Button>
             </div>
