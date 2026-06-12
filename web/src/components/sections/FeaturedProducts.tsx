@@ -73,7 +73,7 @@ export default function FeaturedProducts() {
   };
 
   return (
-    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5">
+    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-12 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Los más buscados</EyebrowBadge>
@@ -101,7 +101,7 @@ export default function FeaturedProducts() {
                   data-card
                   className="card-surface card-surface-hover group block w-[calc(100%-2rem)] shrink-0 overflow-hidden sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]"
                 >
-                  <div className="relative aspect-square overflow-hidden bg-zinc-900/30">
+                  <div className="relative aspect-square overflow-hidden bg-[var(--image-bg)]">
                     {p.imagenes[0] && (
                       <Image
                         src={p.imagenes[0]}
@@ -112,7 +112,7 @@ export default function FeaturedProducts() {
                         loading="lazy"
                       />
                     )}
-                    <span className="absolute right-3 top-3 rounded-full bg-black/70 px-3 py-1 text-sm font-bold text-[#c8a84e] backdrop-blur-sm">
+                    <span className="absolute right-3 top-3 rounded-full bg-[color:var(--price-pill-bg)] px-3 py-1 text-sm font-bold text-[#c8a84e] backdrop-blur-sm">
                       {formatPrice(p.precio)}
                     </span>
                   </div>
@@ -129,14 +129,14 @@ export default function FeaturedProducts() {
 
           <button
             onClick={prev}
-            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[color:var(--card-bg)]/80 border border-[color:var(--border-emphasis)] text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:text-[color:var(--foreground)] hover:border-[color:var(--accent)]/40"
             aria-label="Anterior"
           >
             <CaretLeft size={20} weight="bold" />
           </button>
           <button
             onClick={next}
-            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:text-white hover:border-white/20"
+            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[color:var(--card-bg)]/80 border border-[color:var(--border-emphasis)] text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:text-[color:var(--foreground)] hover:border-[color:var(--accent)]/40"
             aria-label="Siguiente"
           >
             <CaretRight size={20} weight="bold" />
@@ -151,7 +151,7 @@ export default function FeaturedProducts() {
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === current
                     ? "w-6 bg-[#c8a84e]"
-                    : "w-2 bg-zinc-700 hover:bg-zinc-500"
+                    : "w-2 bg-[color:var(--border-emphasis)] hover:bg-[color:var(--muted-foreground)]"
                 }`}
               />
             ))}
