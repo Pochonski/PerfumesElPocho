@@ -15,10 +15,10 @@ export default function NotFound() {
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#c8a84e]">
           Error 404
         </p>
-        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-white md:text-5xl">
+        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-[color:var(--foreground)] md:text-5xl">
           Esta fragancia <span className="gold-gradient">no existe</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-zinc-400">
+        <p className="mx-auto mt-4 max-w-md text-[color:var(--muted-foreground)]">
           El perfume que buscás no está en nuestro catálogo. Pero tenemos más de
           4,000 fragancias esperándote.
         </p>

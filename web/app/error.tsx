@@ -31,10 +31,10 @@ export default function Error({
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#c8a84e]">
           Error inesperado
         </p>
-        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-white md:text-5xl">
+        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-[color:var(--foreground)] md:text-5xl">
           Algo <span className="gold-gradient">salió mal</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-zinc-400">
+        <p className="mx-auto mt-4 max-w-md text-[color:var(--muted-foreground)]">
           Tuvimos un problema al cargar esta página. Probá de nuevo, y si el
           problema persiste, escribinos por WhatsApp.
         </p>
