@@ -32,7 +32,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5">
+    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]">
       <div className="mx-auto max-w-[1200px]">
         {/* Header */}
         <div className="mb-16 flex flex-col items-center gap-4 text-center">

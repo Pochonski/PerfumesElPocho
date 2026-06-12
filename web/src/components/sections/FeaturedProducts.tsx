@@ -47,7 +47,7 @@ export default function FeaturedProducts() {
 
   if (loading) {
     return (
-      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5">
+      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]">
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-12 flex flex-col items-center gap-4 text-center">
             <EyebrowBadge>Los más buscados</EyebrowBadge>
@@ -57,7 +57,7 @@ export default function FeaturedProducts() {
           </div>
           <div className="flex gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-64 w-[calc(25%-15px)] animate-pulse rounded-2xl bg-white/5" />
+              <div key={i} className="h-64 w-[calc(25%-15px)] animate-pulse rounded-2xl bg-[color:var(--skeleton-bg)]" />
             ))}
           </div>
         </div>
