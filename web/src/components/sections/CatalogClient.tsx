@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   type ChangeEvent,
 } from "react";
@@ -124,6 +125,11 @@ export default function CatalogClient({
     return new URLSearchParams(window.location.search).get("q") || "";
   });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /* Ref para preservar scroll position across filter changes. router.replace con
+     scroll:false no funciona cuando solo cambia el query string (limitación de
+     Next 15.5.19), así que guardamos window.scrollY antes del replace y lo
+     restauramos en useLayoutEffect después del re-render. */
+  const pendingScrollY = useRef<number | null>(null);
 
   /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
   useEffect(() => {
@@ -140,6 +146,19 @@ export default function CatalogClient({
       cancelled = true;
     };
   }, []);
+
+  /* Restaurar scroll si quedó pendiente de un pushState. Sin array de deps para
+     que corra después de CADA commit; el ref se limpia al primer hit así que
+     en el 99% de los renders es un no-op (costo: una comparación). Corre
+     síncronamente antes del paint, así que el usuario nunca ve el scroll-to-top
+     que router.replace causa al cambiar query params. */
+  useLayoutEffect(() => {
+    if (pendingScrollY.current !== null) {
+      const y = pendingScrollY.current;
+      pendingScrollY.current = null;
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+    }
+  });
 
   /* Fetch productos: se dispara cuando cambian searchParams (URL) o page.
      filtrosState se deriva de searchParams vía useMemo, así que con searchParams
@@ -192,10 +211,14 @@ export default function CatalogClient({
 
   /* pushState: actualiza SOLO la URL. filtrosState se re-deriva via useMemo
      cuando searchParams cambia, y el fetch effect re-corre por searchParams en deps.
-     Resetear `page` localmente para que volver a página 1 al cambiar filtros. */
+     Resetear `page` localmente para que volver a página 1 al cambiar filtros.
+     Guardamos window.scrollY en pendingScrollY para que el useLayoutEffect de
+     scroll restoration lo restaure después del re-render (router.replace con
+     scroll:false no previene scroll-to-top en Next 15.5.19). */
   const pushState = useCallback(
     (next: FilterState) => {
       setPage(1);
+      pendingScrollY.current = window.scrollY;
       const params = encodeFilters(next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
