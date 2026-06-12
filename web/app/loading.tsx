@@ -6,9 +6,9 @@ export default function Loading() {
       <div className="mx-auto max-w-7xl">
         {/* Header skeleton */}
         <div className="mb-12 flex flex-col items-center gap-4 text-center">
-          <div className="h-6 w-32 animate-pulse rounded-full bg-zinc-800" />
-          <div className="h-10 w-64 animate-pulse rounded-lg bg-zinc-800" />
-          <div className="h-4 w-80 animate-pulse rounded bg-zinc-800/50" />
+          <div className="h-6 w-32 animate-pulse rounded-full bg-[color:var(--skeleton-bg)]" />
+          <div className="h-10 w-64 animate-pulse rounded-lg bg-[color:var(--skeleton-bg)]" />
+          <div className="h-4 w-80 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
         </div>
 
         <SkeletonGrid count={8} columns={4} />
