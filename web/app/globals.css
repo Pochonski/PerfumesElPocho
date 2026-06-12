@@ -19,6 +19,20 @@
   --accent-glow: rgba(200, 168, 78, 0.3);
   --accent-dim: rgba(200, 168, 78, 0.12);
 
+  /* === Theme-aware surfaces (Dark defaults) === */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-emphasis: rgba(255, 255, 255, 0.12);
+  --image-bg: #0a0a0a;
+  --skeleton-bg: rgba(255, 255, 255, 0.04);
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --price-pill-bg: rgba(0, 0, 0, 0.7);
+  --price-pill-fg: #fafafa;
+  --placeholder-fg: #a1a1aa;
+  --featured-card-from: #1a1a1a;
+  --featured-card-via: #111111;
+  --featured-card-to: #0a0a0a;
+  --shipping-banner-bg: #0c0c0c;
+
   /* === Neumorphic Shadow Stack (Dark Mode) === */
   --card-shadow:
     0px 0.7px 0.7px -0.67px rgba(0, 0, 0, 0.4),
@@ -40,7 +54,7 @@
 [data-theme="light"] {
   --background: #faf7f2;
   --foreground: #0a0a0a;
-  --muted: #52525b;
+  --muted: #71717a;
   --muted-foreground: #52525b;
   --subtle-foreground: #27272a;
   --card-bg: #ffffff;
@@ -48,6 +62,20 @@
   --accent: #a08030;
   --accent-glow: rgba(160, 128, 48, 0.2);
   --accent-dim: rgba(160, 128, 48, 0.1);
+
+  /* === Theme-aware surfaces (Light overrides) === */
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-emphasis: rgba(0, 0, 0, 0.15);
+  --image-bg: #f0ebe0;
+  --skeleton-bg: rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --price-pill-bg: rgba(255, 255, 255, 0.85);
+  --price-pill-fg: #0a0a0a;
+  --placeholder-fg: #71717a;
+  --featured-card-from: #fffaf0;
+  --featured-card-via: #faf5e8;
+  --featured-card-to: #f5edd8;
+  --shipping-banner-bg: #f0ebe0;
 
   /* Neumorphic shadows adapted for light surfaces */
   --card-shadow:
