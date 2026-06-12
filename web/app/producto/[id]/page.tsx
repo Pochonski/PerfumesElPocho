@@ -87,8 +87,8 @@ export default async function ProductoPage({
       <main className="min-h-screen pt-24">
         <div className="mx-auto max-w-[1400px] px-6 md:px-8">
           {/* Breadcrumb */}
-          <nav className="mb-8 flex items-center gap-2 text-sm text-zinc-500">
-            <Link href="/" className="hover:text-zinc-300 transition-colors">
+          <nav className="mb-8 flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]">
+            <Link href="/" className="hover:text-[color:var(--foreground)] transition-colors">
               Inicio
             </Link>
             <span>/</span>
@@ -96,14 +96,14 @@ export default async function ProductoPage({
               <span key={cat}>
                 <Link
                   href={`/#productos`}
-                  className="hover:text-zinc-300 transition-colors"
+                  className="hover:text-[color:var(--foreground)] transition-colors"
                 >
                   {cat}
                 </Link>
                 <span className="mx-1">/</span>
               </span>
             ))}
-            <span className="line-clamp-1 text-zinc-400">
+            <span className="line-clamp-1 text-[color:var(--subtle-foreground)]">
               {producto.nombre}
             </span>
           </nav>
@@ -112,7 +112,7 @@ export default async function ProductoPage({
             {/* ─── Images ─── */}
             <Suspense
               fallback={
-                <div className="card-surface aspect-square animate-pulse bg-zinc-900/30" />
+                <div className="card-surface aspect-square animate-pulse bg-[var(--image-bg)]" />
               }
             >
               <ProductGallery
@@ -123,7 +123,7 @@ export default async function ProductoPage({
 
             {/* ─── Product Info ─── */}
             <div>
-              <h1 className="text-2xl font-semibold tracking-tighter text-white md:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-tighter text-[color:var(--foreground)] md:text-3xl">
                 {producto.nombre}
               </h1>
 
@@ -131,12 +131,12 @@ export default async function ProductoPage({
                 {formatPrice(producto.precio)}
               </p>
 
-              <p className="mt-2 text-xs text-zinc-600">
+              <p className="mt-2 text-xs text-[color:var(--muted)]">
                 Envíos a todo Costa Rica 🇨🇷
               </p>
 
               {producto.resumen && (
-                <p className="mt-6 leading-relaxed text-zinc-400">
+                <p className="mt-6 leading-relaxed text-[color:var(--muted-foreground)]">
                   {producto.resumen}
                 </p>
               )}
@@ -183,10 +183,10 @@ export default async function ProductoPage({
               {producto.descripcion &&
                 producto.descripcion !== producto.resumen && (
                   <div className="mt-8">
-                    <h3 className="text-sm font-semibold text-zinc-300">
+                    <h3 className="text-sm font-semibold text-[color:var(--subtle-foreground)]">
                       Descripción
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                    <p className="mt-2 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
                       {producto.descripcion}
                     </p>
                   </div>
@@ -220,8 +220,8 @@ function AttributeCard({
 }) {
   return (
     <div className="card-surface p-4">
-      <span className="text-xs text-zinc-500">{label}</span>
-      <p className="mt-1 text-sm font-medium text-zinc-200">{value}</p>
+      <span className="text-xs text-[color:var(--muted-foreground)]">{label}</span>
+      <p className="mt-1 text-sm font-medium text-[color:var(--subtle-foreground)]">{value}</p>
     </div>
   );
 }
