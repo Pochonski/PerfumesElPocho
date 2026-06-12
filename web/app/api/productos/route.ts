@@ -7,7 +7,11 @@ import {
   type Producto,
 } from "@/lib/productos";
 
-export const dynamic = "force-static";
+/* La ruta es dinámica porque los query params (categoria, precio, etc.) varían
+   por request. Usamos ISR vía revalidate para cachear respuestas idénticas.
+   NO usar `force-static` aquí: con `force-static` Next.js cachea UNA respuesta
+   al build time y la sirve para TODOS los params, ignorando el filtrado. */
+export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 /* ─── Rate Limiting ─── */

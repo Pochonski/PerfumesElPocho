@@ -5,7 +5,6 @@ import {
   useMemo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   type ChangeEvent,
 } from "react";
@@ -101,37 +100,30 @@ export default function CatalogClient({
   /* Facets cargados una sola vez desde /api/facets para alimentar Marca/Familia/Ocasión/Género */
   const [facets, setFacets] = useState<Facets>(DEFAULT_FACETS);
   /* Counts por valor de cada facet, devueltos por /api/productos en cada response.
-     Permiten mostrar "Adidas (234)" en el panel con el número real sobre el universo
-     filtrado (no sobre los 24 productos de la página actual). */
+      Permiten mostrar "Adidas (234)" en el panel con el número real sobre el universo
+      filtrado (no sobre los 24 productos de la página actual). */
   const [facetCounts, setFacetCounts] = useState<FacetCounts>(EMPTY_FACET_COUNTS);
-  /* Version counter para forzar re-fetch cuando filtros cambian */
-  const [filterVersion, setFilterVersion] = useState(0);
 
-  /* Filtros: usamos solo state (no ref) para evitar race conditions en mount
-     cuando la URL trae filtros pre-aplicados. El useLayoutEffect (URL sync)
-     actualiza el state en el primer render antes del paint, y el useEffect
-     (fetch) lo lee consistentemente en cada cambio. */
-  const [filtrosState, setFiltrosState] = useState<FilterState>({
-    categoria: initialCategory,
-    marcas: [],
-    familias: [],
-    ocasiones: [],
-    generos: [],
-    precioMin: null,
-    precioMax: null,
-    sort: "relevancia",
-    q: "",
+  /* filtrosState derivado directamente de searchParams (URL = única fuente de verdad).
+     Cualquier cambio en la URL (deep-link, click en filtro, back/forward) re-deriva
+     este valor, eliminando la race condition entre useLayoutEffect (sync URL→state)
+     y useEffect (fetch con state) que existía en la versión anterior. */
+  const filtrosState: FilterState = useMemo(() => {
+    const fromUrl = decodeFilters(searchParams);
+    return {
+      ...fromUrl,
+      categoria: fromUrl.categoria || initialCategory,
+    };
+  }, [searchParams, initialCategory]);
+
+  /* Search input local. Inicializado desde window.location en client para evitar
+     flash de input vacío en deep-links con ?q=... . El input es controlado y se
+     sincroniza con filtrosState.q via el debounce effect más abajo. */
+  const [searchInput, setSearchInput] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("q") || "";
   });
-
-  /* Search input state (declarado arriba porque los useEffect de URL lo setean) */
-  const [searchInput, setSearchInput] = useState(filtrosState.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  /* Flag para garantizar que el primer run del useLayoutEffect (URL sync) bumpee
-     filterVersion, incluso si useSearchParams() aún no tiene la URL real
-     (race en mount dentro de Suspense: el objeto searchParams es estable entre
-     renders y la guarda JSON.stringify(next === filtrosState) puede fallar
-     silenciosamente cuando ambos son defaults en el primer render). */
-  const hasSyncedRef = useRef(false);
 
   /* Cargar facets (marcas, familias, ocasiones, géneros, categorías, precioRange) una sola vez */
   useEffect(() => {
@@ -149,31 +141,9 @@ export default function CatalogClient({
     };
   }, []);
 
-  /* Sync con URL: corre en mount Y en cada cambio (back/forward, client-side nav).
-     Usa useLayoutEffect para que el state quede sincronizado ANTES del primer paint,
-     y bumpea filterVersion para forzar un refetch con los filtros correctos.
-     El primer run bumpea siempre (hasSyncedRef) para evitar que un mount con
-     URL pre-aplicada (?pmin=..., ?c=...&m=...) termine haciendo un fetch con
-     filtros vacíos por la race entre useSearchParams() y el render inicial. */
-  useLayoutEffect(() => {
-    const fromUrl = decodeFilters(searchParams);
-    const next: FilterState = {
-      ...fromUrl,
-      categoria: fromUrl.categoria || initialCategory,
-    };
-    const isFirstSync = !hasSyncedRef.current;
-    const hasChanged = JSON.stringify(next) !== JSON.stringify(filtrosState);
-    if (isFirstSync || hasChanged) {
-      hasSyncedRef.current = true;
-      setFiltrosState(next);
-      setSearchInput(next.q);
-      setPage(1);
-      setFilterVersion((v) => v + 1);
-    }
-  }, [searchParams, initialCategory]);
-
-  /* Fetch productos: se dispara cuando cambian filtrosState, page, o filterVersion.
-     filtrosState está en deps para que el fetch siempre vea los filtros actuales. */
+  /* Fetch productos: se dispara cuando cambian searchParams (URL) o page.
+     filtrosState se deriva de searchParams vía useMemo, así que con searchParams
+     en deps cubrimos cualquier cambio de filtros sin duplicar el source of truth. */
   useEffect(() => {
     let cancelled = false;
 
@@ -218,13 +188,13 @@ export default function CatalogClient({
     return () => {
       cancelled = true;
     };
-  }, [page, filterVersion, filtrosState]);
+  }, [searchParams, page, filtrosState]);
 
-  /* pushState: actualiza URL + state, resetea página. El useEffect (fetch)
-     detecta el cambio de filtrosState por estar en deps. */
+  /* pushState: actualiza SOLO la URL. filtrosState se re-deriva via useMemo
+     cuando searchParams cambia, y el fetch effect re-corre por searchParams en deps.
+     Resetear `page` localmente para que volver a página 1 al cambiar filtros. */
   const pushState = useCallback(
     (next: FilterState) => {
-      setFiltrosState(next);
       setPage(1);
       const params = encodeFilters(next);
       const qs = params.toString();
@@ -309,21 +279,21 @@ export default function CatalogClient({
   /* Loading skeleton */
   if (loading && productos.length === 0) {
     return (
-      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
+      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]" id={id}>
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 flex flex-col items-center gap-4 text-center">
-            <div className="h-6 w-32 animate-pulse rounded-full bg-zinc-800" />
-            <div className="h-10 w-64 animate-pulse rounded-lg bg-zinc-800" />
-            <div className="h-4 w-80 animate-pulse rounded bg-zinc-800/50" />
+            <div className="h-6 w-32 animate-pulse rounded-full bg-[color:var(--skeleton-bg)]" />
+            <div className="h-10 w-64 animate-pulse rounded-lg bg-[color:var(--skeleton-bg)]" />
+            <div className="h-4 w-80 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, i) => (
               <div key={i} className="card-surface overflow-hidden animate-pulse">
-                <div className="aspect-square bg-zinc-800/50" />
+                <div className="aspect-square bg-[color:var(--skeleton-bg)]" />
                 <div className="p-5 space-y-3">
-                  <div className="h-4 rounded bg-zinc-800/50 w-3/4" />
-                  <div className="h-4 rounded bg-zinc-800/50 w-1/2" />
-                  <div className="h-5 rounded bg-zinc-800/50 w-1/4 mt-3" />
+                  <div className="h-4 rounded bg-[color:var(--skeleton-bg)] w-3/4" />
+                  <div className="h-4 rounded bg-[color:var(--skeleton-bg)] w-1/2" />
+                  <div className="h-5 rounded bg-[color:var(--skeleton-bg)] w-1/4 mt-3" />
                 </div>
               </div>
             ))}
@@ -335,17 +305,17 @@ export default function CatalogClient({
 
   if (apiError && productos.length === 0) {
     return (
-      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
+      <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]" id={id}>
         <div className="mx-auto max-w-7xl text-center">
           <p className="text-red-400">Error cargando productos: {apiError}</p>
-          <button onClick={() => setPage(1)} className="mt-4 px-4 py-2 bg-zinc-800 rounded-lg">Reintentar</button>
+          <button onClick={() => setPage(1)} className="mt-4 px-4 py-2 bg-[color:var(--hover-bg)] rounded-lg text-[color:var(--foreground)]">Reintentar</button>
         </div>
       </AnimatedSection>
     );
   }
 
   return (
-    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-white/5" id={id}>
+    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]" id={id}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
@@ -379,16 +349,17 @@ export default function CatalogClient({
             <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:gap-4">
               {!hideSearch && (
                 <div className="relative flex-1">
-                  <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
                   <input
                     type="search"
                     placeholder="Buscar fragancias..."
                     value={searchInput}
                     onChange={onSearchChange}
-                    className="card-surface w-full pl-11 pr-10 py-3 text-sm bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-zinc-600"
+                    suppressHydrationWarning
+                    className="card-surface w-full pl-11 pr-10 py-3 text-sm bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-[color:var(--placeholder-fg)]"
                   />
                   {searchInput && (
-                    <button onClick={() => setSearchInput("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white" aria-label="Limpiar">
+                    <button onClick={() => setSearchInput("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)]" aria-label="Limpiar">
                       <X size={16} />
                     </button>
                   )}
@@ -399,7 +370,7 @@ export default function CatalogClient({
                 <button
                   type="button"
                   onClick={() => setSheetOpen(true)}
-                  className="card-surface inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:text-white md:hidden"
+                  className="card-surface inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] md:hidden"
                 >
                   <SlidersHorizontal size={18} />
                   Filtros
@@ -424,7 +395,7 @@ export default function CatalogClient({
 
             {/* Count */}
             <div className="mb-4 flex items-center justify-between text-xs">
-              <p className="text-zinc-500" aria-live="polite">
+              <p className="text-[color:var(--muted-foreground)]" aria-live="polite">
                 {totalPages > 1 ? (
                   <>
                     Mostrando{" "}
@@ -442,14 +413,14 @@ export default function CatalogClient({
                   </>
                 )}
               </p>
-              {loading && <span className="text-zinc-600 animate-pulse">Cargando...</span>}
+              {loading && <span className="text-[color:var(--muted)] animate-pulse">Cargando...</span>}
             </div>
 
             {/* Grid */}
             {productos.length === 0 && !loading ? (
               <div className="flex flex-col items-center gap-3 py-24">
-                <Sparkle size={40} className="text-zinc-700" weight="thin" aria-hidden="true" />
-                <p className="text-zinc-500">No se encontraron fragancias.</p>
+                <Sparkle size={40} className="text-[color:var(--muted)]" weight="thin" aria-hidden="true" />
+                <p className="text-[color:var(--muted-foreground)]">No se encontraron fragancias.</p>
                 <button type="button" onClick={clearAll} className="cursor-pointer text-sm text-[#c8a84e] transition-colors hover:underline">Limpiar filtros</button>
               </div>
             ) : (
@@ -466,22 +437,22 @@ export default function CatalogClient({
             {totalPages > 1 && (
               <nav className="mt-12 flex items-center justify-center gap-1" aria-label="Paginación">
                 <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                  className="cursor-pointer rounded-xl p-2 text-zinc-500 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30" aria-label="Anterior">
+                  className="cursor-pointer rounded-xl p-2 text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-30" aria-label="Anterior">
                   <CaretLeft size={20} weight="bold" />
                 </button>
                 {visiblePages.map((p, i) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-zinc-600">...</span>
+                    <span key={`ellipsis-${i}`} className="px-2 text-[color:var(--muted)]">...</span>
                   ) : (
                     <button key={p} type="button" onClick={() => setPage(p as number)}
-                      className={`h-9 min-w-[2.5rem] rounded-xl px-3 text-sm font-medium transition-all ${page === p ? "gold-gradient-bg text-black" : "text-zinc-400 hover:bg-white/5 hover:text-white"}`}
+                      className={`h-9 min-w-[2.5rem] rounded-xl px-3 text-sm font-medium transition-all ${page === p ? "gold-gradient-bg text-black" : "text-[color:var(--muted-foreground)] hover:bg-[color:var(--hover-bg)] hover:text-[color:var(--foreground)]"}`}
                       aria-current={page === p ? "page" : undefined}>
                       {p}
                     </button>
                   )
                 )}
                 <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  className="cursor-pointer rounded-xl p-2 text-zinc-500 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30" aria-label="Siguiente">
+                  className="cursor-pointer rounded-xl p-2 text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-30" aria-label="Siguiente">
                   <CaretRight size={20} weight="bold" />
                 </button>
               </nav>
@@ -523,12 +494,12 @@ function ProductCard({ producto }: { producto: Producto }) {
           <Image src={imgUrl} alt={producto.nombre} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-contain p-6 transition-transform duration-500 group-hover:scale-110" />
         ) : (
-          <div className="flex h-full items-center justify-center text-zinc-700">
+          <div className="flex h-full items-center justify-center text-[color:var(--muted)]">
             <Sparkle size={48} weight="thin" aria-hidden="true" />
           </div>
         )}
         {producto.categorias?.[0] && (
-          <span className="absolute left-4 top-4 rounded-full bg-black/60 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[#c8a84e] backdrop-blur-sm">
+          <span className="absolute left-4 top-4 rounded-full bg-[color:var(--price-pill-bg)] px-2.5 py-1 text-[10px] uppercase tracking-wider text-[#c8a84e] backdrop-blur-sm">
             {producto.categorias[0]}
           </span>
         )}
