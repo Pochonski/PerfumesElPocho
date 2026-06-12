@@ -34,7 +34,7 @@ export function FacetCheckbox({
         {checked && (
           <svg
             viewBox="0 0 12 12"
-            className="h-2.5 w-2.5 text-black"
+            className="h-2.5 w-2.5 text-[color:var(--price-pill-fg)]"
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"
