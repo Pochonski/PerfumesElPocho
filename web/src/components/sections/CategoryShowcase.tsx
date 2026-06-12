@@ -80,7 +80,7 @@ export default function CategoryShowcase() {
                 />
 
                 {/* Icon */}
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-white/10 transition-colors duration-500">
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--hover-bg)] group-hover:bg-[color:var(--skeleton-bg)] transition-colors duration-500">
                   <Icon
                     size={28}
                     className="text-[color:var(--muted-foreground)] group-hover:text-[#c8a84e] transition-colors duration-500"
