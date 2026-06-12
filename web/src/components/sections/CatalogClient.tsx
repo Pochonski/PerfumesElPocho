@@ -11,6 +11,7 @@ import {
 } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useLenis } from "lenis/react";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import {
@@ -90,6 +91,7 @@ export default function CatalogClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const lenis = useLenis();
 
   /* Estado base: se inicializa desde URL al montar */
   const [page, setPage] = useState(1);
@@ -147,18 +149,23 @@ export default function CatalogClient({
     };
   }, []);
 
-  /* Restaurar scroll si quedó pendiente de un pushState. Sin array de deps para
-     que corra después de CADA commit; el ref se limpia al primer hit así que
-     en el 99% de los renders es un no-op (costo: una comparación). Corre
-     síncronamente antes del paint, así que el usuario nunca ve el scroll-to-top
-     que router.replace causa al cambiar query params. */
+  /* Restaurar scroll si quedó pendiente de un pushState. Deps = [searchParams, lenis]
+     para que corra SOLO cuando la URL cambia (o cuando Lenis se inicializa) — no en
+     cada commit. Esto evita una race con el browser scroll-to-top que Next 15.5.19
+     dispara al cambiar query params. Usamos lenis.scrollTo con { immediate: true }
+     si está disponible (SmoothScrollProvider está siempre activo), con fallback a
+     window.scrollTo. */
   useLayoutEffect(() => {
     if (pendingScrollY.current !== null) {
       const y = pendingScrollY.current;
       pendingScrollY.current = null;
-      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      if (lenis) {
+        lenis.scrollTo(y, { immediate: true });
+      } else {
+        window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      }
     }
-  });
+  }, [searchParams, lenis]);
 
   /* Fetch productos: se dispara cuando cambian searchParams (URL) o page.
      filtrosState se deriva de searchParams vía useMemo, así que con searchParams
