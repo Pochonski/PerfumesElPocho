@@ -18,9 +18,9 @@ const badges = [
 
 export default function ShippingBanner() {
   return (
-    <AnimatedSection className="border-y border-white/5 bg-[#0c0c0c]">
+    <AnimatedSection className="border-y border-[color:var(--border-subtle)] bg-[var(--shipping-banner-bg)]">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 divide-y divide-white/5 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-[color:var(--border-subtle)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {badges.map((b) => {
             const Icon = b.icon;
             return (
