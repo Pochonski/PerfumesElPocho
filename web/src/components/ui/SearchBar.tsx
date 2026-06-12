@@ -216,7 +216,7 @@ export default function SearchBar({
   const activeId = activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined;
 
   const inputBase =
-    "card-surface w-full bg-transparent border-none text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-0";
+    "card-surface w-full bg-transparent border-none text-sm placeholder:text-[color:var(--placeholder-fg)] focus:outline-none focus:ring-0";
   const inputSizing =
     variant === "panel" ? "pl-12 pr-10 py-3 rounded-2xl" : "pl-10 pr-9 py-2.5 rounded-2xl";
 
@@ -244,7 +244,7 @@ export default function SearchBar({
         <MagnifyingGlass
           size={variant === "panel" ? 20 : 16}
           weight="bold"
-          className={`absolute top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none ${
+          className={`absolute top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] pointer-events-none ${
             variant === "panel" ? "left-4" : "left-3.5"
           }`}
           aria-hidden="true"
@@ -288,7 +288,7 @@ export default function SearchBar({
             type="button"
             onClick={clear}
             aria-label="Limpiar búsqueda"
-            className={`absolute top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors ${
+            className={`absolute top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)] transition-colors ${
               variant === "panel" ? "right-3" : "right-2.5"
             }`}
           >
@@ -299,7 +299,7 @@ export default function SearchBar({
 
       {showDropdown && (
         <div
-          className="glass-surface absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-white/5 shadow-2xl shadow-black/50"
+          className="glass-surface absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-[color:var(--border-subtle)] shadow-2xl shadow-black/50"
           role="presentation"
         >
           {isLoading && suggestions.length === 0 ? (
@@ -310,19 +310,19 @@ export default function SearchBar({
                   className="flex items-center gap-3 rounded-xl p-3"
                   aria-hidden="true"
                 >
-                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-zinc-800/70" />
+                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-[color:var(--skeleton-bg)]" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 w-3/4 animate-pulse rounded bg-zinc-800/70" />
-                    <div className="h-2 w-1/2 animate-pulse rounded bg-zinc-800/50" />
+                    <div className="h-3 w-3/4 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
+                    <div className="h-2 w-1/2 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
                   </div>
                 </li>
               ))}
             </ul>
           ) : suggestions.length === 0 ? (
-            <div className="p-6 text-center text-sm text-zinc-500">
+            <div className="p-6 text-center text-sm text-[color:var(--muted-foreground)]">
               No encontramos fragancias para{" "}
-              <span className="font-medium text-zinc-300">“{query.trim()}”</span>
-              <p className="mt-2 text-xs text-zinc-600">
+              <span className="font-medium text-[color:var(--subtle-foreground)]">“{query.trim()}”</span>
+              <p className="mt-2 text-xs text-[color:var(--muted)]">
                 Probá con el nombre o la marca
               </p>
             </div>
@@ -345,7 +345,7 @@ export default function SearchBar({
                     className={`flex w-full cursor-pointer items-center gap-3 rounded-xl p-2.5 text-left transition-colors ${
                       i === activeIndex
                         ? "bg-[#c8a84e]/10"
-                        : "hover:bg-white/5"
+                        : "hover:bg-[color:var(--hover-bg)]"
                     }`}
                   >
                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-[var(--image-bg)]">
@@ -358,17 +358,17 @@ export default function SearchBar({
                           className="object-contain p-1"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-zinc-700 text-xs">
+                        <div className="flex h-full items-center justify-center text-[color:var(--muted)] text-xs">
                           —
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-white">
+                      <p className="truncate text-sm font-medium text-[color:var(--foreground)]">
                         {highlightMatch(s.nombre, query.trim())}
                       </p>
                       {s.marca && (
-                        <p className="truncate text-xs text-zinc-500">
+                        <p className="truncate text-xs text-[color:var(--muted-foreground)]">
                           {highlightMatch(s.marca, query.trim())}
                         </p>
                       )}
@@ -380,7 +380,7 @@ export default function SearchBar({
                 </li>
               ))}
               {hasSearched && !isLoading && suggestions.length > 0 && (
-                <li className="border-t border-white/5">
+                <li className="border-t border-[color:var(--border-subtle)]">
                   <button
                     type="button"
                     onMouseDown={(e) => {
