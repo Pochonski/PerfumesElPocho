@@ -8,7 +8,7 @@ interface FilterSheetProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  /** Contenido sticky en el footer (ej: "Aplicar filtros") */
+  
   footer?: ReactNode;
 }
 
@@ -46,7 +46,7 @@ export function FilterSheet({
 
   return (
     <>
-      {/* Backdrop */}
+      {}
       <div
         onClick={onClose}
         className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
@@ -55,12 +55,12 @@ export function FilterSheet({
         aria-hidden="true"
       />
 
-      {/* Sheet */}
+      {}
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col rounded-t-3xl border-t border-[color:var(--border-emphasis)] bg-[color:var(--background)] shadow-2xl transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col rounded-t-3xl border-t border-border-emphasis bg-background shadow-2xl transition-transform duration-300 ease-out md:hidden ${
           open && !dragging ? "translate-y-0" : ""
         }`}
         style={{
@@ -70,7 +70,7 @@ export function FilterSheet({
           transition: dragging ? "none" : undefined,
         }}
       >
-        {/* Handle (único elemento con drag handlers) */}
+        {}
         <div
           onPointerDown={(e) => {
             setDragging(true);
@@ -99,25 +99,25 @@ export function FilterSheet({
           className="flex shrink-0 cursor-grab touch-none items-center justify-center pt-2 pb-1 active:cursor-grabbing"
           aria-label="Arrastrar para cerrar"
         >
-          <div className="h-1.5 w-12 rounded-full bg-[color:var(--border-emphasis)]" />
+          <div className="h-1.5 w-12 rounded-full bg-border-emphasis" />
         </div>
 
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-[color:var(--border-subtle)] px-5 py-3">
-          <h2 className="text-base font-semibold text-[color:var(--foreground)]">
+        {}
+        <div className="flex shrink-0 items-center justify-between border-b border-border-subtle px-5 py-3">
+          <h2 className="text-base font-semibold text-foreground">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border-emphasis)] text-[color:var(--muted-foreground)] transition-all hover:scale-105 hover:text-[color:var(--foreground)]"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border-emphasis text-muted-foreground transition-all hover:scale-105 hover:text-foreground"
             aria-label="Cerrar filtros"
           >
             <X size={16} weight="bold" />
           </button>
         </div>
 
-        {/* Content (con touch-pan-y + data-lenis-prevent) */}
+        {}
         <div
           className="flex-1 touch-pan-y overflow-y-auto px-5 py-3"
           data-lenis-prevent
@@ -125,9 +125,9 @@ export function FilterSheet({
           {children}
         </div>
 
-        {/* Footer */}
+        {}
         {footer && (
-          <div className="shrink-0 border-t border-[color:var(--border-subtle)] bg-[color:var(--background)]/80 p-4 backdrop-blur-md">
+          <div className="shrink-0 border-t border-border-subtle bg-background/80 p-4 backdrop-blur-md">
             {footer}
           </div>
         )}

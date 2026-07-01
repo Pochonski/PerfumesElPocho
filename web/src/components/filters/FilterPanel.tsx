@@ -19,9 +19,7 @@ interface FilterPanelBodyProps {
   familias: string[];
   ocasiones: string[];
   generos: string[];
-  /** Counts por valor de cada facet, calculados en el server sobre el universo
-   *  filtrado (no sobre la página actual). Se usa para mostrar "Adidas (234)"
-   *  y para ocultar facets sin matches. */
+  
   facetCounts: FacetCounts;
   onChange: (next: FilterState) => void;
   onClear: () => void;
@@ -29,7 +27,7 @@ interface FilterPanelBodyProps {
 
 type FilterPanelProps = FilterPanelBodyProps;
 
-/** Cuerpo puro de los filtros (sin wrapper de aside). Reusado en desktop y mobile sheet. */
+
 export function FilterPanelBody({
   state,
   precioMin,
@@ -44,7 +42,7 @@ export function FilterPanelBody({
 }: FilterPanelBodyProps) {
   const [marcaSearch, setMarcaSearch] = useState("");
 
-  /** Lee el count de un facet del objeto facetCounts del server. */
+  
   const countBy = (field: keyof FacetCounts, value: string): number => {
     return facetCounts[field]?.[value] ?? 0;
   };
@@ -57,8 +55,7 @@ export function FilterPanelBody({
     onChange({ ...state, [field]: next });
   };
 
-  /** Filtrar facets: mostrar solo los que tienen count>0 (oculta los que no
-   *  matchean con los filtros activos). */
+  
   const marcasVisibles = useMemo(() => {
     const base = !marcaSearch.trim()
       ? marcas
@@ -81,7 +78,7 @@ export function FilterPanelBody({
 
   return (
     <>
-      {/* Categoría */}
+      {}
       <FilterSection
         title="Categoría"
         count={state.categoria !== "Todos" ? 1 : 0}
@@ -103,7 +100,7 @@ export function FilterPanelBody({
           ))}
           {categorias.length > 12 && (
             <details className="group">
-              <summary className="cursor-pointer list-none rounded-lg px-2 py-1.5 text-xs font-medium text-[color:var(--accent)] transition-colors hover:bg-[color:var(--foreground)]/5">
+              <summary className="cursor-pointer list-none rounded-lg px-2 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-foreground/5">
                 Ver {categorias.length - 12} más
               </summary>
               <div className="mt-1 flex flex-col gap-0.5">
@@ -121,13 +118,13 @@ export function FilterPanelBody({
         </div>
       </FilterSection>
 
-      {/* Marca (con search) */}
+      {}
       <FilterSection title="Marca" count={state.marcas.length}>
         <div className="relative mb-1.5">
           <MagnifyingGlass
             size={14}
             weight="bold"
-            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[color:var(--muted)]"
+            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
             aria-hidden="true"
           />
           <input
@@ -135,7 +132,7 @@ export function FilterPanelBody({
             value={marcaSearch}
             onChange={(e) => setMarcaSearch(e.target.value)}
             placeholder="Buscar marca…"
-            className="w-full rounded-lg border border-[color:var(--border-subtle)] bg-transparent py-1.5 pl-8 pr-7 text-xs text-[color:var(--foreground)] outline-none transition-colors placeholder:text-[color:var(--muted)] focus:border-[color:var(--accent)]/40"
+            className="w-full rounded-lg border border-border-subtle bg-transparent py-1.5 pl-8 pr-7 text-xs text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent/40"
             aria-label="Buscar marca"
             data-lenis-prevent
           />
@@ -143,7 +140,7 @@ export function FilterPanelBody({
             <button
               type="button"
               onClick={() => setMarcaSearch("")}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-[color:var(--muted)] transition-colors hover:text-[color:var(--foreground)]"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted transition-colors hover:text-foreground"
               aria-label="Limpiar búsqueda de marca"
             >
               <X size={12} weight="bold" />
@@ -155,7 +152,7 @@ export function FilterPanelBody({
           data-lenis-prevent
         >
           {marcasVisibles.length === 0 ? (
-            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+            <p className="px-2 py-2 text-xs text-muted">
               Sin resultados
             </p>
           ) : (
@@ -174,7 +171,7 @@ export function FilterPanelBody({
         </div>
       </FilterSection>
 
-      {/* Precio */}
+      {}
       <FilterSection
         title="Precio"
         count={state.precioMin != null || state.precioMax != null ? 1 : 0}
@@ -198,7 +195,7 @@ export function FilterPanelBody({
             onClick={() =>
               onChange({ ...state, precioMin: null, precioMax: null })
             }
-            className="mt-2 cursor-pointer text-xs font-medium text-[color:var(--accent)] transition-colors hover:underline"
+            className="mt-2 cursor-pointer text-xs font-medium text-accent transition-colors hover:underline"
           >
             Restablecer
           </button>
@@ -225,8 +222,8 @@ export function FilterPanelBody({
                 }
                 className={`cursor-pointer rounded-full border px-2.5 py-1 font-mono text-[10px] tabular-nums transition-colors ${
                   isActive
-                    ? "border-[color:var(--accent)]/40 bg-[color:var(--accent)]/15 text-[color:var(--accent)]"
-                    : "border-[color:var(--border-subtle)] text-[color:var(--muted-foreground)] hover:border-[color:var(--accent)]/40 hover:text-[color:var(--foreground)]"
+                    ? "border-accent/40 bg-accent/15 text-accent"
+                    : "border-border-subtle text-muted-foreground hover:border-accent/40 hover:text-foreground"
                 }`}
               >
                 {p.label}
@@ -234,16 +231,16 @@ export function FilterPanelBody({
             );
           })}
         </div>
-        <p className="mt-2 text-[10px] text-[color:var(--muted)]">
+        <p className="mt-2 text-[10px] text-muted">
           Rango: {formatPrice(precioMin)} – {formatPrice(precioMax)}
         </p>
       </FilterSection>
 
-      {/* Familia olfativa */}
+      {}
       <FilterSection title="Familia olfativa" count={state.familias.length}>
         <div className="flex flex-col gap-0.5">
           {familiasVisibles.length === 0 ? (
-            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+            <p className="px-2 py-2 text-xs text-muted">
               Sin resultados
             </p>
           ) : (
@@ -260,11 +257,11 @@ export function FilterPanelBody({
         </div>
       </FilterSection>
 
-      {/* Ocasión */}
+      {}
       <FilterSection title="Ocasión" count={state.ocasiones.length}>
         <div className="flex flex-col gap-0.5">
           {ocasionesVisibles.length === 0 ? (
-            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+            <p className="px-2 py-2 text-xs text-muted">
               Sin resultados
             </p>
           ) : (
@@ -281,11 +278,11 @@ export function FilterPanelBody({
         </div>
       </FilterSection>
 
-      {/* Género */}
+      {}
       <FilterSection title="Género" count={state.generos.length}>
         <div className="flex flex-col gap-0.5">
           {generosVisibles.length === 0 ? (
-            <p className="px-2 py-2 text-xs text-[color:var(--muted)]">
+            <p className="px-2 py-2 text-xs text-muted">
               Sin resultados
             </p>
           ) : (
@@ -305,7 +302,7 @@ export function FilterPanelBody({
   );
 }
 
-/** Panel desktop: aside con card-surface + header "Filtros / Limpiar" + body. */
+
 export function FilterPanel({
   state,
   precioMin,
@@ -326,11 +323,11 @@ export function FilterPanel({
       data-lenis-prevent
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[color:var(--foreground)]">Filtros</h2>
+        <h2 className="text-sm font-semibold text-foreground">Filtros</h2>
         <button
           type="button"
           onClick={onClear}
-          className="cursor-pointer text-xs font-medium text-[color:var(--accent)] transition-colors hover:underline focus-visible:outline-none focus-visible:underline"
+          className="cursor-pointer text-xs font-medium text-accent transition-colors hover:underline focus-visible:outline-none focus-visible:underline"
         >
           Limpiar todo
         </button>

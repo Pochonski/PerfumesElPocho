@@ -53,18 +53,18 @@ export default function CategoryShowcase() {
   return (
     <AnimatedSection className="px-6 py-24 md:px-8 md:py-32">
       <div className="mx-auto max-w-[1200px]">
-        {/* Header */}
+        {}
         <div className="mb-16 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Categorías</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
             Encontrá lo que buscás
           </h2>
-          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
+          <p className="max-w-[48ch] text-muted-foreground">
             Navegá por categoría y descubrí fragancias para cada persona, ocasión y estilo.
           </p>
         </div>
 
-        {/* Grid */}
+        {}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((cat) => {
             const Icon = cat.icon;
@@ -74,21 +74,21 @@ export default function CategoryShowcase() {
                 href={cat.href}
                 className="card-surface card-surface-hover group relative flex flex-col items-center gap-4 overflow-hidden p-6 text-center"
               >
-                {/* Gradient bg */}
+                {}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                 />
 
-                {/* Icon */}
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--hover-bg)] group-hover:bg-[color:var(--skeleton-bg)] transition-colors duration-500">
+                {}
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-hover-bg group-hover:bg-skeleton-bg transition-colors duration-500">
                   <Icon
                     size={28}
-                    className="text-[color:var(--muted-foreground)] group-hover:text-[#c8a84e] transition-colors duration-500"
+                    className="text-muted-foreground group-hover:text-accent transition-colors duration-500"
                     weight="duotone"
                   />
                 </div>
 
-                <span className="relative text-sm font-medium text-[color:var(--muted-foreground)] group-hover:text-[color:var(--foreground)] transition-colors duration-500">
+                <span className="relative text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-500">
                   {cat.label}
                 </span>
               </Link>

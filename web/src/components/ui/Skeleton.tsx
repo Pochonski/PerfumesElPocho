@@ -1,22 +1,15 @@
-"use client";
-
-export function SkeletonCard() {
+function SkeletonCard() {
   return (
     <div className="card-surface overflow-hidden animate-pulse">
-      {/* Image placeholder */}
-      <div className="aspect-square bg-[color:var(--skeleton-bg)]" />
+      <div className="aspect-square bg-skeleton-bg" />
 
-      {/* Info */}
       <div className="p-5 space-y-3">
-        {/* Title */}
-        <div className="h-4 rounded-md bg-[color:var(--skeleton-bg)] w-3/4" />
-        <div className="h-4 rounded-md bg-[color:var(--skeleton-bg)] w-1/2" />
+        <div className="h-4 rounded-md bg-skeleton-bg w-3/4" />
+        <div className="h-4 rounded-md bg-skeleton-bg w-1/2" />
 
-        {/* Brand */}
-        <div className="h-3 rounded-md bg-[color:var(--skeleton-bg)] w-1/3" />
+        <div className="h-3 rounded-md bg-skeleton-bg w-1/3" />
 
-        {/* Price */}
-        <div className="h-5 rounded-md bg-[color:var(--skeleton-bg)] w-1/4 mt-3" />
+        <div className="h-5 rounded-md bg-skeleton-bg w-1/4 mt-3" />
       </div>
     </div>
   );

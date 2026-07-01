@@ -1,13 +1,35 @@
 @import "tailwindcss";
 
-@theme inline {
+@theme {
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-serif: var(--font-playfair), Georgia, serif;
   --font-mono: var(--font-geist-mono), monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-accent: var(--accent);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-dim: var(--accent-dim);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-emphasis: var(--border-emphasis);
+  --color-image-bg: var(--image-bg);
+  --color-skeleton-bg: var(--skeleton-bg);
+  --color-hover-bg: var(--hover-bg);
+  --color-price-pill-bg: var(--price-pill-bg);
+  --color-price-pill-fg: var(--price-pill-fg);
+  --color-placeholder-fg: var(--placeholder-fg);
+  --color-featured-card-from: var(--featured-card-from);
+  --color-featured-card-via: var(--featured-card-via);
+  --color-featured-card-to: var(--featured-card-to);
+  --color-shipping-banner-bg: var(--shipping-banner-bg);
 }
 
 :root {
-  /* === Luxury Perfume Palette (Dark Mode) === */
   --background: #080808;
   --foreground: #fafafa;
   --muted: #a1a1aa;
@@ -19,7 +41,6 @@
   --accent-glow: rgba(200, 168, 78, 0.3);
   --accent-dim: rgba(200, 168, 78, 0.12);
 
-  /* === Theme-aware surfaces (Dark defaults) === */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-emphasis: rgba(255, 255, 255, 0.12);
   --image-bg: #0a0a0a;
@@ -33,7 +54,6 @@
   --featured-card-to: #0a0a0a;
   --shipping-banner-bg: #0c0c0c;
 
-  /* === Neumorphic Shadow Stack (Dark Mode) === */
   --card-shadow:
     0px 0.7px 0.7px -0.67px rgba(0, 0, 0, 0.4),
     0px 1.8px 1.8px -1.33px rgba(0, 0, 0, 0.4),
@@ -50,7 +70,6 @@
     inset 0px 2px 1px 0px rgba(255, 255, 255, 0.04);
 }
 
-/* === Light Mode Palette (warm ivory) === */
 [data-theme="light"] {
   --background: #faf7f2;
   --foreground: #0a0a0a;
@@ -63,7 +82,6 @@
   --accent-glow: rgba(160, 128, 48, 0.2);
   --accent-dim: rgba(160, 128, 48, 0.1);
 
-  /* === Theme-aware surfaces (Light overrides) === */
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-emphasis: rgba(0, 0, 0, 0.15);
   --image-bg: #f0ebe0;
@@ -77,7 +95,6 @@
   --featured-card-to: #f5edd8;
   --shipping-banner-bg: #f0ebe0;
 
-  /* Neumorphic shadows adapted for light surfaces */
   --card-shadow:
     0px 1px 2px rgba(0, 0, 0, 0.04),
     0px 2px 4px rgba(0, 0, 0, 0.05),
@@ -94,7 +111,6 @@
     inset 0px 2px 1px 0px rgba(255, 255, 255, 0.8);
 }
 
-/* Light-mode glass surfaces: lighter blur, dark text */
 [data-theme="light"] .glass-surface {
   background: rgba(255, 255, 255, 0.7);
   border-color: rgba(0, 0, 0, 0.08);
@@ -105,7 +121,6 @@
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-/* === Base Styles === */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -116,7 +131,6 @@ body {
   line-height: 1.6;
 }
 
-/* === Heading Defaults (Playfair Display for editorial feel) === */
 h1, h2 {
   font-family: var(--font-playfair), Georgia, serif;
   letter-spacing: -0.02em;
@@ -133,7 +147,6 @@ p {
   text-wrap: pretty;
 }
 
-/* Smooth color transitions when toggling theme */
 body,
 .card-surface,
 .glass-surface,
@@ -150,7 +163,6 @@ p, span, div {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* === Neumorphic Card === */
 .card-surface {
   background: var(--card-bg);
   border-radius: 20px;
@@ -182,7 +194,6 @@ p, span, div {
     inset 0px 1px 1px rgba(255, 255, 255, 0.9);
 }
 
-/* === Glassmorphism === */
 .glass-surface {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(20px);
@@ -197,7 +208,6 @@ p, span, div {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* === Gold Gradient === */
 .gold-gradient {
   background: linear-gradient(135deg, #c8a84e 0%, #e2c87a 30%, #a08030 60%, #d4b65a 100%);
   -webkit-background-clip: text;
@@ -217,17 +227,14 @@ p, span, div {
   background: linear-gradient(135deg, #c8a84e 0%, #e2c87a 30%, #a08030 60%, #d4b65a 100%);
 }
 
-/* === Text Balance === */
 .text-balance {
   text-wrap: balance;
 }
 
-/* === Text Pretty === */
 .text-pretty {
   text-wrap: pretty;
 }
 
-/* === Custom Scrollbar === */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -242,7 +249,6 @@ p, span, div {
   background: rgba(200, 168, 78, 0.5);
 }
 
-/* === Floating Animation === */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -256,7 +262,6 @@ p, span, div {
   animation: float 4s ease-in-out infinite;
 }
 
-/* === Reduced Motion === */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

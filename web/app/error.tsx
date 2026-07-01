@@ -1,8 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import Button from "@/components/ui/Button";
 import { WarningCircle } from "@phosphor-icons/react";
+import { SITE } from "@/lib/site";
+import { warn } from "@/lib/logger";
 
 export default function Error({
   error,
@@ -12,7 +14,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    warn("error-boundary", error);
   }, [error]);
 
   return (
@@ -23,18 +25,18 @@ export default function Error({
             <WarningCircle
               size={36}
               weight="duotone"
-              className="text-[#c8a84e]"
+              className="text-accent"
             />
           </div>
         </div>
 
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#c8a84e]">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
           Error inesperado
         </p>
-        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-[color:var(--foreground)] md:text-5xl">
+        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-foreground md:text-5xl">
           Algo <span className="gold-gradient">salió mal</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-[color:var(--muted-foreground)]">
+        <p className="mx-auto mt-4 max-w-md text-muted-foreground">
           Tuvimos un problema al cargar esta página. Probá de nuevo, y si el
           problema persiste, escribinos por WhatsApp.
         </p>
@@ -44,7 +46,7 @@ export default function Error({
             Intentar de nuevo
           </Button>
           <Button
-            href="https://wa.me/50664779672"
+            href={SITE.whatsappHref("")}
             variant="secondary"
           >
             WhatsApp

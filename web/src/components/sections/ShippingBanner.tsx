@@ -18,9 +18,9 @@ const badges = [
 
 export default function ShippingBanner() {
   return (
-    <AnimatedSection className="border-y border-[color:var(--border-subtle)] bg-[var(--shipping-banner-bg)]">
+    <AnimatedSection className="border-y border-border-subtle bg-shipping-banner-bg">
       <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 divide-y divide-[color:var(--border-subtle)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-border-subtle sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {badges.map((b) => {
             const Icon = b.icon;
             return (
@@ -30,10 +30,10 @@ export default function ShippingBanner() {
               >
                 <Icon
                   size={22}
-                  className="shrink-0 text-[#c8a84e]"
+                  className="shrink-0 text-accent"
                   weight="fill"
                 />
-                <span className="text-sm font-medium text-[color:var(--subtle-foreground)]">
+                <span className="text-sm font-medium text-subtle-foreground">
                   {b.text}
                 </span>
               </div>

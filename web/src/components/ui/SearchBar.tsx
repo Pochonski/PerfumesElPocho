@@ -36,7 +36,7 @@ function highlightMatch(text: string, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="rounded bg-[#c8a84e]/25 px-0.5 text-[#e2c87a]">
+      <mark className="rounded bg-accent/25 px-0.5 text-[#e2c87a]">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -53,13 +53,13 @@ export default function SearchBar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lenis = useLenis();
-  // IDs determinísticos (no useId) para evitar hydration mismatch
-  // cuando este componente se monta vía Suspense boundary
+  
+  
   const listboxId = `searchbar-listbox-${variant}`;
   const inputId = `searchbar-input-${variant}`;
 
-  // Mounted flag: render placeholder idéntico en server y first client render
-  // para evitar hydration mismatch cuando useSearchParams() fuerza bailout
+  
+  
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -137,7 +137,7 @@ export default function SearchBar({
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
-      // Por si el componente se desmonta con el input focused, restaurar Lenis.
+      
       lenis?.start();
     };
   }, [lenis]);
@@ -216,11 +216,11 @@ export default function SearchBar({
   const activeId = activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined;
 
   const inputBase =
-    "card-surface w-full bg-transparent border-none text-sm placeholder:text-[color:var(--placeholder-fg)] focus:outline-none focus:ring-0";
+    "card-surface w-full bg-transparent border-none text-sm placeholder:text-placeholder-fg focus:outline-none focus:ring-0";
   const inputSizing =
     variant === "panel" ? "pl-12 pr-10 py-3 rounded-2xl" : "pl-10 pr-9 py-2.5 rounded-2xl";
 
-  // Antes de hidratar, mostrar placeholder idéntico al fallback del Suspense
+  
   if (!mounted) {
     const placeholderCls =
       variant === "panel"
@@ -244,7 +244,7 @@ export default function SearchBar({
         <MagnifyingGlass
           size={variant === "panel" ? 20 : 16}
           weight="bold"
-          className={`absolute top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] pointer-events-none ${
+          className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none ${
             variant === "panel" ? "left-4" : "left-3.5"
           }`}
           aria-hidden="true"
@@ -261,9 +261,9 @@ export default function SearchBar({
           }}
           onFocus={() => {
             if (query.trim().length >= 2) setIsOpen(true);
-            // Lenis intercepta el scroll del viewport; al detenerlo mientras
-            // el input está focused evitamos que interfiera con la interacción
-            // (tipear, dropdown, keyboard nav).
+            
+            
+            
             lenis?.stop();
           }}
           onBlur={() => {
@@ -288,7 +288,7 @@ export default function SearchBar({
             type="button"
             onClick={clear}
             aria-label="Limpiar búsqueda"
-            className={`absolute top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)] transition-colors ${
+            className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors ${
               variant === "panel" ? "right-3" : "right-2.5"
             }`}
           >
@@ -299,7 +299,7 @@ export default function SearchBar({
 
       {showDropdown && (
         <div
-          className="glass-surface absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-[color:var(--border-subtle)] shadow-2xl shadow-black/50"
+          className="glass-surface absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border-subtle shadow-2xl shadow-black/50"
           role="presentation"
         >
           {isLoading && suggestions.length === 0 ? (
@@ -310,19 +310,19 @@ export default function SearchBar({
                   className="flex items-center gap-3 rounded-xl p-3"
                   aria-hidden="true"
                 >
-                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-[color:var(--skeleton-bg)]" />
+                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-skeleton-bg" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 w-3/4 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
-                    <div className="h-2 w-1/2 animate-pulse rounded bg-[color:var(--skeleton-bg)]" />
+                    <div className="h-3 w-3/4 animate-pulse rounded bg-skeleton-bg" />
+                    <div className="h-2 w-1/2 animate-pulse rounded bg-skeleton-bg" />
                   </div>
                 </li>
               ))}
             </ul>
           ) : suggestions.length === 0 ? (
-            <div className="p-6 text-center text-sm text-[color:var(--muted-foreground)]">
+            <div className="p-6 text-center text-sm text-muted-foreground">
               No encontramos fragancias para{" "}
-              <span className="font-medium text-[color:var(--subtle-foreground)]">“{query.trim()}”</span>
-              <p className="mt-2 text-xs text-[color:var(--muted)]">
+              <span className="font-medium text-subtle-foreground">“{query.trim()}”</span>
+              <p className="mt-2 text-xs text-muted">
                 Probá con el nombre o la marca
               </p>
             </div>
@@ -344,11 +344,11 @@ export default function SearchBar({
                     }}
                     className={`flex w-full cursor-pointer items-center gap-3 rounded-xl p-2.5 text-left transition-colors ${
                       i === activeIndex
-                        ? "bg-[#c8a84e]/10"
-                        : "hover:bg-[color:var(--hover-bg)]"
+                        ? "bg-accent/10"
+                        : "hover:bg-hover-bg"
                     }`}
                   >
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-[var(--image-bg)]">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-image-bg">
                       {s.imagen ? (
                         <Image
                           src={s.imagen}
@@ -358,36 +358,36 @@ export default function SearchBar({
                           className="object-contain p-1"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[color:var(--muted)] text-xs">
+                        <div className="flex h-full items-center justify-center text-muted text-xs">
                           —
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[color:var(--foreground)]">
+                      <p className="truncate text-sm font-medium text-foreground">
                         {highlightMatch(s.nombre, query.trim())}
                       </p>
                       {s.marca && (
-                        <p className="truncate text-xs text-[color:var(--muted-foreground)]">
+                        <p className="truncate text-xs text-muted-foreground">
                           {highlightMatch(s.marca, query.trim())}
                         </p>
                       )}
                     </div>
-                    <span className="shrink-0 text-xs font-semibold text-[#c8a84e]">
+                    <span className="shrink-0 text-xs font-semibold text-accent">
                       {formatPrice(s.precio)}
                     </span>
                   </button>
                 </li>
               ))}
               {hasSearched && !isLoading && suggestions.length > 0 && (
-                <li className="border-t border-[color:var(--border-subtle)]">
+                <li className="border-t border-border-subtle">
                   <button
                     type="button"
                     onMouseDown={(e) => {
                       e.preventDefault();
                       goToSearch(query);
                     }}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl p-3 text-xs font-medium text-[#c8a84e] transition-colors hover:bg-[#c8a84e]/10"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl p-3 text-xs font-medium text-accent transition-colors hover:bg-accent/10"
                   >
                     <MagnifyingGlass size={14} weight="bold" />
                     Ver todos los resultados para “{query.trim()}”

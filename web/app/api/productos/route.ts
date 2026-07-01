@@ -1,71 +1,41 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import {
-  getProductos,
-  getFacetCounts,
-  normalizeText,
-  type Producto,
-} from "@/lib/productos";
+import { getProductos, getFacetCounts, normalizeText } from "@/lib/productos";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
-/* La ruta es dinámica porque los query params (categoria, precio, etc.) varían
-   por request. Usamos ISR vía revalidate para cachear respuestas idénticas.
-   NO usar `force-static` aquí: con `force-static` Next.js cachea UNA respuesta
-   al build time y la sirve para TODOS los params, ignorando el filtrado. */
 export const dynamic = "force-dynamic";
-export const revalidate = 3600;
 
-/* ─── Rate Limiting ─── */
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 120;
+const PRICE_PATTERN = /^\d{1,9}(\.\d{1,2})?$/;
+const INT_PATTERN = /^\d{1,5}$/;
 
-function checkRateLimit(ip: string) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
-  }
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, remaining: 0, resetIn: entry.resetAt - now };
-  }
-  entry.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
-}
-
-function getClientIP(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
-
-/* ─── Zod Schema ─── */
 const SearchParamsSchema = z.object({
-  categoria: z.string().optional(),
-  marcas: z.string().optional(),
-  familias: z.string().optional(),
-  ocasiones: z.string().optional(),
-  generos: z.string().optional(),
-  precioMin: z.string().optional(),
-  precioMax: z.string().optional(),
-  q: z.string().optional(),
-  sort: z.string().optional(),
+  categoria: z.string().max(120).optional(),
+  marcas: z.string().max(2000).optional(),
+  familias: z.string().max(2000).optional(),
+  ocasiones: z.string().max(2000).optional(),
+  generos: z.string().max(2000).optional(),
+  precioMin: z.string().regex(PRICE_PATTERN).optional(),
+  precioMax: z.string().regex(PRICE_PATTERN).optional(),
+  q: z.string().max(200).optional(),
+  sort: z.enum(["precio-asc", "precio-desc", "nombre-asc"]).optional(),
   page: z
     .string()
+    .regex(INT_PATTERN)
     .transform((v) => {
       const n = parseInt(v, 10);
       return isNaN(n) || n < 1 ? 1 : n;
     })
+    .optional()
     .default(1),
   perPage: z
     .string()
+    .regex(/^\d{1,3}$/)
     .transform((v) => {
       const n = parseInt(v, 10);
       if (isNaN(n) || n < 1) return 24;
       return n > 48 ? 48 : n;
     })
+    .optional()
     .default(24),
 });
 
@@ -88,7 +58,7 @@ interface ApiProducto {
 
 export async function GET(request: NextRequest) {
   const ip = getClientIP(request);
-  const { allowed, remaining } = checkRateLimit(ip);
+  const { allowed, remaining } = checkRateLimit(ip, { windowMs: 60_000, max: 120 });
 
   if (!allowed) {
     return NextResponse.json({ error: "Demasiadas solicitudes." }, { status: 429 });
@@ -104,7 +74,6 @@ export async function GET(request: NextRequest) {
   const params = parsed.data;
   let filtered = getProductos();
 
-  /* Listas activas (originales, no normalizadas) para el cálculo de facetCounts */
   const activeMarcas: string[] = [];
   const activeFamilias: string[] = [];
   const activeOcasiones: string[] = [];
@@ -153,11 +122,11 @@ export async function GET(request: NextRequest) {
   }
   if (params.precioMin) {
     const min = parseFloat(params.precioMin);
-    if (!isNaN(min)) filtered = filtered.filter((p) => p.precio >= min);
+    if (Number.isFinite(min)) filtered = filtered.filter((p) => p.precio >= min);
   }
   if (params.precioMax) {
     const max = parseFloat(params.precioMax);
-    if (!isNaN(max)) filtered = filtered.filter((p) => p.precio <= max);
+    if (Number.isFinite(max)) filtered = filtered.filter((p) => p.precio <= max);
   }
   if (params.q) {
     const q = normalizeText(params.q);
@@ -178,7 +147,6 @@ export async function GET(request: NextRequest) {
     filtered = [...filtered].sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 
-  /* Calcular facet counts sobre el universo filtrado (sin paginar) */
   const facetCounts = getFacetCounts(filtered, {
     marcas: activeMarcas,
     familias: activeFamilias,

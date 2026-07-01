@@ -16,14 +16,6 @@ const nextConfig: NextConfig = {
     ],
     minimumCacheTTL: 86400,
   },
-  // Skip type checking during build (faster deploys, types already checked in IDE)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // Skip ESLint during build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;

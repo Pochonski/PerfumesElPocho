@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { CaretDown, Check } from "@phosphor-icons/react";
@@ -40,14 +40,14 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[color:var(--border-emphasis)] bg-[color:var(--card-bg)]/60 px-3.5 py-1.5 text-xs font-medium text-[color:var(--foreground)] transition-all hover:border-[color:var(--accent)]/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--accent)]/40"
+        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border-emphasis bg-card-bg/60 px-3.5 py-1.5 text-xs font-medium text-foreground transition-all hover:border-accent/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/40"
       >
-        <span className="text-[color:var(--muted)]">Ordenar:</span>
+        <span className="text-muted">Ordenar:</span>
         <span>{current.label}</span>
         <CaretDown
           size={12}
           weight="bold"
-          className={`text-[color:var(--muted)] transition-transform ${
+          className={`text-muted transition-transform ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden="true"
@@ -72,8 +72,8 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
                   }}
                   className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                     isActive
-                      ? "bg-[color:var(--accent)]/15 text-[color:var(--accent)]"
-                      : "text-[color:var(--foreground)]/85 hover:bg-[color:var(--foreground)]/5"
+                      ? "bg-accent/15 text-accent"
+                      : "text-foreground/85 hover:bg-foreground/5"
                   }`}
                 >
                   <span>{opt.label}</span>

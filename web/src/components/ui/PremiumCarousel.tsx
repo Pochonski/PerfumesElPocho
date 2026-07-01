@@ -14,23 +14,23 @@ interface PremiumCarouselProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
   keyExtractor: (item: T, index: number) => string | number;
-  /** Cuántos items mostrar a la vez en desktop. Default: 3 */
+  
   desktopVisible?: number;
   tabletVisible?: number;
   mobileVisible?: number;
-  /** Gap entre items en px. Default: 20 */
+  
   gap?: number;
-  /** Autoplay en ms. 0 para desactivar. Default: 5000 */
+  
   autoplay?: number;
-  /** Class para el contenedor raíz */
+  
   className?: string;
-  /** Accesibilidad: aria-label del carousel */
+  
   ariaLabel?: string;
-  /** Loading state */
+  
   loading?: boolean;
-  /** Cantidad de skeletons cuando loading=true */
+  
   skeletonCount?: number;
-  /** Skeleton renderer */
+  
   renderSkeleton?: (i: number) => ReactNode;
 }
 
@@ -69,7 +69,7 @@ export default function PremiumCarousel<T>({
     setCurrentIndex((c) => (c <= 0 ? maxIndex : c - 1));
   }, [maxIndex]);
 
-  // Scroll programático al current index
+  
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -80,7 +80,7 @@ export default function PremiumCarousel<T>({
     track.scrollTo({ left: offset, behavior: "smooth" });
   }, [currentIndex, gap]);
 
-  // Detectar índice activo por scroll
+  
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -102,7 +102,7 @@ export default function PremiumCarousel<T>({
     };
   }, [gap, maxIndex]);
 
-  // Autoplay
+  
   useEffect(() => {
     if (!autoplay || isHover || isDragging || items.length <= 1) return;
     autoplayTimer.current = setInterval(next, autoplay);
@@ -111,7 +111,7 @@ export default function PremiumCarousel<T>({
     };
   }, [autoplay, isHover, isDragging, items.length, next]);
 
-  // Pausar autoplay si el tab no está visible
+  
   useEffect(() => {
     if (!autoplay) return;
     const onVisibility = () => {
@@ -124,7 +124,7 @@ export default function PremiumCarousel<T>({
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [autoplay]);
 
-  // Drag (pointer events unificados)
+  
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     const track = trackRef.current;
     if (!track) return;
@@ -147,7 +147,7 @@ export default function PremiumCarousel<T>({
     setIsDragging(false);
   };
 
-  // Keyboard
+  
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
@@ -158,7 +158,7 @@ export default function PremiumCarousel<T>({
     }
   };
 
-  // Helper para generar clases responsivas de flex
+  
   const getFlexClass = () => {
     const base = `flex-[0_0_calc((100%-${gap * (mobileVisible - 1)}px)/${mobileVisible})]`;
     const sm = `sm:flex-[0_0_calc((100%-${gap}px)/2)]`;
@@ -167,7 +167,7 @@ export default function PremiumCarousel<T>({
     return `${base} ${sm} ${md} ${lg}`;
   };
 
-  // Skeleton state
+  
   if (loading) {
     const skeletonFlex = getFlexClass();
     return (
@@ -196,7 +196,7 @@ export default function PremiumCarousel<T>({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
-      {/* Track */}
+      {}
       <div
         ref={trackRef}
         role="region"
@@ -227,13 +227,13 @@ export default function PremiumCarousel<T>({
         ))}
       </div>
 
-      {/* X / Y indicator */}
+      {}
       <div className="mt-6 flex items-center justify-center gap-2 text-xs">
-        <span className="font-mono text-[color:var(--muted-foreground)]">
-          <span className="text-[color:var(--foreground)]">
+        <span className="font-mono text-muted-foreground">
+          <span className="text-foreground">
             {String(currentIndex + 1).padStart(2, "0")}
           </span>
-          <span className="mx-1 text-[color:var(--muted)]">/</span>
+          <span className="mx-1 text-muted">/</span>
           <span>{String(items.length).padStart(2, "0")}</span>
         </span>
       </div>
@@ -244,10 +244,10 @@ export default function PremiumCarousel<T>({
 function DefaultSkeleton() {
   return (
     <div className="card-surface animate-pulse overflow-hidden">
-      <div className="aspect-square bg-[color:var(--foreground)]/[0.04]" />
+      <div className="aspect-square bg-foreground/[0.04]" />
       <div className="space-y-2 p-4">
-        <div className="h-4 w-3/4 rounded bg-[color:var(--foreground)]/[0.06]" />
-        <div className="h-3 w-1/2 rounded bg-[color:var(--foreground)]/[0.04]" />
+        <div className="h-4 w-3/4 rounded bg-foreground/[0.06]" />
+        <div className="h-3 w-1/2 rounded bg-foreground/[0.04]" />
       </div>
     </div>
   );

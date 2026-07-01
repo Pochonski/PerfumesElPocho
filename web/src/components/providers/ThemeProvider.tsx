@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem("theme", t);
     } catch {
-      /* ignore */
+      
     }
   };
 
@@ -42,7 +42,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
-    // Fallback para componentes que no están envueltos
+    
     return {
       theme: "dark",
       toggle: () => {},

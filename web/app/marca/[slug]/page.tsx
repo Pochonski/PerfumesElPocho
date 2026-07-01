@@ -7,6 +7,7 @@ import {
   getMarcas,
   slugify,
 } from "@/lib/productos";
+import { serializeJsonLd } from "@/lib/json-ld";
 import CatalogSection from "@/components/sections/CatalogSection";
 import Footer from "@/components/sections/Footer";
 
@@ -15,7 +16,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  // Solo generar las top 100 marcas para no reventar el build
+  
   const marcas = getMarcas().slice(0, 100);
   return marcas.map((m) => ({ slug: slugify(m) }));
 }
@@ -50,7 +51,7 @@ export default async function MarcaPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
             name: `Perfumes ${marca}`,
@@ -68,24 +69,24 @@ export default async function MarcaPage({ params }: PageProps) {
       <main className="min-h-screen pt-28 pb-16">
         <div className="mx-auto max-w-7xl px-6 md:px-8">
           <nav
-            className="mb-8 flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]"
+            className="mb-8 flex items-center gap-2 text-sm text-muted-foreground"
             aria-label="Breadcrumb"
           >
             <Link
               href="/"
-              className="transition-colors hover:text-[color:var(--foreground)]"
+              className="transition-colors hover:text-foreground"
             >
               Inicio
             </Link>
             <span aria-hidden="true">/</span>
             <Link
               href="/#productos"
-              className="transition-colors hover:text-[color:var(--foreground)]"
+              className="transition-colors hover:text-foreground"
             >
               Catálogo
             </Link>
             <span aria-hidden="true">/</span>
-            <span className="text-[color:var(--muted)]">{marca}</span>
+            <span className="text-muted">{marca}</span>
           </nav>
         </div>
 

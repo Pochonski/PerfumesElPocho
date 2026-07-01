@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { X } from "@phosphor-icons/react";
 import { formatPrice } from "@/lib/format";
@@ -92,7 +92,7 @@ export function ActiveFilterChips({
           key={c.key}
           type="button"
           onClick={c.onRemove}
-          className="group inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/10 py-1 pl-3 pr-2 text-xs text-[color:var(--accent)] transition-colors hover:border-[color:var(--accent)]/50 hover:bg-[color:var(--accent)]/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--accent)]"
+          className="group inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 py-1 pl-3 pr-2 text-xs text-accent transition-colors hover:border-accent/50 hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
           aria-label={`Quitar filtro ${c.label}`}
         >
           <span className="max-w-[200px] truncate">{c.label}</span>
@@ -108,7 +108,7 @@ export function ActiveFilterChips({
         <button
           type="button"
           onClick={onClearAll}
-          className="cursor-pointer text-xs font-medium text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--accent)] hover:underline focus-visible:outline-none focus-visible:underline"
+          className="cursor-pointer text-xs font-medium text-muted-foreground transition-colors hover:text-accent hover:underline focus-visible:outline-none focus-visible:underline"
         >
           Limpiar todo
         </button>

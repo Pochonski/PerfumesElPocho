@@ -1,8 +1,3 @@
-/**
- * Estado de filtros compartidos entre panel desktop, sheet mobile, y grid.
- * Codifica/decodifica a URL search params (compartible, back button funciona).
- */
-
 export type SortKey =
   | "relevancia"
   | "precio-asc"
@@ -47,13 +42,11 @@ const VALID_SORTS = new Set<SortKey>([
   "nombre-asc",
 ]);
 
-/** Codifica un array de facets en un string CSV */
 function encodeList(values: string[]): string | null {
   if (values.length === 0) return null;
   return values.join("~");
 }
 
-/** Decodifica CSV → array. Si falla, array vacío. */
 function decodeList(raw: string | null): string[] {
   if (!raw) return [];
   return raw
@@ -62,7 +55,6 @@ function decodeList(raw: string | null): string[] {
     .filter(Boolean);
 }
 
-/** Codifica FilterState → URLSearchParams */
 export function encodeFilters(state: FilterState): URLSearchParams {
   const p = new URLSearchParams();
   if (state.categoria && state.categoria !== "Todos") {
@@ -83,7 +75,6 @@ export function encodeFilters(state: FilterState): URLSearchParams {
   return p;
 }
 
-/** Decodifica URLSearchParams → FilterState */
 export function decodeFilters(params: URLSearchParams | ReadonlyURLSearchParams): FilterState {
   const get = (k: string) => params.get(k);
   const sort = get("s") as SortKey | null;
@@ -100,7 +91,6 @@ export function decodeFilters(params: URLSearchParams | ReadonlyURLSearchParams)
   };
 }
 
-/** Tipo para ReadonlyURLSearchParams de Next.js (compatible con URLSearchParams) */
 type ReadonlyURLSearchParams = {
   get(key: string): string | null;
   has(key: string): boolean;
@@ -114,7 +104,6 @@ type ReadonlyURLSearchParams = {
   toString(): string;
 };
 
-/** Cuenta cuántos filtros activos hay (excluye categoria="Todos", sort, q) */
 export function countActiveFilters(state: FilterState): number {
   let n = 0;
   if (state.categoria && state.categoria !== "Todos") n++;
@@ -127,12 +116,10 @@ export function countActiveFilters(state: FilterState): number {
   return n;
 }
 
-/** Verifica si hay filtros distintos a los defaults */
 export function hasActiveFilters(state: FilterState): boolean {
   return countActiveFilters(state) > 0;
 }
 
-/** Limpia todos los filtros a defaults */
 export function clearFilters(): FilterState {
   return { ...DEFAULT_FILTER_STATE };
 }

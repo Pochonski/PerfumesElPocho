@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
 import type { FacetCounts } from "./facet-counts";
-export type { FacetCounts } from "./facet-counts";
-export { EMPTY_FACET_COUNTS } from "./facet-counts";
+import { normalizeText, slugify } from "./utils";
+
+export { normalizeText, slugify } from "./utils";
 
 export interface Producto {
   id: number;
@@ -21,11 +22,8 @@ export interface Producto {
   genero: string;
   ocasion: string;
   familia_olfativa: string;
-  /** Normalizado: array de familias canónicas */
   familias_olfativas: string[];
-  /** Normalizado: array de ocasiones canónicas */
   ocasiones: string[];
-  /** Normalizado: array de géneros canónicos derivados */
   generos: string[];
 }
 
@@ -47,7 +45,6 @@ export function getProductos(): Producto[] {
     if (!Array.isArray(p.ocasiones)) p.ocasiones = [];
     if (!Array.isArray(p.generos)) p.generos = [];
 
-    // Derivar familias_olfativas desde familia_olfativa (string comma-separated)
     if (p.familias_olfativas.length === 0 && p.familia_olfativa) {
       p.familias_olfativas = p.familia_olfativa
         .split(",")
@@ -55,7 +52,6 @@ export function getProductos(): Producto[] {
         .filter(Boolean);
     }
 
-    // Derivar ocasiones desde ocasion (string comma-separated)
     if (p.ocasiones.length === 0 && p.ocasion) {
       p.ocasiones = p.ocasion
         .split(",")
@@ -63,7 +59,6 @@ export function getProductos(): Producto[] {
         .filter(Boolean);
     }
 
-    // Derivar generos desde genero (string comma-separated)
     if (p.generos.length === 0 && p.genero) {
       p.generos = p.genero
         .split(",")
@@ -71,12 +66,10 @@ export function getProductos(): Producto[] {
         .filter(Boolean);
     }
 
-    // Generar resumen desde descripcion si está vacío
     if (!p.resumen && p.descripcion) {
       p.resumen = p.descripcion.slice(0, 150).trim() + (p.descripcion.length > 150 ? "…" : "");
     }
 
-    // Generar descripcion fallback desde nombre + marca + concentracion
     if (!p.descripcion && (p.nombre || p.marca || p.concentracion)) {
       const parts: string[] = [];
       if (p.marca) parts.push(p.marca);
@@ -103,7 +96,7 @@ export function getCategorias(): string[] {
       cats.add(c);
     }
   }
-  return Array.from(cats).sort();
+  return Array.from(cats).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getMarcas(): string[] {
@@ -111,7 +104,7 @@ export function getMarcas(): string[] {
   for (const p of getProductos()) {
     if (p.marca) marcas.add(p.marca);
   }
-  return Array.from(marcas).sort();
+  return Array.from(marcas).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getConcentraciones(): string[] {
@@ -119,7 +112,7 @@ export function getConcentraciones(): string[] {
   for (const p of getProductos()) {
     if (p.concentracion) set.add(p.concentracion);
   }
-  return Array.from(set).sort();
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getTamanos(): string[] {
@@ -131,7 +124,7 @@ export function getTamanos(): string[] {
     const na = parseInt(a, 10);
     const nb = parseInt(b, 10);
     if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    return a.localeCompare(b);
+    return a.localeCompare(b, "es");
   });
 }
 
@@ -140,7 +133,7 @@ export function getFamiliasOlfativas(): string[] {
   for (const p of getProductos()) {
     for (const f of p.familias_olfativas) set.add(f);
   }
-  return Array.from(set).sort();
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getOcasiones(): string[] {
@@ -148,7 +141,7 @@ export function getOcasiones(): string[] {
   for (const p of getProductos()) {
     for (const o of p.ocasiones) set.add(o);
   }
-  return Array.from(set).sort();
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getGeneros(): string[] {
@@ -156,7 +149,7 @@ export function getGeneros(): string[] {
   for (const p of getProductos()) {
     for (const g of p.generos) set.add(g);
   }
-  return Array.from(set).sort();
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
 export function getPrecioRange(): { min: number; max: number } {
@@ -171,16 +164,6 @@ export function getPrecioRange(): { min: number; max: number } {
   return { min, max };
 }
 
-/**
- * Calcula cuántos productos matchean por cada valor de cada facet,
- * aplicando los filtros activos EXCEPTO el facet que se está contando.
- *
- * Convención estándar de e-commerce: si filtraste por Marca=Adidas, los counts
- * de Familia asumen que Adidas está activa (muestran cuántas familias hay entre
- * los Adidas). Los counts de Marca asumen que NO hay marca activa (muestran
- * cuántas marcas hay en el universo, así el usuario ve qué otras marcas puede
- * sumar).
- */
 export function getFacetCounts(
   productos: Producto[],
   active: {
@@ -250,24 +233,6 @@ export function getFacetCounts(
   }
 
   return counts;
-}
-
-/** Normalizar texto para búsqueda: lowercase + sin acentos */
-export function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
-
-/** Slugify seguro para URL: lowercase, sin acentos, con guiones */
-export function slugify(text: string): string {
-  return normalizeText(text)
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
 }
 
 export function findCategoriaBySlug(slug: string): string | null {
