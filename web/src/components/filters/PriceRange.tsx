@@ -9,7 +9,7 @@ interface PriceRangeProps {
   valueMin: number;
   valueMax: number;
   onChange: (min: number, max: number) => void;
-  /** Snap a este step (default: 1000) */
+  
   step?: number;
 }
 
@@ -123,7 +123,7 @@ export function PriceRange({
     <div className="px-1 pt-2">
       <div
         ref={trackRef}
-        className="relative h-2 cursor-pointer rounded-full bg-[color:var(--foreground)]/5"
+        className="relative h-2 cursor-pointer rounded-full bg-foreground/5"
         onPointerDown={(e) => {
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -133,12 +133,12 @@ export function PriceRange({
           updateFromClientX(e.clientX, which);
         }}
       >
-        {/* Fill */}
+        {}
         <div
-          className="absolute top-0 h-2 rounded-full bg-[color:var(--accent)]"
+          className="absolute top-0 h-2 rounded-full bg-accent"
           style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
         />
-        {/* Min thumb */}
+        {}
         <button
           type="button"
           role="slider"
@@ -152,12 +152,12 @@ export function PriceRange({
             e.stopPropagation();
             setDragging("min");
           }}
-          className={`absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-[color:var(--accent)] bg-[color:var(--card-bg)] shadow-md transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 ${
+          className={`absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-accent bg-card-bg shadow-md transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
             dragging === "min" ? "scale-125 cursor-grabbing" : "hover:scale-110"
           } ${isAtMin ? "opacity-50" : ""}`}
           style={{ left: `${minPct}%` }}
         />
-        {/* Max thumb */}
+        {}
         <button
           type="button"
           role="slider"
@@ -171,13 +171,13 @@ export function PriceRange({
             e.stopPropagation();
             setDragging("max");
           }}
-          className={`absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-[color:var(--accent)] bg-[color:var(--card-bg)] shadow-md transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 ${
+          className={`absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-accent bg-card-bg shadow-md transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
             dragging === "max" ? "scale-125 cursor-grabbing" : "hover:scale-110"
           } ${isAtMax ? "opacity-50" : ""}`}
           style={{ left: `${maxPct}%` }}
         />
       </div>
-      <div className="mt-3 flex items-center justify-between font-mono text-xs tabular-nums text-[color:var(--muted-foreground)]">
+      <div className="mt-3 flex items-center justify-between font-mono text-xs tabular-nums text-muted-foreground">
         <span>{formatPrice(localMin)}</span>
         <span>{formatPrice(localMax)}</span>
       </div>

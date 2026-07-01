@@ -9,7 +9,8 @@
     "vercel-build": "next build"
   },
   "overrides": {
-    "next": "15.5.19"
+    "next": "15.5.19",
+    "postcss": "^8.5.10"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

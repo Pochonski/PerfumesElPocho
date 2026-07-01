@@ -39,7 +39,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
 
   if (!hasImages) {
     return (
-      <div className="card-surface relative aspect-square overflow-hidden bg-[var(--image-bg)]">
+      <div className="card-surface relative aspect-square overflow-hidden bg-image-bg">
         <div className="flex h-full items-center justify-center text-6xl">🕯️</div>
       </div>
     );
@@ -48,10 +48,10 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
   return (
     <>
       <div className="flex flex-col gap-4">
-        {/* Main image */}
+        {}
         <div className="relative">
           <div
-            className="card-surface relative aspect-square overflow-hidden bg-[var(--image-bg)]"
+            className="card-surface relative aspect-square overflow-hidden bg-image-bg"
           >
             {mainSrc ? (
               <Image
@@ -74,7 +74,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
                     goPrev();
                   }}
                   aria-label="Imagen anterior"
-                  className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border-emphasis)] bg-[color:var(--card-bg)]/80 text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:border-[color:var(--accent)]/40 hover:text-[color:var(--foreground)]"
+                  className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border-emphasis bg-card-bg/80 text-muted-foreground backdrop-blur-sm transition-all hover:border-accent/40 hover:text-foreground"
                 >
                   <CaretLeft size={20} weight="bold" />
                 </button>
@@ -85,7 +85,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
                     goNext();
                   }}
                   aria-label="Imagen siguiente"
-                  className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border-emphasis)] bg-[color:var(--card-bg)]/80 text-[color:var(--muted-foreground)] backdrop-blur-sm transition-all hover:border-[color:var(--accent)]/40 hover:text-[color:var(--foreground)]"
+                  className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border-emphasis bg-card-bg/80 text-muted-foreground backdrop-blur-sm transition-all hover:border-accent/40 hover:text-foreground"
                 >
                   <CaretRight size={20} weight="bold" />
                 </button>
@@ -95,7 +95,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
 
           {hasMultiple && (
             <p
-              className="mt-2 text-center text-xs text-[color:var(--muted-foreground)]"
+              className="mt-2 text-center text-xs text-muted-foreground"
               aria-live="polite"
             >
               Imagen {active + 1} de {validImages.length}
@@ -103,7 +103,7 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
           )}
         </div>
 
-        {/* Thumbnails strip */}
+        {}
         {hasMultiple && (
           <div
             className="grid grid-cols-4 gap-3"
@@ -121,9 +121,9 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
                   aria-selected={isActive}
                   aria-label={`Ver imagen ${i + 1}`}
                   onClick={() => setActive(i)}
-                  className={`card-surface relative aspect-square overflow-hidden p-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8a84e] ${
+                  className={`card-surface relative aspect-square overflow-hidden p-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                     isActive
-                      ? "ring-2 ring-[#c8a84e] border-[#c8a84e]/40"
+                      ? "ring-2 ring-accent border-accent/40"
                       : "opacity-70 hover:opacity-100"
                   }`}
                 >

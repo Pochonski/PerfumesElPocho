@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 interface FacetCheckboxProps {
   label: string;
@@ -20,21 +20,21 @@ export function FacetCheckbox({
       className={`group flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors ${
         disabled
           ? "cursor-not-allowed opacity-40"
-          : "hover:bg-[color:var(--foreground)]/5"
+          : "hover:bg-foreground/5"
       }`}
     >
       <span
         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
           checked
-            ? "border-[color:var(--accent)] bg-[color:var(--accent)]"
-            : "border-[color:var(--border-emphasis)] bg-transparent group-hover:border-[color:var(--accent)]/60"
+            ? "border-accent bg-accent"
+            : "border-border-emphasis bg-transparent group-hover:border-accent/60"
         }`}
         aria-hidden="true"
       >
         {checked && (
           <svg
             viewBox="0 0 12 12"
-            className="h-2.5 w-2.5 text-[color:var(--price-pill-fg)]"
+            className="h-2.5 w-2.5 text-price-pill-fg"
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"
@@ -50,11 +50,11 @@ export function FacetCheckbox({
         onChange={onChange}
         className="sr-only"
       />
-      <span className="flex-1 truncate text-[color:var(--foreground)]/85 group-hover:text-[color:var(--foreground)]">
+      <span className="flex-1 truncate text-foreground/85 group-hover:text-foreground">
         {label}
       </span>
       {count != null && (
-        <span className="font-mono text-xs tabular-nums text-[color:var(--muted)]">
+        <span className="font-mono text-xs tabular-nums text-muted">
           {count}
         </span>
       )}

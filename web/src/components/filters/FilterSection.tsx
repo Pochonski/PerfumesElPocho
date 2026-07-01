@@ -6,9 +6,9 @@ import { CaretDown } from "@phosphor-icons/react";
 interface FilterSectionProps {
   title: string;
   children: ReactNode;
-  /** Estado inicial del collapse */
+  
   defaultOpen?: boolean;
-  /** Cantidad de items seleccionados */
+  
   count?: number;
 }
 
@@ -21,17 +21,17 @@ export function FilterSection({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-[color:var(--border-subtle)] py-4 last:border-0">
+    <div className="border-b border-border-subtle py-4 last:border-0">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full cursor-pointer items-center justify-between gap-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--accent)]/30"
+        className="flex w-full cursor-pointer items-center justify-between gap-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/30"
         aria-expanded={open}
       >
-        <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+        <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {title}
           {count > 0 && (
-            <span className="rounded-full bg-[color:var(--accent)]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[color:var(--accent)]">
+            <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold text-accent">
               {count}
             </span>
           )}
@@ -39,7 +39,7 @@ export function FilterSection({
         <CaretDown
           size={14}
           weight="bold"
-          className={`shrink-0 text-[color:var(--muted)] transition-transform duration-200 ${
+          className={`shrink-0 text-muted transition-transform duration-200 ${
             open ? "rotate-0" : "-rotate-90"
           }`}
           aria-hidden="true"

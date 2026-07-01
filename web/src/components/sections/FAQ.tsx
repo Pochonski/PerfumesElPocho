@@ -36,21 +36,21 @@ export default function FAQ() {
   };
 
   return (
-    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-[color:var(--border-subtle)]">
+    <AnimatedSection className="px-6 py-24 md:px-8 md:py-32 border-t border-border-subtle">
       <div className="mx-auto max-w-[800px]">
-        {/* Header */}
+        {}
         <div className="mb-12 flex flex-col items-center gap-4 text-center">
           <EyebrowBadge>Preguntas Frecuentes</EyebrowBadge>
-          <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
             ¿Tenés dudas?
           </h2>
-          <p className="max-w-[48ch] text-[color:var(--muted-foreground)]">
+          <p className="max-w-[48ch] text-muted-foreground">
             Acá respondemos las preguntas más comunes. Si no encontrás lo que
             buscás, escribinos por WhatsApp.
           </p>
         </div>
 
-        {/* FAQ Items */}
+        {}
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
             <div
@@ -61,14 +61,14 @@ export default function FAQ() {
                 onClick={() => toggle(i)}
                 className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="text-sm font-semibold text-[color:var(--subtle-foreground)]">
+                <span className="text-sm font-semibold text-subtle-foreground">
                   {faq.q}
                 </span>
                 <CaretDown
                   size={18}
                   weight="bold"
-                  className={`shrink-0 text-[color:var(--muted-foreground)] transition-transform duration-300 ${
-                    openIndex === i ? "rotate-180 text-[#c8a84e]" : ""
+                  className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                    openIndex === i ? "rotate-180 text-accent" : ""
                   }`}
                 />
               </button>
@@ -78,7 +78,7 @@ export default function FAQ() {
                   openIndex === i ? "max-h-96 pb-5" : "max-h-0"
                 }`}
               >
-                <p className="px-6 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
+                <p className="px-6 text-sm leading-relaxed text-muted-foreground">
                   {faq.a}
                 </p>
               </div>

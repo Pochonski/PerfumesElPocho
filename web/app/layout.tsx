@@ -1,9 +1,10 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/ui/Navbar";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
+import { PRODUCT_COUNT_DISPLAY } from "@/data/constants";
 import "./globals.css";
 
 const inter = Inter({
@@ -27,8 +28,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
-  description:
-    "Descubre más de 2,900 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.",
+  description: `Descubre más de ${PRODUCT_COUNT_DISPLAY} fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.`,
   keywords: [
     "perfumes",
     "fragancias",
@@ -40,16 +40,14 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Perfumes El Pocho | Fragancias Premium",
-    description:
-      "Más de 2,900 fragancias originales con envíos a todo Costa Rica.",
+    description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales con envíos a todo Costa Rica.`,
     type: "website",
     locale: "es_CR",
   },
   twitter: {
     card: "summary_large_image",
     title: "Perfumes El Pocho | Fragancias Premium",
-    description:
-      "Más de 2,900 fragancias originales con envíos a todo Costa Rica.",
+    description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales con envíos a todo Costa Rica.`,
   },
 };
 
@@ -63,7 +61,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// Anti-flash: lee localStorage / system preference y setea data-theme antes del primer paint
 const themeScript = `
 (function() {
   try {
@@ -93,13 +90,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
       </head>
-      <body
-        className="min-h-full flex flex-col text-[color:var(--foreground)]"
-        style={{ background: "var(--background)" }}
-      >
+      <body className="min-h-full flex flex-col text-foreground bg-background">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
         >
           Saltar al contenido
         </a>

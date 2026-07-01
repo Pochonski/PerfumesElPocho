@@ -1,42 +1,45 @@
-import { AnimatedSection } from "@/components/ui/AnimatedSection";
+﻿import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import Button from "@/components/ui/Button";
+import { SITE } from "@/lib/site";
 
 export default function FinalCTA() {
   return (
     <AnimatedSection id="contacto" className="px-6 py-24 md:px-8 md:py-32">
       <div className="mx-auto max-w-[1400px]">
         <div
-          className="relative overflow-hidden rounded-[32px] border border-[#c8a84e]/10 p-12 text-center md:p-20"
+          className="relative overflow-hidden rounded-[32px] border border-accent/10 p-12 text-center md:p-20"
           style={{
             backgroundImage: `linear-gradient(to bottom right, var(--featured-card-from), var(--featured-card-via), var(--featured-card-to))`,
           }}
         >
-          {/* Background glow */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,168,78,0.08)_0%,transparent_70%)]" />
 
           <div className="relative">
             <EyebrowBadge>Contáctanos</EyebrowBadge>
 
-            <h2 className="mt-6 text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-5xl">
+            <h2 className="mt-6 text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
               ¿Listo para encontrar
               <br />
               <span className="gold-gradient italic">tu esencia</span>?
             </h2>
 
-            <p className="mx-auto mt-4 max-w-[48ch] text-[color:var(--muted-foreground)]">
+            <p className="mx-auto mt-4 max-w-[48ch] text-muted-foreground">
               Escríbenos por WhatsApp y te ayudamos a elegir la fragancia
               perfecta. Envíos a todo Costa Rica.
             </p>
 
             <div className="mt-8 flex items-center justify-center gap-4">
               <Button
-                href="https://wa.me/50664779672"
+                href={SITE.whatsappHref("")}
                 showArrow
               >
                 WhatsApp
               </Button>
-              <Button href="mailto:joseph19102005@gmail.com?subject=Consulta%20Perfumes%20El%20Pocho" variant="secondary">
+              <Button
+                href={`mailto:${SITE.contactEmail}?subject=Consulta%20Perfumes%20El%20Pocho`}
+                variant="secondary"
+              >
                 Email
               </Button>
             </div>

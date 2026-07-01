@@ -1,33 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 import { getProductos, normalizeText } from "@/lib/productos";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 240;
-
-function checkRateLimit(ip: string) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
-  }
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, remaining: 0, resetIn: entry.resetAt - now };
-  }
-  entry.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
-}
-
-function getClientIP(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
+const SuggestSchema = z.object({
+  q: z.string().min(1).max(200),
+  limit: z
+    .string()
+    .regex(/^\d{1,2}$/)
+    .transform((v) => {
+      const n = parseInt(v, 10);
+      if (isNaN(n)) return 6;
+      return Math.max(1, Math.min(8, n));
+    })
+    .optional(),
+});
 
 interface Suggestion {
   id: number;
@@ -39,14 +28,29 @@ interface Suggestion {
 
 export async function GET(request: NextRequest) {
   const ip = getClientIP(request);
-  const { allowed, remaining } = checkRateLimit(ip);
+  const { allowed, remaining } = checkRateLimit(ip, { windowMs: 60_000, max: 240 });
   if (!allowed) {
     return NextResponse.json({ error: "Demasiadas solicitudes." }, { status: 429 });
   }
 
-  const q = (request.nextUrl.searchParams.get("q") || "").trim();
-  const limitRaw = parseInt(request.nextUrl.searchParams.get("limit") || "6", 10);
-  const limit = isNaN(limitRaw) ? 6 : Math.max(1, Math.min(8, limitRaw));
+  const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
+  const parsed = SuggestSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { items: [], total: 0, query: "" },
+      {
+        status: 400,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "X-RateLimit-Remaining": String(remaining),
+        },
+      }
+    );
+  }
+
+  const q = parsed.data.q.trim();
+  const limit = parsed.data.limit ?? 6;
 
   if (q.length < 2) {
     return NextResponse.json(

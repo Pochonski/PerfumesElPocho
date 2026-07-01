@@ -39,22 +39,22 @@ export default function Navbar({ children }: { children?: ReactNode }) {
           </div>
         </Link>
 
-        {/* Desktop search */}
+        {}
         <div className="hidden flex-1 justify-center md:flex md:max-w-md">
           <Suspense fallback={<SearchBarFallback variant="navbar" />}>
             <SearchBar variant="navbar" className="w-full" />
           </Suspense>
         </div>
 
-        {/* Desktop links */}
+        {}
         <div className="hidden items-center gap-8 md:flex">
-          <Link href="/#productos" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
+          <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Productos
           </Link>
-          <Link href="/#categorias" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
+          <Link href="/#categorias" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Categorías
           </Link>
-          <Link href="/#contacto" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]">
+          <Link href="/#contacto" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Contacto
           </Link>
           <ThemeToggle />
@@ -64,9 +64,9 @@ export default function Navbar({ children }: { children?: ReactNode }) {
           {children}
         </div>
 
-        {/* Mobile toggle */}
+        {}
         <button
-          className="shrink-0 text-[color:var(--foreground)] md:hidden"
+          className="shrink-0 text-foreground md:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Menú"
         >
@@ -74,28 +74,28 @@ export default function Navbar({ children }: { children?: ReactNode }) {
         </button>
       </nav>
 
-      {/* Mobile search bar (always visible) */}
-      <div className="border-t border-[color:var(--border-subtle)] px-4 pb-3 pt-1 md:hidden">
+      {}
+      <div className="border-t border-border-subtle px-4 pb-3 pt-1 md:hidden">
         <Suspense fallback={<SearchBarFallback variant="panel" />}>
           <SearchBar variant="panel" />
         </Suspense>
       </div>
 
-        {/* Mobile menu */}
+        {}
       {open && (
-        <div className="glass-surface border-t border-[color:var(--border-subtle)] md:hidden">
+        <div className="glass-surface border-t border-border-subtle md:hidden">
           <div className="flex flex-col gap-1 px-6 py-4">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-[color:var(--muted-foreground)]">Tema</span>
+              <span className="text-sm text-muted-foreground">Tema</span>
               <ThemeToggle />
             </div>
-            <Link href="/#productos" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
+            <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={() => setOpen(false)}>
               Productos
             </Link>
-            <Link href="/#categorias" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
+            <Link href="/#categorias" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={() => setOpen(false)}>
               Categorías
             </Link>
-            <Link href="/#contacto" className="text-sm text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)] py-2" onClick={() => setOpen(false)}>
+            <Link href="/#contacto" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={() => setOpen(false)}>
               Contacto
             </Link>
             <div className="mt-3">

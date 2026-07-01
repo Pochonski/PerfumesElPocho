@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 type ButtonProps = {
@@ -23,11 +23,11 @@ export default function Button({
 
   const variants = {
     primary:
-      "gold-gradient-bg text-black shadow-lg shadow-[#c8a84e]/20 hover:shadow-[#c8a84e]/40 hover:scale-[1.02]",
+      "gold-gradient-bg text-black shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:scale-[1.02]",
     secondary:
-      "card-surface text-[color:var(--foreground)] hover:border-[#c8a84e]/30",
+      "card-surface text-foreground hover:border-accent/30",
     ghost:
-      "text-[color:var(--muted-foreground)] hover:text-[color:var(--foreground)]",
+      "text-muted-foreground hover:text-foreground",
   };
 
   const cls = `${base} ${variants[variant]} ${className}`;

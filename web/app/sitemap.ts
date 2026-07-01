@@ -4,7 +4,7 @@ import { getProductos } from "@/lib/productos";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://perfumeselpocho.com";
 
-  // Homepage
+  
   const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Product pages (all products for complete SEO coverage)
+  
   const productos = getProductos();
   for (const p of productos) {
     routes.push({

@@ -20,10 +20,10 @@ export function Lightbox({ open, onClose, src, alt }: LightboxProps) {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    // Lock body scroll
+    
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    // Auto focus close button
+    
     closeRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
@@ -48,7 +48,7 @@ export function Lightbox({ open, onClose, src, alt }: LightboxProps) {
           e.stopPropagation();
           onClose();
         }}
-        className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all hover:scale-110 hover:border-[color:var(--accent)] hover:text-[color:var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+        className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all hover:scale-110 hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         aria-label="Cerrar imagen ampliada"
       >
         <X size={20} weight="bold" />

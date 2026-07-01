@@ -8,37 +8,37 @@ import FAQ from "@/components/sections/FAQ";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
 import type { Metadata } from "next";
+import { SITE } from "@/lib/site";
+import { serializeJsonLd } from "@/lib/json-ld";
+import { PRODUCT_COUNT_DISPLAY, PRICE_RANGE_DISPLAY } from "@/data/constants";
 
-// ISR: revalidar cada hora
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
-  description:
-    "Más de 2,900 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica en 24-48h. Comprá por WhatsApp.",
+  description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica en 24-48h. Comprá por WhatsApp.`,
 };
 
 export default function Home() {
   return (
     <main>
-      {/* Schema.org Organization */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "OnlineStore",
-            name: "Perfumes El Pocho",
+            name: SITE.brand,
             description:
               "Tienda de perfumes originales, árabes y de diseñador. Envíos a todo Costa Rica.",
             url: "https://perfumeselpocho.com",
-            telephone: "+50664779672",
-            email: "joseph19102005@gmail.com",
+            telephone: `+${SITE.whatsappNumber}`,
+            email: SITE.contactEmail,
             address: {
               "@type": "PostalAddress",
               addressCountry: "CR",
             },
-            priceRange: "₡6,000 - ₡230,000",
+            priceRange: PRICE_RANGE_DISPLAY,
           }),
         }}
       />
@@ -52,7 +52,7 @@ export default function Home() {
         id="productos"
         eyebrow="Catálogo"
         title="Nuestra Colección"
-        description="Más de 2,900 fragancias originales, árabes y de diseñador. Filtrá por categoría, marca, precio, familia olfativa y más."
+        description={`Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales, árabes y de diseñador. Filtrá por categoría, marca, precio, familia olfativa y más.`}
       />
       <FAQ />
       <FinalCTA />

@@ -7,6 +7,7 @@ import {
   getCategorias,
   slugify,
 } from "@/lib/productos";
+import { serializeJsonLd } from "@/lib/json-ld";
 import CatalogSection from "@/components/sections/CatalogSection";
 import Footer from "@/components/sections/Footer";
 
@@ -49,7 +50,7 @@ export default async function CategoriaPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
             name: `Perfumes ${categoria}`,
@@ -66,26 +67,26 @@ export default async function CategoriaPage({ params }: PageProps) {
 
       <main className="min-h-screen pt-28 pb-16">
         <div className="mx-auto max-w-7xl px-6 md:px-8">
-          {/* Breadcrumb */}
+          {}
           <nav
-            className="mb-8 flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]"
+            className="mb-8 flex items-center gap-2 text-sm text-muted-foreground"
             aria-label="Breadcrumb"
           >
             <Link
               href="/"
-              className="transition-colors hover:text-[color:var(--foreground)]"
+              className="transition-colors hover:text-foreground"
             >
               Inicio
             </Link>
             <span aria-hidden="true">/</span>
             <Link
               href="/#productos"
-              className="transition-colors hover:text-[color:var(--foreground)]"
+              className="transition-colors hover:text-foreground"
             >
               Catálogo
             </Link>
             <span aria-hidden="true">/</span>
-            <span className="text-[color:var(--muted)]">{categoria}</span>
+            <span className="text-muted">{categoria}</span>
           </nav>
         </div>
 
