@@ -2,13 +2,34 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react";
-import type { CategoryTab } from "@/data/category-tabs";
+import { useEffect, useRef, useState, type ComponentType } from "react";
+import {
+  CaretLeft,
+  CaretRight,
+  House,
+  GenderFemale,
+  GenderMale,
+  Sparkle,
+  Gift,
+  Drop,
+} from "@phosphor-icons/react";
+import type { CategoryIconName, CategoryTab } from "@/data/category-tabs";
 
 interface CategoryTabsProps {
   tabs: CategoryTab[];
 }
+
+const ICON_MAP: Record<
+  CategoryIconName,
+  ComponentType<{ size?: number; weight?: "duotone" | "regular" | "fill"; className?: string }>
+> = {
+  house: House,
+  female: GenderFemale,
+  male: GenderMale,
+  sparkle: Sparkle,
+  gift: Gift,
+  drop: Drop,
+};
 
 export default function CategoryTabs({ tabs }: CategoryTabsProps) {
   const pathname = usePathname();
@@ -73,8 +94,11 @@ export default function CategoryTabs({ tabs }: CategoryTabsProps) {
           className="no-scrollbar flex items-stretch gap-1 overflow-x-auto scroll-smooth py-2 md:gap-2 md:py-3"
         >
           {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = tab.match(pathname);
+            const Icon = ICON_MAP[tab.icon];
+            const isActive =
+              tab.matchMode === "exact"
+                ? pathname === tab.href
+                : pathname === tab.href || pathname.startsWith(tab.href + "/");
             return (
               <Link
                 key={tab.href}

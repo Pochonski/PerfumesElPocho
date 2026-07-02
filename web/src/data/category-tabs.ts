@@ -1,58 +1,58 @@
-import type { ComponentType } from "react";
-import {
-  House,
-  GenderFemale,
-  GenderMale,
-  Sparkle,
-  Gift,
-  Drop,
-} from "@phosphor-icons/react";
+export type CategoryIconName =
+  | "house"
+  | "female"
+  | "male"
+  | "sparkle"
+  | "gift"
+  | "drop";
+
+export type CategoryMatchMode = "exact" | "prefix";
 
 export interface CategoryTab {
   label: string;
   href: string;
-  icon: ComponentType<{ size?: number; weight?: "duotone" | "regular" | "fill"; className?: string }>;
+  icon: CategoryIconName;
   categoryName?: string;
-  match: (pathname: string) => boolean;
+  matchMode: CategoryMatchMode;
 }
 
 export const CATEGORY_TABS: CategoryTab[] = [
   {
     label: "Inicio",
     href: "/",
-    icon: House,
-    match: (pathname) => pathname === "/",
+    icon: "house",
+    matchMode: "exact",
   },
   {
     label: "Perfumes de Mujer",
     href: "/categoria/perfumes-de-mujer",
-    icon: GenderFemale,
+    icon: "female",
     categoryName: "Perfumes de mujer",
-    match: (pathname) => pathname === "/categoria/perfumes-de-mujer",
+    matchMode: "prefix",
   },
   {
     label: "Perfumes de Hombre",
     href: "/categoria/perfumes-de-hombre",
-    icon: GenderMale,
+    icon: "male",
     categoryName: "Perfumes de hombre",
-    match: (pathname) => pathname === "/categoria/perfumes-de-hombre",
+    matchMode: "prefix",
   },
   {
     label: "Perfumes Árabes/Nicho",
     href: "/categoria/perfumes-arabes-nicho",
-    icon: Sparkle,
-    match: (pathname) => pathname === "/categoria/perfumes-arabes-nicho",
+    icon: "sparkle",
+    matchMode: "prefix",
   },
   {
     label: "Estuches",
     href: "/categoria/estuches",
-    icon: Gift,
-    match: (pathname) => pathname === "/categoria/estuches",
+    icon: "gift",
+    matchMode: "prefix",
   },
   {
     label: "Body Sprays",
     href: "/categoria/body-sprays",
-    icon: Drop,
-    match: (pathname) => pathname === "/categoria/body-sprays",
+    icon: "drop",
+    matchMode: "prefix",
   },
 ];
