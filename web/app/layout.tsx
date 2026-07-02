@@ -4,6 +4,7 @@ import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/ui/Navbar";
 import CategoryTabsList from "@/components/ui/CategoryTabsList";
+import HeaderHeightSync from "@/components/ui/HeaderHeightSync";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import { PRODUCT_COUNT_DISPLAY } from "@/data/constants";
 import "./globals.css";
@@ -100,11 +101,12 @@ export default function RootLayout({
         </a>
         <ThemeProvider>
           <SmoothScrollProvider>
-            <header className="fixed top-0 left-0 right-0 z-50">
+            <header data-fixed-header className="fixed top-0 left-0 right-0 z-50">
               <Navbar />
               <CategoryTabsList />
             </header>
-            <div id="main-content" className="flex-1 pt-[var(--header-h)]">
+            <HeaderHeightSync />
+            <div id="main-content" className="flex-1 pt-[var(--real-header-h,var(--header-h))]">
               {children}
             </div>
             <WhatsAppFloat />
