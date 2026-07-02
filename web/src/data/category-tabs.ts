@@ -39,20 +39,23 @@ export const CATEGORY_TABS: CategoryTab[] = [
   },
   {
     label: "Perfumes Árabes/Nicho",
-    href: "/categoria/perfumes-arabes-nicho",
+    href: "/categoria/arabes",
     icon: "sparkle",
+    categoryName: "Árabe",
     matchMode: "prefix",
   },
   {
     label: "Estuches",
     href: "/categoria/estuches",
     icon: "gift",
+    categoryName: "Estuches",
     matchMode: "prefix",
   },
   {
     label: "Body Sprays",
     href: "/categoria/body-sprays",
     icon: "drop",
+    categoryName: "Body Sprays",
     matchMode: "prefix",
   },
 ];
