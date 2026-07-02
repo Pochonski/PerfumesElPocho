@@ -29,6 +29,52 @@ export interface Producto {
 
 let cached: Producto[] | null = null;
 
+const GENDER_CATEGORIES = [
+  "Perfumes de mujer",
+  "Perfumes de hombre",
+  "Perfumes unisex",
+] as const;
+
+function detectGenderFromName(name: string): string | null {
+  const upper = name.toUpperCase();
+  const hasMujer = /\bMUJER\b/.test(upper);
+  const hasHombre = /\bHOMBRE\b/.test(upper);
+  const hasUnisex = /\bUNISEX\b/.test(upper);
+  if (hasHombre && !hasMujer) return "Perfumes de hombre";
+  if (hasMujer && !hasHombre) return "Perfumes de mujer";
+  if (hasUnisex && !hasMujer && !hasHombre) return "Perfumes unisex";
+  return null;
+}
+
+function detectGenderFromAtributos(p: Producto): string | null {
+  const raw = String(p.atributos?.["género"] ?? "");
+  const tokens = raw
+    .split(/[,;]+/)
+    .map((t) => t.trim().toUpperCase())
+    .filter(Boolean);
+  const hasMujer = tokens.includes("MUJER");
+  const hasHombre = tokens.includes("HOMBRE");
+  const hasUnisex = tokens.includes("UNISEX");
+  if (hasHombre && !hasMujer) return "Perfumes de hombre";
+  if (hasMujer && !hasHombre) return "Perfumes de mujer";
+  if (hasUnisex && !hasMujer && !hasHombre) return "Perfumes unisex";
+  return null;
+}
+
+function resolveGenderCategoria(p: Producto): string | null {
+  return detectGenderFromName(p.nombre) ?? detectGenderFromAtributos(p);
+}
+
+function normalizeCategorias(p: Producto): string[] {
+  const set = new Set(p.categorias ?? []);
+  const gender = resolveGenderCategoria(p);
+  if (gender) {
+    for (const g of GENDER_CATEGORIES) set.delete(g);
+    set.add(gender);
+  }
+  return Array.from(set);
+}
+
 export function getProductos(): Producto[] {
   if (cached) return cached;
   const jsonPath = path.join(
@@ -80,6 +126,8 @@ export function getProductos(): Producto[] {
         ? `${p.nombre}. ${parts.join(". ")}.`
         : p.nombre;
     }
+
+    p.categorias = normalizeCategorias(p);
   }
   cached = data;
   return data;
