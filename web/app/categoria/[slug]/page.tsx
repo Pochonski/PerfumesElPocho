@@ -29,10 +29,10 @@ export async function generateMetadata({
 
   return {
     title: `${categoria} | Perfumes El Pocho`,
-    description: `Descubrí nuestra selección de perfumes ${categoria.toLowerCase()}. Originales, árabes y de diseñador con envío a todo Costa Rica.`,
+    description: `Descubrí nuestra selección de ${categoria.toLowerCase()}. Originales, árabes y de diseñador con envío a todo Costa Rica.`,
     openGraph: {
       title: `${categoria} | Perfumes El Pocho`,
-      description: `Perfumes ${categoria.toLowerCase()} con envío a todo Costa Rica.`,
+      description: `${categoria} con envío a todo Costa Rica.`,
       type: "website",
     },
   };
@@ -93,7 +93,7 @@ export default async function CategoriaPage({ params }: PageProps) {
         <CatalogSection
           initialCategory={categoria}
           eyebrow={categoria}
-          title={`Perfumes ${categoria}`}
+          title={categoria}
           description={`${totalCategoria.toLocaleString("es-CR")} fragancias de la categoría ${categoria.toLowerCase()}.`}
           id="catalogo-categoria"
         />

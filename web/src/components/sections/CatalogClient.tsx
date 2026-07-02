@@ -107,9 +107,15 @@ export default function CatalogClient({
   
   const filtrosState: FilterState = useMemo(() => {
     const fromUrl = decodeFilters(searchParams);
+    const urlCategoria = fromUrl.categoria;
+    const resolvedCategoria =
+      initialCategory && initialCategory !== "Todos" &&
+      (!urlCategoria || urlCategoria === "Todos")
+        ? initialCategory
+        : urlCategoria ?? initialCategory ?? "Todos";
     return {
       ...fromUrl,
-      categoria: fromUrl.categoria || initialCategory,
+      categoria: resolvedCategoria,
     };
   }, [searchParams, initialCategory]);
 

@@ -67,6 +67,12 @@ function resolveGenderCategoria(p: Producto): string | null {
   return detectGenderFromName(p.nombre) ?? detectGenderFromAtributos(p);
 }
 
+const GENERO_LABEL: Record<string, string> = {
+  "Perfumes de mujer": "Mujer",
+  "Perfumes de hombre": "Hombre",
+  "Perfumes unisex": "Unisex",
+};
+
 function normalizeCategorias(p: Producto): string[] {
   const set = new Set(p.categorias ?? []);
   for (const c of DROPPED_CATEGORIES) set.delete(c);
@@ -75,6 +81,12 @@ function normalizeCategorias(p: Producto): string[] {
   for (const g of GENDER_CATEGORIES) set.delete(g);
   set.add(gender);
   return Array.from(set);
+}
+
+function normalizeGeneros(p: Producto): string[] {
+  const gender = resolveGenderCategoria(p);
+  const label = gender ? GENERO_LABEL[gender] : null;
+  return label ? [label] : [];
 }
 
 export function getProductos(): Producto[] {
@@ -107,13 +119,6 @@ export function getProductos(): Producto[] {
         .filter(Boolean);
     }
 
-    if (p.generos.length === 0 && p.genero) {
-      p.generos = p.genero
-        .split(",")
-        .map((g: string) => g.trim())
-        .filter(Boolean);
-    }
-
     if (!p.resumen && p.descripcion) {
       p.resumen = p.descripcion.slice(0, 150).trim() + (p.descripcion.length > 150 ? "…" : "");
     }
@@ -130,6 +135,7 @@ export function getProductos(): Producto[] {
     }
 
     p.categorias = normalizeCategorias(p);
+    p.generos = normalizeGeneros(p);
   }
   cached = data;
   return data;
