@@ -35,6 +35,8 @@ const GENDER_CATEGORIES = [
   "Perfumes unisex",
 ] as const;
 
+const DROPPED_CATEGORIES = ["Ofertas"] as const;
+
 function detectGenderFromName(name: string): string | null {
   const upper = name.toUpperCase();
   const hasMujer = /\bMUJER\b/.test(upper);
@@ -67,11 +69,11 @@ function resolveGenderCategoria(p: Producto): string | null {
 
 function normalizeCategorias(p: Producto): string[] {
   const set = new Set(p.categorias ?? []);
-  const gender = resolveGenderCategoria(p);
-  if (gender) {
-    for (const g of GENDER_CATEGORIES) set.delete(g);
-    set.add(gender);
-  }
+  for (const c of DROPPED_CATEGORIES) set.delete(c);
+  const detected = resolveGenderCategoria(p);
+  const gender = detected ?? "Perfumes unisex";
+  for (const g of GENDER_CATEGORIES) set.delete(g);
+  set.add(gender);
   return Array.from(set);
 }
 
