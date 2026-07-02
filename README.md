@@ -70,4 +70,4 @@ Rango: **₡6,500 – ₡190,000** — hay para todo presupuesto. Los precios se
 
 ---
 
-*Hecho en Costa Rica 🇨🇷 con ❤️ y mucho café*
+*Hecho en Costa Rica*
