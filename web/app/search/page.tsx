@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : "Tipeá el nombre de un perfume o marca para empezar.";
 
   return (
-    <main className="pt-28 md:pt-32">
+    <main>
       <CatalogSection
         eyebrow="Búsqueda"
         title={title}

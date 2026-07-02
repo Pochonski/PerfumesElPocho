@@ -66,7 +66,7 @@ export default async function MarcaPage({ params }: PageProps) {
         }}
       />
 
-      <main className="min-h-screen pt-28 pb-16">
+      <main className="min-h-screen pb-16">
         <div className="mx-auto max-w-7xl px-6 md:px-8">
           <nav
             className="mb-8 flex items-center gap-2 text-sm text-muted-foreground"

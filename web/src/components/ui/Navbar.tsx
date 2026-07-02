@@ -19,8 +19,8 @@ export default function Navbar({ children }: { children?: ReactNode }) {
   }, []);
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+    <div
+      className={`transition-all duration-500 ${
         scrolled
           ? "glass-surface"
           : "bg-transparent"
@@ -106,7 +106,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
           </div>
         </div>
       )}
-    </header>
+    </div>
   );
 }
 

@@ -82,7 +82,7 @@ export default async function ProductoPage({
           }),
         }}
       />
-      <main className="min-h-screen pt-24">
+      <main className="min-h-screen">
         <div className="mx-auto max-w-[1400px] px-6 md:px-8">
           <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-foreground transition-colors">

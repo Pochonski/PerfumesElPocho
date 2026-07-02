@@ -8,7 +8,7 @@ export default function GuiasPage() {
   const guias = getAllGuias();
 
   return (
-    <main className="min-h-screen pt-28 pb-20">
+    <main className="min-h-screen pb-20">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <AnimatedSection className="mx-auto max-w-3xl text-center">
           <EyebrowBadge>Guías & educación</EyebrowBadge>

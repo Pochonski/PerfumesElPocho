@@ -63,7 +63,7 @@ export default async function GuiaPage({ params }: PageProps) {
         }}
       />
 
-      <main className="min-h-screen pt-28 pb-20">
+      <main className="min-h-screen pb-20">
         <article className="mx-auto max-w-3xl px-6 md:px-8">
           <AnimatedSection>
             <Link

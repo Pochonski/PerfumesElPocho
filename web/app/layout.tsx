@@ -3,6 +3,7 @@ import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/ui/Navbar";
+import CategoryTabsList from "@/components/ui/CategoryTabsList";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import { PRODUCT_COUNT_DISPLAY } from "@/data/constants";
 import "./globals.css";
@@ -99,8 +100,11 @@ export default function RootLayout({
         </a>
         <ThemeProvider>
           <SmoothScrollProvider>
-            <Navbar />
-            <div id="main-content" className="flex-1">
+            <header className="fixed top-0 left-0 right-0 z-50">
+              <Navbar />
+              <CategoryTabsList />
+            </header>
+            <div id="main-content" className="flex-1 pt-[var(--header-h)]">
               {children}
             </div>
             <WhatsAppFloat />
