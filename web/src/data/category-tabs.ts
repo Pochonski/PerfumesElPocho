@@ -1,7 +1,21 @@
+import type { ComponentType } from "react";
+import {
+  House,
+  GenderFemale,
+  GenderMale,
+  GenderIntersex,
+  Baby,
+  Sparkle,
+  Gift,
+  Drop,
+} from "@phosphor-icons/react";
+
 export type CategoryIconName =
   | "house"
   | "female"
   | "male"
+  | "intersex"
+  | "baby"
   | "sparkle"
   | "gift"
   | "drop";
@@ -14,6 +28,7 @@ export interface CategoryTab {
   icon: CategoryIconName;
   categoryName?: string;
   matchMode: CategoryMatchMode;
+  forceVisible?: boolean;
 }
 
 export const CATEGORY_TABS: CategoryTab[] = [
@@ -38,10 +53,24 @@ export const CATEGORY_TABS: CategoryTab[] = [
     matchMode: "prefix",
   },
   {
+    label: "Perfumes Unisex",
+    href: "/categoria/perfumes-unisex",
+    icon: "intersex",
+    categoryName: "Perfumes unisex",
+    matchMode: "prefix",
+  },
+  {
     label: "Perfumes Árabes/Nicho",
     href: "/categoria/arabes",
     icon: "sparkle",
-    categoryName: "\u00c1rabe\u0073",
+    categoryName: "Árabe",
+    matchMode: "prefix",
+  },
+  {
+    label: "Niños",
+    href: "/categoria/ninos",
+    icon: "baby",
+    categoryName: "Niños",
     matchMode: "prefix",
   },
   {
@@ -57,5 +86,6 @@ export const CATEGORY_TABS: CategoryTab[] = [
     icon: "drop",
     categoryName: "Body Sprays",
     matchMode: "prefix",
+    forceVisible: true,
   },
 ];
