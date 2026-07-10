@@ -1,5 +1,6 @@
 {
+  "rootDirectory": "web",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": "web/.next"
+  "outputDirectory": ".next"
 }

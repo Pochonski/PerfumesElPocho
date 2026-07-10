@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CatalogSection from "@/components/sections/CatalogSection";
+import { PRODUCT_COUNT_DISPLAY } from "@/data/constants";
 
 export const revalidate = 3600;
 
@@ -16,7 +17,7 @@ export async function generateMetadata({
     return {
       title: "Buscar fragancias | Perfumes El Pocho",
       description:
-        "Buscá entre más de 2,900 fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica.",
+        `Buscá entre más de ${PRODUCT_COUNT_DISPLAY} fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica.`,
     };
   }
   return {

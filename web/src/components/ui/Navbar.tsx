@@ -79,7 +79,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <div className="relative h-12 w-40 md:h-16 md:w-52">
             <Image
-              src="/brand/logo.png"
+              src="/brand/logo.webp"
               alt="Perfumes El Pocho"
               fill
               className="object-contain"

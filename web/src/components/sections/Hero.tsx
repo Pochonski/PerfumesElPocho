@@ -65,9 +65,9 @@ export default function Hero() {
           </div>
 
           <div className="relative flex items-center justify-center">
-            <div className="relative h-[280px] w-[280px] sm:h-[350px] sm:w-[350px] md:h-[400px] md:w-[400px] lg:h-[450px] lg:h-[450px]">
+            <div className="relative h-[280px] w-[280px] sm:h-[350px] sm:w-[350px] md:h-[400px] md:w-[400px] lg:h-[450px] lg:w-[450px]">
               <Image
-                src="/brand/logo.png"
+                src="/brand/logo.webp"
                 alt="Perfumes El Pocho"
                 fill
                 sizes="(max-width: 640px) 280px, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"

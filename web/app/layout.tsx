@@ -29,6 +29,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://perfumeselpocho.com"),
   title: "Perfumes El Pocho | Fragancias Premium en Costa Rica",
   description: `Descubre más de ${PRODUCT_COUNT_DISPLAY} fragancias originales, árabes y de diseñador. Envíos a todo Costa Rica. Calidad garantizada.`,
   keywords: [
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     siteName: "Perfumes El Pocho",
     images: [
       {
-        url: "https://perfumeselpocho.com/og-image.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Perfumes El Pocho — Fragancias Premium en Costa Rica",
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Perfumes El Pocho | Fragancias Premium",
     description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales con envíos a todo Costa Rica.`,
-    images: ["https://perfumeselpocho.com/og-image.png"],
+    images: ["/og-image.png"],
   },
 };
 

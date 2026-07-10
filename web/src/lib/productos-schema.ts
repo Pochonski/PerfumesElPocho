@@ -22,10 +22,15 @@ const RawProductoSchema = z.object({
   generos: z.array(z.string()).catch([]),
 });
 
-export type RawProducto = z.input<typeof RawProductoSchema>;
+export const ProductoSchema = RawProductoSchema.omit({ precio_texto: true });
 
-export function parseProductos(raw: unknown): z.output<typeof RawProductoSchema>[] {
+export type Producto = z.output<typeof ProductoSchema>;
+
+export function parseProductos(raw: unknown): Producto[] {
   const arr = z.array(RawProductoSchema).safeParse(raw);
   if (!arr.success) return [];
-  return arr.data;
+  return arr.data.map((p) => {
+    const { precio_texto, ...rest } = p;
+    return rest;
+  });
 }

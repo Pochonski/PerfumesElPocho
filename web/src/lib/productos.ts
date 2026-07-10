@@ -3,30 +3,11 @@ import path from "path";
 import type { FacetCounts } from "./facet-counts";
 import { normalizeText, slugify } from "./utils";
 import { warn } from "./logger";
-import { parseProductos } from "./productos-schema";
+import { parseProductos, type Producto } from "./productos-schema";
 
 export { normalizeText, slugify } from "./utils";
 
-export interface Producto {
-  id: number;
-  url: string;
-  nombre: string;
-  precio: number;
-  descripcion: string;
-  resumen: string;
-  categorias: string[];
-  atributos: Record<string, string>;
-  imagenes: string[];
-  marca: string;
-  concentracion: string;
-  tamano: string;
-  genero: string;
-  ocasion: string;
-  familia_olfativa: string;
-  familias_olfativas: string[];
-  ocasiones: string[];
-  generos: string[];
-}
+export type { Producto };
 
 let cached: Producto[] | null = null;
 
@@ -118,7 +99,7 @@ export function getProductos(): Producto[] {
     return [];
   }
 
-  const data = validated as Producto[];
+  const data = validated;
 
   for (const p of data) {
     if (!Array.isArray(p.imagenes)) p.imagenes = [];
