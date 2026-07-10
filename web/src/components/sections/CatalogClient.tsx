@@ -89,23 +89,39 @@ export default function CatalogClient({
 }: CatalogClientProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const rawSearchParams = useSearchParams();
   const lenis = useLenis();
 
-  
+  const searchParams = useMemo(
+    () => (rawSearchParams ? new URLSearchParams(rawSearchParams.toString()) : null),
+    [rawSearchParams]
+  );
+
   const [page, setPage] = useState(1);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
-  
+
   const [facets, setFacets] = useState<Facets>(DEFAULT_FACETS);
-  
+
   const [facetCounts, setFacetCounts] = useState<FacetCounts>(EMPTY_FACET_COUNTS);
 
-  
   const filtrosState: FilterState = useMemo(() => {
+    if (!searchParams) {
+      return {
+        categoria: initialCategory ?? "Todos",
+        marcas: [],
+        familias: [],
+        ocasiones: [],
+        generos: [],
+        precioMin: null,
+        precioMax: null,
+        sort: "relevancia",
+        q: "",
+      };
+    }
     const fromUrl = decodeFilters(searchParams);
     const urlCategoria = fromUrl.categoria;
     const resolvedCategoria =
@@ -136,41 +152,29 @@ export default function CatalogClient({
       .then((data: Facets) => {
         if (!cancelled) setFacets(data);
       })
-      .catch(() => {
-        
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("[catalog] failed to load facets:", err);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  
+  const filtrosKey = searchParams?.toString() ?? "";
+
   useLayoutEffect(() => {
-    if (pendingScrollY.current !== null) {
-      const y = pendingScrollY.current;
-      if (lenis) {
-        lenis.scrollTo(y, { immediate: true });
-      } else {
-        window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
-      }
+    if (pendingScrollY.current === null) return;
+    const y = pendingScrollY.current;
+    pendingScrollY.current = null;
+    if (lenis) {
+      lenis.scrollTo(y, { immediate: true });
+    } else {
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
     }
-  }, [searchParams, lenis]);
+  }, [filtrosKey, lenis]);
 
-  useEffect(() => {
-    if (pendingScrollY.current !== null) {
-      const y = pendingScrollY.current;
-      pendingScrollY.current = null;
-      setTimeout(() => {
-        if (lenis) {
-          lenis.scrollTo(y, { immediate: true });
-        } else {
-          window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
-        }
-      }, 0);
-    }
-  }, [searchParams]);
-
-  
   useEffect(() => {
     let cancelled = false;
 
@@ -215,7 +219,7 @@ export default function CatalogClient({
     return () => {
       cancelled = true;
     };
-  }, [searchParams, page, filtrosState]);
+  }, [filtrosKey, page, filtrosState]);
 
   
   const pushState = useCallback(

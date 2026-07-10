@@ -9,7 +9,7 @@ interface PriceRangeProps {
   valueMin: number;
   valueMax: number;
   onChange: (min: number, max: number) => void;
-  
+
   step?: number;
 }
 
@@ -27,6 +27,13 @@ export function PriceRange({
   const [dragging, setDragging] = useState<"min" | "max" | null>(null);
   const [localMin, setLocalMin] = useState(valueMin);
   const [localMax, setLocalMax] = useState(valueMax);
+  const localMinRef = useRef(localMin);
+  const localMaxRef = useRef(localMax);
+  const onChangeRef = useRef(onChange);
+
+  localMinRef.current = localMin;
+  localMaxRef.current = localMax;
+  onChangeRef.current = onChange;
 
   useEffect(() => setLocalMin(valueMin), [valueMin]);
   useEffect(() => setLocalMax(valueMax), [valueMax]);
@@ -35,39 +42,29 @@ export function PriceRange({
   const minPct = range > 0 ? ((localMin - min) / range) * 100 : 0;
   const maxPct = range > 0 ? ((localMax - min) / range) * 100 : 100;
 
-  const updateFromClientX = useCallback(
-    (clientX: number, which: "min" | "max") => {
+  useEffect(() => {
+    if (!dragging) return;
+
+    const onMove = (e: PointerEvent) => {
       const track = trackRef.current;
       if (!track) return;
       const rect = track.getBoundingClientRect();
-      const ratio = Math.max(
-        0,
-        Math.min(1, (clientX - rect.left) / rect.width)
-      );
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       const raw = min + ratio * range;
       const snapped = Math.round(raw / step) * step;
-      if (which === "min") {
-        const next = Math.min(snapped, localMax - step);
+      if (dragging === "min") {
+        const next = Math.min(snapped, localMaxRef.current - step);
+        localMinRef.current = next;
         setLocalMin(next);
       } else {
-        const next = Math.max(snapped, localMin + step);
+        const next = Math.max(snapped, localMinRef.current + step);
+        localMaxRef.current = next;
         setLocalMax(next);
       }
-    },
-    [min, range, step, localMax, localMin]
-  );
-
-  useEffect(() => {
-    if (!dragging) return;
-    const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      updateFromClientX(e.clientX, dragging);
     };
     const onUp = () => {
-      if (dragging) {
-        setDragging(null);
-        onChange(localMin, localMax);
-      }
+      setDragging(null);
+      onChangeRef.current(localMinRef.current, localMaxRef.current);
     };
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
@@ -75,7 +72,7 @@ export function PriceRange({
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
     };
-  }, [dragging, localMin, localMax, onChange, updateFromClientX]);
+  }, [dragging, min, range, step]);
 
   const handleKey = useCallback(
     (which: "min" | "max") => (e: React.KeyboardEvent) => {
@@ -130,15 +127,24 @@ export function PriceRange({
           const mid = rect.width / 2;
           const which = x < mid ? "min" : "max";
           setDragging(which);
-          updateFromClientX(e.clientX, which);
+          const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          const raw = min + ratio * range;
+          const snapped = Math.round(raw / step) * step;
+          if (which === "min") {
+            const next = Math.min(snapped, localMax - step);
+            localMinRef.current = next;
+            setLocalMin(next);
+          } else {
+            const next = Math.max(snapped, localMin + step);
+            localMaxRef.current = next;
+            setLocalMax(next);
+          }
         }}
       >
-        {}
         <div
           className="absolute top-0 h-2 rounded-full bg-accent"
           style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
         />
-        {}
         <button
           type="button"
           role="slider"
@@ -157,7 +163,6 @@ export function PriceRange({
           } ${isAtMin ? "opacity-50" : ""}`}
           style={{ left: `${minPct}%` }}
         />
-        {}
         <button
           type="button"
           role="slider"

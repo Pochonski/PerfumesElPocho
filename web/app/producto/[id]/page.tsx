@@ -10,9 +10,11 @@ import Button from "@/components/ui/Button";
 import Footer from "@/components/sections/Footer";
 import ProductGallery from "@/components/product/ProductGallery";
 
+export const revalidate = 3600;
+
 export function generateStaticParams() {
   const productos = getProductos();
-  return productos.slice(0, 500).map((p) => ({ id: String(p.id) }));
+  return productos.map((p) => ({ id: String(p.id) }));
 }
 
 export async function generateMetadata({

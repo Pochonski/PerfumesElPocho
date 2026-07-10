@@ -63,7 +63,7 @@ export const CATEGORY_TABS: CategoryTab[] = [
     label: "Perfumes Árabes/Nicho",
     href: "/categoria/arabes",
     icon: "sparkle",
-    categoryName: "Árabe",
+    categoryName: "Árabes",
     matchMode: "prefix",
   },
   {

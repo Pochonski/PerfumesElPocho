@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import type { FacetCounts } from "./facet-counts";
 import { normalizeText, slugify } from "./utils";
+import { warn } from "./logger";
+import { parseProductos } from "./productos-schema";
 
 export { normalizeText, slugify } from "./utils";
 
@@ -10,7 +12,6 @@ export interface Producto {
   url: string;
   nombre: string;
   precio: number;
-  precio_texto: string;
   descripcion: string;
   resumen: string;
   categorias: string[];
@@ -97,8 +98,28 @@ export function getProductos(): Producto[] {
     "data",
     "productos.json"
   );
-  if (!fs.existsSync(jsonPath)) return [];
-  const data: Producto[] = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+  if (!fs.existsSync(jsonPath)) {
+    warn("data-layer", new Error(`productos.json not found at ${jsonPath}`));
+    return [];
+  }
+
+  let raw: unknown;
+  try {
+    const text = fs.readFileSync(jsonPath, "utf-8");
+    raw = JSON.parse(text);
+  } catch (err) {
+    warn("data-layer", err);
+    return [];
+  }
+
+  const validated = parseProductos(raw);
+  if (validated.length === 0) {
+    warn("data-layer", new Error("productos.json parsed but no valid products found"));
+    return [];
+  }
+
+  const data = validated as Producto[];
+
   for (const p of data) {
     if (!Array.isArray(p.imagenes)) p.imagenes = [];
     if (!Array.isArray(p.familias_olfativas)) p.familias_olfativas = [];

@@ -7,6 +7,8 @@ import { serializeJsonLd } from "@/lib/json-ld";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import Footer from "@/components/sections/Footer";
 
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

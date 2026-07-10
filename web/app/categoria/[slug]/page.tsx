@@ -11,6 +11,8 @@ import { serializeJsonLd } from "@/lib/json-ld";
 import CatalogSection from "@/components/sections/CatalogSection";
 import Footer from "@/components/sections/Footer";
 
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

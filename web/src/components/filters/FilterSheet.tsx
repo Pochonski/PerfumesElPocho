@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { X } from "@phosphor-icons/react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 
 interface FilterSheetProps {
   open: boolean;
@@ -24,15 +25,9 @@ export function FilterSheet({
   const startYRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      setTranslateY(0);
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    lockBodyScroll(open);
+    if (open) setTranslateY(0);
+    return () => lockBodyScroll(false);
   }, [open]);
 
   useEffect(() => {

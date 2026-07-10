@@ -45,11 +45,21 @@ export const metadata: Metadata = {
     description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales con envíos a todo Costa Rica.`,
     type: "website",
     locale: "es_CR",
+    siteName: "Perfumes El Pocho",
+    images: [
+      {
+        url: "https://perfumeselpocho.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Perfumes El Pocho — Fragancias Premium en Costa Rica",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Perfumes El Pocho | Fragancias Premium",
     description: `Más de ${PRODUCT_COUNT_DISPLAY} fragancias originales con envíos a todo Costa Rica.`,
+    images: ["https://perfumeselpocho.com/og-image.png"],
   },
 };
 

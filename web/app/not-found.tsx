@@ -17,10 +17,10 @@ export default function NotFound() {
           Error 404
         </p>
         <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tighter text-foreground md:text-5xl">
-          Esta fragancia <span className="gold-gradient">no existe</span>
+          Esta página <span className="gold-gradient">no existe</span>
         </h1>
         <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-          El perfume que buscás no está en nuestro catálogo. Pero tenemos más de {PRODUCT_COUNT_TAG} fragancias esperándote.
+          El contenido que buscás no está disponible. Pero tenemos más de {PRODUCT_COUNT_TAG} fragancias esperándote.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

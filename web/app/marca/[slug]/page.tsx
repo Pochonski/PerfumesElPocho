@@ -11,13 +11,14 @@ import { serializeJsonLd } from "@/lib/json-ld";
 import CatalogSection from "@/components/sections/CatalogSection";
 import Footer from "@/components/sections/Footer";
 
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  
-  const marcas = getMarcas().slice(0, 100);
+  const marcas = getMarcas();
   return marcas.map((m) => ({ slug: slugify(m) }));
 }
 

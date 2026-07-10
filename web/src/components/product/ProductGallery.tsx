@@ -3,7 +3,7 @@
 import { useCallback, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { Lightbox } from "@/components/ui/Lightbox";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, Sparkle } from "@phosphor-icons/react";
 
 interface ProductGalleryProps {
   imagenes: string[];
@@ -40,7 +40,9 @@ export default function ProductGallery({ imagenes, nombre }: ProductGalleryProps
   if (!hasImages) {
     return (
       <div className="card-surface relative aspect-square overflow-hidden bg-image-bg">
-        <div className="flex h-full items-center justify-center text-6xl">🕯️</div>
+        <div className="flex h-full items-center justify-center text-muted">
+          <Sparkle size={48} weight="thin" aria-hidden="true" />
+        </div>
       </div>
     );
   }

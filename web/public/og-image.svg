@@ -1,0 +1,36 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c8a84e"/>
+      <stop offset="100%" stop-color="#a08030"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d0d0d"/>
+      <stop offset="100%" stop-color="#080808"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <circle cx="1050" cy="120" r="320" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+  <circle cx="1050" cy="120" r="220" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+  <circle cx="1050" cy="120" r="120" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+
+  <text x="100" y="200" font-family="'Playfair Display', 'Georgia', serif" font-size="28" fill="#c8a84e" font-style="italic" letter-spacing="4">PERFUMES EL POCHO</text>
+
+  <text x="100" y="340" font-family="'Times New Roman', 'Georgia', serif" font-size="82" fill="#ffffff" font-weight="700" letter-spacing="-1">
+    Fragancias Premium
+  </text>
+  <text x="100" y="440" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="82" fill="url(#gold)" font-weight="600" letter-spacing="-1">
+    en Costa Rica
+  </text>
+
+  <text x="100" y="530" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="22" fill="#737373" font-weight="400">
+    +4,000 fragancias originales, árabes y de diseñador
+  </text>
+  <text x="100" y="565" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="22" fill="#737373" font-weight="400">
+    Envíos a todo Costa Rica · Calidad garantizada
+  </text>
+
+  <line x1="100" y1="260" x2="400" y2="260" stroke="url(#gold)" stroke-width="2"/>
+</svg>

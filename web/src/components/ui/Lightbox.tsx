@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { X } from "@phosphor-icons/react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 
 interface LightboxProps {
   open: boolean;
@@ -20,14 +21,13 @@ export function Lightbox({ open, onClose, src, alt }: LightboxProps) {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    
+
+    lockBodyScroll(true);
     closeRef.current?.focus();
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      lockBodyScroll(false);
     };
   }, [open, onClose]);
 
