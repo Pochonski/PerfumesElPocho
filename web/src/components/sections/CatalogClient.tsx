@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   type ChangeEvent,
 } from "react";
@@ -139,6 +140,9 @@ export default function CatalogClient({
   });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const pendingScrollY = useRef<number | null>(null);
+  const restoringScroll = useRef(false);
+
   
   useEffect(() => {
     let cancelled = false;
@@ -196,6 +200,14 @@ export default function CatalogClient({
           if (data.facetCounts) setFacetCounts(data.facetCounts);
           setLoading(false);
           isFirstLoadRef.current = false;
+          if (restoringScroll.current && pendingScrollY.current !== null) {
+            const y = pendingScrollY.current;
+            pendingScrollY.current = null;
+            restoringScroll.current = false;
+            requestAnimationFrame(() => {
+              window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+            });
+          }
         }
       })
       .catch((err) => {
@@ -214,6 +226,8 @@ export default function CatalogClient({
   const pushState = useCallback(
     (next: FilterState) => {
       setPage(1);
+      pendingScrollY.current = window.scrollY;
+      restoringScroll.current = true;
       const params = encodeFilters(next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
