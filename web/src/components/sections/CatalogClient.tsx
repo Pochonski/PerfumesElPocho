@@ -10,7 +10,7 @@ import {
   type ChangeEvent,
 } from "react";
 import Image from "next/image";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import {
@@ -86,6 +86,7 @@ export default function CatalogClient({
   id = "productos",
   hideSearch = false,
 }: CatalogClientProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const rawSearchParams = useSearchParams();
 
@@ -169,16 +170,25 @@ export default function CatalogClient({
     const y = pendingScrollY.current;
     pendingScrollY.current = null;
     restoringScroll.current = false;
+    const targetY = y;
 
     const restore = () => {
-      if (window.scrollY !== y) {
-        window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      if (window.scrollY !== targetY && window.scrollY < targetY) {
+        window.scrollTo({ top: targetY, behavior: "instant" as ScrollBehavior });
       }
     };
 
     restore();
     requestAnimationFrame(restore);
     requestAnimationFrame(() => requestAnimationFrame(restore));
+
+    const interval = setInterval(() => {
+      if (window.scrollY === 0 || window.scrollY > targetY + 1000) {
+        window.scrollTo({ top: targetY, behavior: "instant" as ScrollBehavior });
+        clearInterval(interval);
+      }
+    }, 50);
+    setTimeout(() => clearInterval(interval), 2000);
   }, [filtrosKey]);
 
   useEffect(() => {
@@ -238,11 +248,9 @@ export default function CatalogClient({
       restoringScroll.current = true;
       const params = encodeFilters(next);
       const qs = params.toString();
-      const newUrl = qs ? `${pathname}?${qs}` : pathname;
-      window.history.replaceState(window.history.state, "", newUrl);
-      window.dispatchEvent(new PopStateEvent("popstate"));
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [pathname]
+    [pathname, router]
   );
 
   
