@@ -165,6 +165,16 @@ export default function CatalogClient({
 
   const isFirstLoadRef = useRef(true);
 
+  useLayoutEffect(() => {
+    if (!restoringScroll.current || pendingScrollY.current === null) return;
+    const y = pendingScrollY.current;
+    pendingScrollY.current = null;
+    restoringScroll.current = false;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+    });
+  }, [filtrosKey]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -200,14 +210,6 @@ export default function CatalogClient({
           if (data.facetCounts) setFacetCounts(data.facetCounts);
           setLoading(false);
           isFirstLoadRef.current = false;
-          if (restoringScroll.current && pendingScrollY.current !== null) {
-            const y = pendingScrollY.current;
-            pendingScrollY.current = null;
-            restoringScroll.current = false;
-            requestAnimationFrame(() => {
-              window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
-            });
-          }
         }
       })
       .catch((err) => {
