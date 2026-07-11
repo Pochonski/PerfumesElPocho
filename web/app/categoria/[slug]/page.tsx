@@ -36,6 +36,7 @@ export async function generateMetadata({
       title: `${categoria} | Perfumes El Pocho`,
       description: `${categoria} con envío a todo Costa Rica.`,
       type: "website",
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: `${categoria} — Perfumes El Pocho` }],
     },
   };
 }

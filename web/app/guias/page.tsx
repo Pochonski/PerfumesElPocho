@@ -1,8 +1,21 @@
 ﻿import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { getAllGuias, type Guia } from "@/data/guias";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
+
+export const metadata: Metadata = {
+  title: "Guías & educación sobre perfumes | Perfumes El Pocho",
+  description:
+    "Aprendé sobre fragancias: diferencias entre EDT, EDP y Parfum, perfumes árabes para principiantes, y cómo elegir tu perfume según tu personalidad.",
+  openGraph: {
+    title: "Guías & educación sobre perfumes | Perfumes El Pocho",
+    description:
+      "Consejos, guías y cultura del perfume para elegir tu próxima fragancia con confianza.",
+    type: "website",
+  },
+};
 
 export default function GuiasPage() {
   const guias = getAllGuias();
