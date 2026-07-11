@@ -170,9 +170,16 @@ export default function CatalogClient({
     const y = pendingScrollY.current;
     pendingScrollY.current = null;
     restoringScroll.current = false;
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
-    });
+
+    const restore = () => {
+      if (window.scrollY !== y) {
+        window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      }
+    };
+
+    restore();
+    requestAnimationFrame(restore);
+    requestAnimationFrame(() => requestAnimationFrame(restore));
   }, [filtrosKey]);
 
   useEffect(() => {
