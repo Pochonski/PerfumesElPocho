@@ -479,7 +479,7 @@ export default function CatalogClient({
                 <button type="button" onClick={clearAll} className="cursor-pointer text-sm text-accent transition-colors hover:underline">Limpiar filtros</button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [overflow-anchor:auto]">
+              <div className="catalog-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {productos.map((p, i) => (
                   <AnimatedItem key={p.id} index={i % PER_PAGE}>
                     <ProductCard producto={p} />

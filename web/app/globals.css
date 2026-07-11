@@ -264,6 +264,10 @@ p, span, div {
   display: none;
 }
 
+.catalog-grid {
+  overflow-anchor: auto;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
