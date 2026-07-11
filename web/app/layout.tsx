@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/ui/Navbar";
 import CategoryTabsList from "@/components/ui/CategoryTabsList";
 import HeaderHeightSync from "@/components/ui/HeaderHeightSync";
+import ScrollLockGuard from "@/components/ui/ScrollLockGuard";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import { PRODUCT_COUNT_DISPLAY } from "@/data/constants";
 import "./globals.css";
@@ -117,7 +118,8 @@ export default function RootLayout({
               <CategoryTabsList />
             </header>
             <HeaderHeightSync />
-            <div id="main-content" className="flex-1 pt-[var(--real-header-h,var(--header-h))]">
+            <ScrollLockGuard />
+            <div id="main-content" className="pt-[var(--real-header-h,var(--header-h))]">
               {children}
             </div>
             <WhatsAppFloat />
