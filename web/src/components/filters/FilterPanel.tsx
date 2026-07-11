@@ -22,10 +22,11 @@ interface FilterPanelBodyProps {
   
   facetCounts: FacetCounts;
   onChange: (next: FilterState) => void;
-  onClear: () => void;
 }
 
-type FilterPanelProps = FilterPanelBodyProps;
+interface FilterPanelProps extends FilterPanelBodyProps {
+  onClear: () => void;
+}
 
 
 export function FilterPanelBody({
@@ -344,7 +345,6 @@ export function FilterPanel({
         generos={generos}
         facetCounts={facetCounts}
         onChange={onChange}
-        onClear={onClear}
       />
     </aside>
   );

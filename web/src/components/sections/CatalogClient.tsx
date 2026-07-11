@@ -500,6 +500,15 @@ export default function CatalogClient({
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         title="Filtros"
+        footer={
+          <button
+            type="button"
+            onClick={clearAll}
+            className="w-full cursor-pointer rounded-full border border-accent/40 bg-accent/10 py-2.5 text-center text-sm font-medium text-accent transition-colors hover:bg-accent/20"
+          >
+            Limpiar todo
+          </button>
+        }
       >
         <FilterPanelBody
           state={filtrosState}
@@ -512,7 +521,6 @@ export default function CatalogClient({
           generos={facets.generos}
           facetCounts={facetCounts}
           onChange={pushState}
-          onClear={clearAll}
         />
       </FilterSheet>
     </AnimatedSection>

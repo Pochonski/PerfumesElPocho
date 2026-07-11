@@ -1,6 +1,7 @@
 import Hero from "@/components/sections/Hero";
 import ShippingBanner from "@/components/sections/ShippingBanner";
 import HowItWorks from "@/components/sections/HowItWorks";
+import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import CatalogSection from "@/components/sections/CatalogSection";
 import FAQ from "@/components/sections/FAQ";
 import FinalCTA from "@/components/sections/FinalCTA";
@@ -44,6 +45,7 @@ export default function Home() {
       <Hero />
       <ShippingBanner />
       <HowItWorks />
+      <FeaturedProducts />
       <CatalogSection
         id="productos"
         eyebrow="Catálogo"

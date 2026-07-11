@@ -352,7 +352,7 @@ export default function SearchBar({
                       {s.imagen ? (
                         <Image
                           src={s.imagen}
-                          alt=""
+                          alt={s.nombre}
                           fill
                           sizes="40px"
                           className="object-contain p-1"

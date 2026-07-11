@@ -19,6 +19,19 @@ const GENDER_CATEGORIES = [
 
 const DROPPED_CATEGORIES = ["Ofertas"] as const;
 
+const BRAND_NORMALIZER: Record<string, string> = {
+  Montblanc: "Mont Blanc",
+  Monblanc: "Mont Blanc",
+  Lataffa: "Lattafa",
+  "Paris Corner Perfumes": "Paris Corner",
+  "Yvs Saint Laurent": "Yves Saint Laurent",
+  "Gulf Orquid": "Gulf Orchid",
+  "Mantblanc": "Mont Blanc",
+  "Marciso Rodriguez": "Narciso Rodriguez",
+  "Billie Elish": "Billie Eilish",
+  "Swiss Army Victorinox": "Victorinox",
+};
+
 function detectGenderFromName(name: string): string | null {
   const upper = name.toUpperCase();
   const hasMujer = /\bMUJER\b/.test(upper);
@@ -106,6 +119,14 @@ export function getProductos(): Producto[] {
     if (!Array.isArray(p.familias_olfativas)) p.familias_olfativas = [];
     if (!Array.isArray(p.ocasiones)) p.ocasiones = [];
     if (!Array.isArray(p.generos)) p.generos = [];
+
+    if (p.tamano) p.tamano = p.tamano.replace("1OOML", "100ML");
+    if (p.familia_olfativa) p.familia_olfativa = p.familia_olfativa.replace("Ctrica", "Cítrica");
+
+    if (p.marca) {
+      const brand = p.marca;
+      p.marca = BRAND_NORMALIZER[brand] ?? brand;
+    }
 
     if (p.familias_olfativas.length === 0 && p.familia_olfativa) {
       p.familias_olfativas = p.familia_olfativa

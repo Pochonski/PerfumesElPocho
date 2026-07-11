@@ -244,10 +244,10 @@ export default function PremiumCarousel<T>({
 function DefaultSkeleton() {
   return (
     <div className="card-surface animate-pulse overflow-hidden">
-      <div className="aspect-square bg-foreground/[0.04]" />
+      <div className="aspect-square bg-skeleton-bg" />
       <div className="space-y-2 p-4">
-        <div className="h-4 w-3/4 rounded bg-foreground/[0.06]" />
-        <div className="h-3 w-1/2 rounded bg-foreground/[0.04]" />
+        <div className="h-4 w-3/4 rounded bg-skeleton-bg" />
+        <div className="h-3 w-1/2 rounded bg-skeleton-bg" />
       </div>
     </div>
   );

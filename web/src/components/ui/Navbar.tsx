@@ -98,7 +98,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
           <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Productos
           </Link>
-          <Link href="/#categorias" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Categorías
           </Link>
           <Link href="/#contacto" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
@@ -154,7 +154,7 @@ export default function Navbar({ children }: { children?: ReactNode }) {
             <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={close}>
               Productos
             </Link>
-            <Link href="/#categorias" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={close}>
+            <Link href="/#productos" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={close}>
               Categorías
             </Link>
             <Link href="/#contacto" className="text-sm text-muted-foreground transition-colors hover:text-foreground py-2" onClick={close}>

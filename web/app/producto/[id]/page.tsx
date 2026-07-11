@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { getProductos, getProductoById } from "@/lib/productos";
+import { getProductos, getProductoById, slugify } from "@/lib/productos";
 import { formatPrice } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import { serializeJsonLd } from "@/lib/json-ld";
@@ -94,7 +94,7 @@ export default async function ProductoPage({
             {producto.categorias.slice(0, 2).map((cat) => (
               <span key={cat}>
                 <Link
-                  href={`/#productos`}
+                  href={`/categoria/${slugify(cat)}`}
                   className="hover:text-foreground transition-colors"
                 >
                   {cat}
@@ -149,8 +149,11 @@ export default async function ProductoPage({
                 {producto.tamano && (
                   <AttributeCard label="Tamaño" value={producto.tamano} />
                 )}
-                {producto.genero && (
-                  <AttributeCard label="Género" value={producto.genero} />
+                {producto.generos.length > 0 && (
+                  <AttributeCard
+                    label="Género"
+                    value={producto.generos.join(", ")}
+                  />
                 )}
                 {producto.familia_olfativa && (
                   <AttributeCard
@@ -158,8 +161,8 @@ export default async function ProductoPage({
                     value={producto.familia_olfativa}
                   />
                 )}
-                {producto.ocasion && (
-                  <AttributeCard label="Ocasión" value={producto.ocasion} />
+                {producto.ocasiones.length > 0 && (
+                  <AttributeCard label="Ocasión" value={producto.ocasiones.join(", ")} />
                 )}
               </div>
 
