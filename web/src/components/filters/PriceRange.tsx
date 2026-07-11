@@ -23,24 +23,74 @@ export function PriceRange({
   onChange,
   step = DEFAULT_STEP,
 }: PriceRangeProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   const [dragging, setDragging] = useState<"min" | "max" | null>(null);
   const [localMin, setLocalMin] = useState(valueMin);
   const [localMax, setLocalMax] = useState(valueMax);
-  const localMinRef = useRef(localMin);
-  const localMaxRef = useRef(localMax);
-  const onChangeRef = useRef(onChange);
 
-  localMinRef.current = localMin;
-  localMaxRef.current = localMax;
-  onChangeRef.current = onChange;
+  useEffect(() => {
+    if (dragging) return;
+    setLocalMin(valueMin);
+  }, [valueMin, dragging]);
+  useEffect(() => {
+    if (dragging) return;
+    setLocalMax(valueMax);
+  }, [valueMax, dragging]);
 
-  useEffect(() => setLocalMin(valueMin), [valueMin]);
-  useEffect(() => setLocalMax(valueMax), [valueMax]);
+  return (
+    <PriceRangeInner
+      min={min}
+      max={max}
+      valueMin={localMin}
+      valueMax={localMax}
+      step={step}
+      dragging={dragging}
+      setDragging={setDragging}
+      setLocalMin={setLocalMin}
+      setLocalMax={setLocalMax}
+      localMaxRef_current={localMax}
+      onCommit={(lo, hi) => onChangeRef.current(lo, hi)}
+    />
+  );
+}
+
+function PriceRangeInner({
+  min,
+  max,
+  valueMin,
+  valueMax,
+  step,
+  dragging,
+  setDragging,
+  setLocalMin,
+  setLocalMax,
+  localMaxRef_current,
+  onCommit,
+}: {
+  min: number;
+  max: number;
+  valueMin: number;
+  valueMax: number;
+  step: number;
+  dragging: "min" | "max" | null;
+  setDragging: (d: "min" | "max" | null) => void;
+  setLocalMin: (n: number) => void;
+  setLocalMax: (n: number) => void;
+  localMaxRef_current: number;
+  onCommit: (min: number, max: number) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const localMinRef = useRef(valueMin);
+  const localMaxRef = useRef(valueMax);
+
+  localMinRef.current = valueMin;
+  localMaxRef.current = valueMax;
 
   const range = max - min;
-  const minPct = range > 0 ? ((localMin - min) / range) * 100 : 0;
-  const maxPct = range > 0 ? ((localMax - min) / range) * 100 : 100;
+  const minPct = range > 0 ? ((valueMin - min) / range) * 100 : 0;
+  const maxPct = range > 0 ? ((valueMax - min) / range) * 100 : 100;
 
   useEffect(() => {
     if (!dragging) return;
@@ -64,7 +114,7 @@ export function PriceRange({
     };
     const onUp = () => {
       setDragging(null);
-      onChangeRef.current(localMinRef.current, localMaxRef.current);
+      onCommit(localMinRef.current, localMaxRef.current);
     };
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
@@ -72,49 +122,49 @@ export function PriceRange({
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
     };
-  }, [dragging, min, range, step]);
+  }, [dragging, min, range, step, setDragging, setLocalMin, setLocalMax, onCommit]);
 
   const handleKey = useCallback(
     (which: "min" | "max") => (e: React.KeyboardEvent) => {
       const big = step * 10;
-      let nextMin = localMin;
-      let nextMax = localMax;
+      let nextMin = localMinRef.current;
+      let nextMax = localMaxRef.current;
       if (e.key === "ArrowRight" || e.key === "ArrowUp") {
         e.preventDefault();
-        if (which === "min") nextMin = Math.min(localMax - step, localMin + step);
-        else nextMax = Math.max(localMin + step, localMax + step);
+        if (which === "min") nextMin = Math.min(localMaxRef.current - step, localMinRef.current + step);
+        else nextMax = Math.max(localMinRef.current + step, localMaxRef.current + step);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
         e.preventDefault();
-        if (which === "min") nextMin = Math.max(min, localMin - step);
-        else nextMax = Math.max(localMin + step, localMax - step);
+        if (which === "min") nextMin = Math.max(min, localMinRef.current - step);
+        else nextMax = Math.max(localMinRef.current + step, localMaxRef.current - step);
       } else if (e.key === "PageUp") {
         e.preventDefault();
-        if (which === "min") nextMin = Math.min(localMax - step, localMin + big);
-        else nextMax = Math.min(max, localMax + big);
+        if (which === "min") nextMin = Math.min(localMaxRef.current - step, localMinRef.current + big);
+        else nextMax = Math.min(max, localMaxRef.current + big);
       } else if (e.key === "PageDown") {
         e.preventDefault();
-        if (which === "min") nextMin = Math.max(min, localMin - big);
-        else nextMax = Math.max(localMin + step, localMax - big);
+        if (which === "min") nextMin = Math.max(min, localMinRef.current - big);
+        else nextMax = Math.max(localMinRef.current + step, localMaxRef.current - big);
       } else if (e.key === "Home") {
         e.preventDefault();
         if (which === "min") nextMin = min;
-        else nextMax = localMin + step;
+        else nextMax = localMinRef.current + step;
       } else if (e.key === "End") {
         e.preventDefault();
-        if (which === "min") nextMin = localMax - step;
+        if (which === "min") nextMin = localMaxRef.current - step;
         else nextMax = max;
       } else {
         return;
       }
       setLocalMin(nextMin);
       setLocalMax(nextMax);
-      onChange(nextMin, nextMax);
+      onCommit(nextMin, nextMax);
     },
-    [localMin, localMax, min, max, step, onChange]
+    [min, max, step, onCommit, setLocalMin, setLocalMax]
   );
 
-  const isAtMin = localMin === min;
-  const isAtMax = localMax === max;
+  const isAtMin = valueMin === min;
+  const isAtMax = valueMax === max;
 
   return (
     <div className="px-1 pt-2">
@@ -131,11 +181,11 @@ export function PriceRange({
           const raw = min + ratio * range;
           const snapped = Math.round(raw / step) * step;
           if (which === "min") {
-            const next = Math.min(snapped, localMax - step);
+            const next = Math.min(snapped, localMaxRef.current - step);
             localMinRef.current = next;
             setLocalMin(next);
           } else {
-            const next = Math.max(snapped, localMin + step);
+            const next = Math.max(snapped, localMinRef.current + step);
             localMaxRef.current = next;
             setLocalMax(next);
           }
@@ -150,9 +200,9 @@ export function PriceRange({
           role="slider"
           aria-label="Precio mínimo"
           aria-valuemin={min}
-          aria-valuemax={localMax - step}
-          aria-valuenow={localMin}
-          aria-valuetext={formatPrice(localMin)}
+          aria-valuemax={localMaxRef.current - step}
+          aria-valuenow={valueMin}
+          aria-valuetext={formatPrice(valueMin)}
           onKeyDown={handleKey("min")}
           onPointerDown={(e) => {
             e.stopPropagation();
@@ -167,10 +217,10 @@ export function PriceRange({
           type="button"
           role="slider"
           aria-label="Precio máximo"
-          aria-valuemin={localMin + step}
+          aria-valuemin={localMinRef.current + step}
           aria-valuemax={max}
-          aria-valuenow={localMax}
-          aria-valuetext={formatPrice(localMax)}
+          aria-valuenow={valueMax}
+          aria-valuetext={formatPrice(valueMax)}
           onKeyDown={handleKey("max")}
           onPointerDown={(e) => {
             e.stopPropagation();
@@ -183,8 +233,8 @@ export function PriceRange({
         />
       </div>
       <div className="mt-3 flex items-center justify-between font-mono text-xs tabular-nums text-muted-foreground">
-        <span>{formatPrice(localMin)}</span>
-        <span>{formatPrice(localMax)}</span>
+        <span>{formatPrice(valueMin)}</span>
+        <span>{formatPrice(valueMax)}</span>
       </div>
     </div>
   );

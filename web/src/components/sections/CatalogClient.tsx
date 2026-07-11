@@ -5,13 +5,11 @@ import {
   useMemo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   type ChangeEvent,
 } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useLenis } from "lenis/react";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import {
@@ -90,7 +88,6 @@ export default function CatalogClient({
   const router = useRouter();
   const pathname = usePathname();
   const rawSearchParams = useSearchParams();
-  const lenis = useLenis();
 
   const searchParams = useMemo(
     () => (rawSearchParams ? new URLSearchParams(rawSearchParams.toString()) : null),
@@ -141,8 +138,6 @@ export default function CatalogClient({
     return new URLSearchParams(window.location.search).get("q") || "";
   });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
-  const pendingScrollY = useRef<number | null>(null);
 
   
   useEffect(() => {
@@ -164,21 +159,14 @@ export default function CatalogClient({
 
   const filtrosKey = searchParams?.toString() ?? "";
 
-  useLayoutEffect(() => {
-    if (pendingScrollY.current === null) return;
-    const y = pendingScrollY.current;
-    pendingScrollY.current = null;
-    if (lenis) {
-      lenis.scrollTo(y, { immediate: true });
-    } else {
-      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
-    }
-  }, [filtrosKey, lenis]);
+  const isFirstLoadRef = useRef(true);
 
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
+    if (isFirstLoadRef.current) {
+      setLoading(true);
+    }
     setApiError(null);
 
     const filtros = filtrosState;
@@ -207,6 +195,7 @@ export default function CatalogClient({
           setTotalPages(data.totalPages);
           if (data.facetCounts) setFacetCounts(data.facetCounts);
           setLoading(false);
+          isFirstLoadRef.current = false;
         }
       })
       .catch((err) => {
@@ -225,7 +214,6 @@ export default function CatalogClient({
   const pushState = useCallback(
     (next: FilterState) => {
       setPage(1);
-      pendingScrollY.current = window.scrollY;
       const params = encodeFilters(next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -459,7 +447,7 @@ export default function CatalogClient({
                 <button type="button" onClick={clearAll} className="cursor-pointer text-sm text-accent transition-colors hover:underline">Limpiar filtros</button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [overflow-anchor:auto]">
                 {productos.map((p, i) => (
                   <AnimatedItem key={p.id} index={i % PER_PAGE}>
                     <ProductCard producto={p} />
