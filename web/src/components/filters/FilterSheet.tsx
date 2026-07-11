@@ -114,7 +114,7 @@ export function FilterSheet({
 
         {}
         <div
-          className="flex-1 touch-pan-y overflow-y-auto px-5 py-3"
+          className="flex-1 touch-pan-y overflow-y-auto overscroll-contain px-5 py-3"
           data-lenis-prevent
         >
           {children}

@@ -319,7 +319,7 @@ export function FilterPanel({
 }: FilterPanelProps) {
   return (
     <aside
-      className="card-surface sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl p-5"
+      className="card-surface sticky top-24 max-h-[calc(100vh-7rem)] touch-pan-y overflow-y-auto rounded-2xl p-5"
       aria-label="Filtros"
       data-lenis-prevent
     >
