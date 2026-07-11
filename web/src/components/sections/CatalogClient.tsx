@@ -165,6 +165,7 @@ export default function CatalogClient({
   const isFirstLoadRef = useRef(true);
 
   useLayoutEffect(() => {
+    console.log("[catalog] useLayoutEffect, filtrosKey=", filtrosKey, "restoring=", restoringScroll.current);
     if (!restoringScroll.current || pendingScrollY.current === null) return;
     const y = pendingScrollY.current;
     pendingScrollY.current = null;
@@ -172,6 +173,7 @@ export default function CatalogClient({
 
     const restore = () => {
       if (window.scrollY !== y) {
+        console.log("[catalog] restoring scroll to", y, "current=", window.scrollY);
         window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
       }
     };
@@ -236,9 +238,11 @@ export default function CatalogClient({
       setPage(1);
       pendingScrollY.current = window.scrollY;
       restoringScroll.current = true;
+      console.log("[catalog] pushState called, scrollY=", window.scrollY);
       const params = encodeFilters(next);
       const qs = params.toString();
       const newUrl = qs ? `${pathname}?${qs}` : pathname;
+      console.log("[catalog] replaceState to:", newUrl);
       window.history.replaceState(window.history.state, "", newUrl);
       window.dispatchEvent(new PopStateEvent("popstate"));
     },
