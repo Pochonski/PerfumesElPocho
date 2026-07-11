@@ -10,7 +10,7 @@ import {
   type ChangeEvent,
 } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 import EyebrowBadge from "@/components/ui/EyebrowBadge";
 import {
@@ -86,7 +86,6 @@ export default function CatalogClient({
   id = "productos",
   hideSearch = false,
 }: CatalogClientProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const rawSearchParams = useSearchParams();
 
@@ -239,9 +238,11 @@ export default function CatalogClient({
       restoringScroll.current = true;
       const params = encodeFilters(next);
       const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      const newUrl = qs ? `${pathname}?${qs}` : pathname;
+      window.history.replaceState(window.history.state, "", newUrl);
+      window.dispatchEvent(new PopStateEvent("popstate"));
     },
-    [pathname, router]
+    [pathname]
   );
 
   
